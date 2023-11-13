@@ -73,7 +73,7 @@ class c_mark:
     def mod(self):
         if self.parent:
             return self.parent.mod
-        if not self._mod is None:
+        if self._mod is None:
             self._mod = bytearray(self._raw)
         return self._mod
 
@@ -122,11 +122,6 @@ class c_mark:
             if cb(i, s, ln) == False:
                 return False
         return True
-
-    def replace(self, buf):
-        if not isinstance(buf, bytearray):
-            buf = bytearray(buf)
-        self._mod = buf
 
     I8  = lambda self, pos: self.readval(pos, 1, True)
     U8  = lambda self, pos: self.readval(pos, 1, False)
@@ -202,10 +197,10 @@ class c_mark:
     def FSTR(self, dst, pos, stp = 1, codec = 'utf8'):
         return self.FBYTES(dst.encode(codec), pos, stp)
 
-    def sub(self, pos, length = 0, cls = None):
+    def sub(self, pos, length = -1, cls = None):
         if not cls:
             cls = c_mark
-        if length > 0:
+        if length >= 0:
             s = cls(None, 0)
             s._mod = bytearray(self.BYTES(pos, length))
             s._par_offset = self.par_offset + pos
@@ -394,8 +389,7 @@ class c_ffta_sect_scene_text_line(c_ffta_sect):
             d.append(v)
         return di + l
 
-    def _decompress(self, src_idx, dst_len):
-        dst = bytearray()
+    def _decompress(self, dst, src_idx, dst_len):
         dst_idx = 0
         while dst_idx < dst_len:
             cmd, src_idx = self._gc(src_idx)
@@ -434,21 +428,25 @@ class c_ffta_sect_scene_text_line(c_ffta_sect):
                 dst_idx = self._flip(dst_idx, dst, ln, fl)
             else:
                 pass
-        return dst
+        assert(len(dst) == dst_len)
 
     def parse(self):
         flags = self.U16(0)
         cmpr = not not (flags & 0x2)
         self.compressed = cmpr
-        self.text = self.sub(2, cls = c_ffta_sect_scene_text_buf)
         if cmpr:
             dst_len = rvs_endian(self.U32(2), 4, False)
-            buf = self._decompress(6, dst_len)
-            assert(len(buf) == dst_len)
-            self.text.replace(buf)
+            subsect = self.sub(2, 0, cls = c_ffta_sect_scene_text_buf)
+            buf = self._decompress(subsect.mod, 6, dst_len)
+        else:
+            subsect = self.sub(2, cls = c_ffta_sect_scene_text_buf)
+        self.text = subsect
+        self.text.parse()
 
 class c_ffta_sect_scene_text_buf(c_ffta_sect):
-    pass
+
+    def parse(self):
+        pass
 
 class c_ffta_sect_rom(c_ffta_sect):
 
@@ -498,6 +496,9 @@ if __name__ == '__main__':
     fat = rom_us.tabs['s_fat']
     txt = rom_us.tabs['s_text']
     def enum_text():
-        for page in range(20):
+        for page in range(2):
             for line in range(5):
-                txt.get_page(page).get_line(line).parse()
+                tl = txt.get_page(page).get_line(line)
+                tl.parse()
+                print(f'page: 0x{page:x} line: 0x{line:x} cmpr: {tl.compressed}')
+                hd(tl.text.BYTES(0, 0x20))
