@@ -37,6 +37,21 @@ def writeval_le(val, dst, offset, size):
         dst[i] = (val & 0xff)
         val >>= 8
 
+def rvs_endian(src, size, dst_signed):
+    if src < 0:
+        src += (1 << (size*8))
+    dst = 0
+    neg = False
+    for i in range(size):
+        b = (src & 0xff)
+        if dst_signed and i == 0 and b + 0x7f:
+            neg = True
+            b &= 0x7f
+        dst <<= 8
+        dst |= b
+        src >>= 8
+    return dst - (1 << (size*8 - 1)) if neg else dst
+
 INF = float('inf')
 
 class c_mark:
@@ -204,6 +219,17 @@ class c_mark:
             self.mod[pos:] = db
         return self
 
+def clsdec(hndl, *args, **kargs):
+    class _dec:
+        def __init__(self, mth):
+            self.mth = mth
+        def __set_name__(self, cls, mname):
+            nmth = hndl(cls, mname, self.mth, *args, **kargs)
+            if nmth is None:
+                nmth = self.mth
+            setattr(cls, mname, nmth)
+    return _dec
+
 # ===============
 # ffta desc
 # ===============
@@ -234,18 +260,14 @@ class c_ffta_sect(c_mark):
         return self._aot(self.U32(ptr), typ[1:])
 
 def cmdc(code):
-    class _dec:
-        def __init__(self, mth):
-            self.mth = mth
-        def __set_name__(self, cls, mname):
-            #if not hasattr(cls, '_cmd_tab'):
-            # in __dict__ is the same as js hasOwnProperty
-            # but hasattr check parents
-            if not '_cmd_tab' in cls.__dict__:
-                cls._cmd_tab = {}
-            cls._cmd_tab[code] = self.mth
-            setattr(cls, mname, self.mth)
-    return _dec
+    def _hndl(cls, mname, mth):
+        #if not hasattr(cls, '_cmd_tab'):
+        # in __dict__ is the same as js hasOwnProperty
+        # but hasattr check parents
+        if not '_cmd_tab' in cls.__dict__:
+            cls._cmd_tab = {}
+        cls._cmd_tab[code] = mth
+    return clsdec(_hndl)
 
 class c_ffta_sect_cmd(c_ffta_sect):
 
@@ -271,14 +293,19 @@ class c_ffta_sect_scene_cmd(c_ffta_sect_cmd):
         pass
 
 class c_ffta_sect_tab(c_ffta_sect):
-
-    _TAB_DESC = [(4, 0)]
-    
+    _TAB_DESC = []
     def tbase(self, idx):
         cur = idx
         lst_stp = None
         for td in self._TAB_DESC:
-            stp, ofs = td[:2]
+            try:
+                stp = td[0]
+            except:
+                stp = td
+            try:
+                ofs = td[1]
+            except:
+                ofs = 0
             if not lst_stp is None:
                 #print(f'(lst_stp)[0x{cur:x}] = ', end = '')
                 cur = self.readval(cur, lst_stp, False)
@@ -286,29 +313,137 @@ class c_ffta_sect_tab(c_ffta_sect):
             #print(f'0x{cur:x} * {stp} + {ofs} = ', end = '')
             cur = cur * stp + ofs
             #print(f'0x{cur:x}')
-            if len(td) > 2:
+            try:
                 lst_stp = td[2]
-            else:
+            except:
                 lst_stp = stp
         return cur
 
+def tabitm(ofs):
+    def _mod(mth):
+        def _wrap(self, idx):
+            return mth(self, self.tbase(idx) + ofs)
+        return _wrap
+    return _mod
+
 class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     
-    _TAB_DESC = [(4, 2)]
-    
-    def get_entry(self, idx):
-        return self.U8(self.tbase(idx))
+    _TAB_DESC = [4]
+
+    @tabitm(0)
+    def get_page_id(self, ofs):
+        return self.U8(ofs)
+
+    @tabitm(1)
+    def get_line_idx(self, ofs):
+        return self.U8(ofs)
+
+    @tabitm(2)
+    def get_page_idx(self, ofs):
+        return self.U8(ofs)
+
+    def iter_lines(self):
+        idx = 1
+        while True:
+            pid = self.get_page_id(idx)
+            li = self.get_line_idx(idx)
+            pi = self.get_page_idx(idx)
+            if pi == 0:
+                break
+            yield idx, pid, li, pi
+            idx += 1
 
 class c_ffta_sect_scene_text(c_ffta_sect_tab):
-    
-    _TAB_DESC = [(4, 0), (1, 0)]
-
-    def get_page(self, idx):
-        bs = self.tbase(idx)
-        return self.sub(bs, cls = c_ffta_sect_scene_text_page)
+    _TAB_DESC = [4, 1]
+    @tabitm(0)
+    def get_page(self, ofs):
+        return self.sub(ofs, cls = c_ffta_sect_scene_text_page)
 
 class c_ffta_sect_scene_text_page(c_ffta_sect_tab):
-    _TAB_DESC = [(2, 0), (1, 0)]
+    _TAB_DESC = [2, 1]
+    @tabitm(0)
+    def get_line(self, ofs):
+        return self.sub(ofs, cls = c_ffta_sect_scene_text_line)
+
+class c_ffta_sect_scene_text_line(c_ffta_sect):
+    
+    def _gc(self, si):
+        c = self.U8(si)
+        return c, si + 1
+
+    def _bypass(self, si, di, d, l):
+        for i in range(l):
+            d.append(self.U8(si + i))
+        return si + l, di + l
+
+    @staticmethod
+    def _flip(di, d, l, f):
+        for i in range(l):
+            #d.append(readval_le(d, di - f + i - 1, 1, False))
+            d.append(d[di - f + i - 1])
+        return di + l
+
+    @staticmethod
+    def _bset(di, d, l, v):
+        for i in range(l):
+            d.append(v)
+        return di + l
+
+    def _decompress(self, src_idx, dst_len):
+        dst = bytearray()
+        dst_idx = 0
+        while dst_idx < dst_len:
+            cmd, src_idx = self._gc(src_idx)
+            #print hex(cmd)
+            if cmd & 0x80:
+                cmd1, src_idx = self._gc(src_idx)
+                ln = ((cmd >> 3) & 0xf) + 3
+                fl = (((cmd & 0x7) << 8) | cmd1)
+                dst_idx = self._flip(dst_idx, dst, ln, fl)
+            elif cmd & 0x40:
+                ln = (cmd & 0x3f) + 1
+                src_idx, dst_idx = self._bypass(src_idx, dst_idx, dst, ln)
+            elif cmd & 0x20:
+                ln = (cmd & 0x1f) + 2
+                dst_idx = self._bset(dst_idx, dst, ln, 0x00)
+            elif cmd & 0x10:
+                cmd1, src_idx = self._gc(src_idx)
+                cmd2, src_idx = self._gc(src_idx)
+                ln = (((cmd1 & 0xc0) >> 2) | (cmd & 0xf)) + 4
+                fl = (((cmd1 & 0x3f) << 8) | cmd2)
+                dst_idx = self._flip(dst_idx, dst, ln, fl)
+            elif cmd == 0x2:
+                cmd1, src_idx = self._gc(src_idx)
+                ln = cmd1 + 3
+                dst_idx = self._bset(dst_idx, dst, ln, 0x00)
+            elif cmd == 0x1:
+                cmd1, src_idx = self._gc(src_idx)
+                ln = cmd1 + 3
+                dst_idx = self._bset(dst_idx, dst, ln, 0xff)
+            elif cmd == 0x0:
+                cmd1, src_idx = self._gc(src_idx)
+                cmd2, src_idx = self._gc(src_idx)
+                cmd3, src_idx = self._gc(src_idx)
+                ln = cmd1 + 5
+                fl = ((cmd2 << 8) | cmd3)
+                dst_idx = self._flip(dst_idx, dst, ln, fl)
+            else:
+                pass
+        return dst, dst_idx
+
+    def parse(self):
+        flags = self.U16(0)
+        cmpr = not not (flags & 0x2)
+        self.compressed = cmpr
+        if cmpr:
+            dst_len = rvs_endian(self.U32(2), 4, False)
+            buf, buf_len = self._decompress(6, dst_len)
+            assert(len(buf) == buf_len == dst_len)
+            print(f'decompress 0x{dst_len:x}')
+        else:
+            print('non-compress')
+            buf = self.BYTES(2, 0x20)
+        hd(buf)
 
 class c_ffta_sect_rom(c_ffta_sect):
 
@@ -357,15 +492,7 @@ if __name__ == '__main__':
     main()
     fat = rom_us.tabs['s_fat']
     txt = rom_us.tabs['s_text']
-    def tst_scan_fat():
-        ofs = 0
-        while True:
-            i1 = fat.U8(ofs)
-            i2 = fat.U8(ofs + 2)
-            if i1 != i2:
-                print(f'0x{ofs:x}({ofs//4}): {i1:x} {i2:x}, {fat.U32(ofs):x}')
-                bofs = ((ofs >> 4) << 4) - 0x10
-                print(f'{bofs:08x}')
-                hd(fat.BYTES(bofs, 0x50))
-                break
-            ofs += 4
+    def enum_text():
+        for page in range(20):
+            for line in range(5):
+                txt.get_page(page).get_line(line).parse()
