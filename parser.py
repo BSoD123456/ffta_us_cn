@@ -233,6 +233,83 @@ class c_ffta_sect(c_mark):
             ptr = self._addr2offs(ptr)
         return self._aot(self.U32(ptr), typ[1:])
 
+def cmdc(code):
+    class _dec:
+        def __init__(self, mth):
+            self.mth = mth
+        def __set_name__(self, cls, mname):
+            #if not hasattr(cls, '_cmd_tab'):
+            # in __dict__ is the same as js hasOwnProperty
+            # but hasattr check parents
+            if not '_cmd_tab' in cls.__dict__:
+                cls._cmd_tab = {}
+            cls._cmd_tab[code] = self.mth
+            setattr(cls, mname, self.mth)
+    return _dec
+
+class c_ffta_sect_cmd(c_ffta_sect):
+
+    _cmd_tab = {}
+
+    def _cmd(self, code):
+        if not code in self._cmd_tab:
+            return None
+        return self._cmd_tab[code].__get__(self, type(self))
+
+    def exec(self, params):
+        pass
+
+class c_ffta_sect_scene_cmd(c_ffta_sect_cmd):
+
+    #cmd: text window
+    #params: p1(c) p2(c) p3(c)
+    #p1: index of text on this page
+    #p2: index of portrait
+    #p3: flags, 80: left, 82: right
+    @cmdc(0x0f)
+    def cmd_text(self, params):
+        pass
+
+class c_ffta_sect_tab(c_ffta_sect):
+
+    _TAB_DESC = [(4, 0)]
+    
+    def tbase(self, idx):
+        cur = idx
+        lst_stp = None
+        for td in self._TAB_DESC:
+            stp, ofs = td[:2]
+            if not lst_stp is None:
+                #print(f'(lst_stp)[0x{cur:x}] = ', end = '')
+                cur = self.readval(cur, lst_stp, False)
+                #print(f'0x{cur:x}')
+            #print(f'0x{cur:x} * {stp} + {ofs} = ', end = '')
+            cur = cur * stp + ofs
+            #print(f'0x{cur:x}')
+            if len(td) > 2:
+                lst_stp = td[2]
+            else:
+                lst_stp = stp
+        return cur
+
+class c_ffta_sect_scene_fat(c_ffta_sect_tab):
+    
+    _TAB_DESC = [(4, 2)]
+    
+    def get_entry(self, idx):
+        return self.U8(self.tbase(idx))
+
+class c_ffta_sect_scene_text(c_ffta_sect_tab):
+    
+    _TAB_DESC = [(4, 0), (1, 0)]
+
+    def get_page(self, idx):
+        bs = self.tbase(idx)
+        return self.sub(bs, cls = c_ffta_sect_scene_text_page)
+
+class c_ffta_sect_scene_text_page(c_ffta_sect_tab):
+    _TAB_DESC = [(2, 0), (1, 0)]
+
 class c_ffta_sect_rom(c_ffta_sect):
 
     def parse(self, tabs_info):
@@ -250,23 +327,45 @@ class c_ffta_sect_rom(c_ffta_sect):
             tabs[tab_name] = self._subsect(tab_ptr, tab_cls)
         self.tabs = tabs
 
-if __name__ == '__main__':
+    def tst_txtdump(self, pg, ln, cnt):
+        ent = self.tabs['s_fat'].get_entry(pg)
+        tp = self.tabs['s_text'].get_page(ent)
+        ofs = tp.tbase(ln)
+        return self.tabs['s_text'].BYTES(ofs, cnt)
 
+if __name__ == '__main__':
+    import pdb
+    from hexdump import hexdump as hd
+    
     def main():
         global rom_us, rom_cn, rom_jp
         with open('fftaus.gba', 'rb') as fd:
             rom_us = c_ffta_sect_rom(fd.read(), 0).parse({
-                's_fat': (0x009a20, c_ffta_sect),
-                's_text': (0x009a88, c_ffta_sect),
+                's_fat': (0x009a20, c_ffta_sect_scene_fat),
+                's_text': (0x009a88, c_ffta_sect_scene_text),
             })
         with open('fftacns.gba', 'rb') as fd:
             rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
-                's_fat': (0x009a70, c_ffta_sect),
-                's_text': (0x009ad8, c_ffta_sect),
+                's_fat': (0x009a70, c_ffta_sect_scene_fat),
+                's_text': (0x009ad8, c_ffta_sect_scene_text),
             })
         with open('fftajp.gba', 'rb') as fd:
             rom_jp = c_ffta_sect_rom(fd.read(), 0).parse({
-                's_fat': (0x009a70, c_ffta_sect),
-                's_text': (0x009ad8, c_ffta_sect),
+                's_fat': (0x009a70, c_ffta_sect_scene_fat),
+                's_text': (0x009ad8, c_ffta_sect_scene_text),
             })
     main()
+    fat = rom_us.tabs['s_fat']
+    txt = rom_us.tabs['s_text']
+    def tst_scan_fat():
+        ofs = 0
+        while True:
+            i1 = fat.U8(ofs)
+            i2 = fat.U8(ofs + 2)
+            if i1 != i2:
+                print(f'0x{ofs:x}({ofs//4}): {i1:x} {i2:x}, {fat.U32(ofs):x}')
+                bofs = ((ofs >> 4) << 4) - 0x10
+                print(f'{bofs:08x}')
+                hd(fat.BYTES(bofs, 0x50))
+                break
+            ofs += 4
