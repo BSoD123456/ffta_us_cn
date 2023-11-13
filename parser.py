@@ -67,13 +67,13 @@ class c_mark:
     def raw(self):
         if self.parent:
             return self.parent.raw
-        return self._mod if self._mod else self._raw
+        return self._raw if self._mod is None else self._mod
 
     @property
     def mod(self):
         if self.parent:
             return self.parent.mod
-        if not self._mod:
+        if not self._mod is None:
             self._mod = bytearray(self._raw)
         return self._mod
 
@@ -122,6 +122,11 @@ class c_mark:
             if cb(i, s, ln) == False:
                 return False
         return True
+
+    def replace(self, buf):
+        if not isinstance(buf, bytearray):
+            buf = bytearray(buf)
+        self._mod = buf
 
     I8  = lambda self, pos: self.readval(pos, 1, True)
     U8  = lambda self, pos: self.readval(pos, 1, False)
@@ -429,21 +434,21 @@ class c_ffta_sect_scene_text_line(c_ffta_sect):
                 dst_idx = self._flip(dst_idx, dst, ln, fl)
             else:
                 pass
-        return dst, dst_idx
+        return dst
 
     def parse(self):
         flags = self.U16(0)
         cmpr = not not (flags & 0x2)
         self.compressed = cmpr
+        self.text = self.sub(2, cls = c_ffta_sect_scene_text_buf)
         if cmpr:
             dst_len = rvs_endian(self.U32(2), 4, False)
-            buf, buf_len = self._decompress(6, dst_len)
-            assert(len(buf) == buf_len == dst_len)
-            print(f'decompress 0x{dst_len:x}')
-        else:
-            print('non-compress')
-            buf = self.BYTES(2, 0x20)
-        hd(buf)
+            buf = self._decompress(6, dst_len)
+            assert(len(buf) == dst_len)
+            self.text.replace(buf)
+
+class c_ffta_sect_scene_text_buf(c_ffta_sect):
+    pass
 
 class c_ffta_sect_rom(c_ffta_sect):
 
