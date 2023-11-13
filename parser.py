@@ -59,9 +59,11 @@ class c_mark:
     def __init__(self, raw, offset):
         self._raw = raw
         self._mod = None
+        # mark from buf
         self.offset = offset
         self.parent = None
-        self._par_offset = 0
+        self._buf_offset = 0
+        self._buf_real_offset = 0
 
     @property
     def raw(self):
@@ -77,16 +79,28 @@ class c_mark:
             self._mod = bytearray(self._raw)
         return self._mod
 
+    # buf from last buf
     @property
-    def par_offset(self):
-        po = self._par_offset
+    def buf_offset(self):
         if self.parent:
-            po += self.parent.par_offset
-        return po
+            #assert(self._buf_offset == 0)
+            return self.parent.buf_offset
+        else:
+            return self._buf_offset
 
+    # buf from base
+    @property
+    def buf_real_offset(self):
+        if self.parent:
+            #assert(self._buf_real_offset == 0)
+            return self.parent.buf_real_offset
+        else:
+            return self._buf_real_offset
+
+    # mark from base
     @property
     def real_offset(self):
-        return self.par_offset + self.offset
+        return self.buf_real_offset + self.offset
 
     def shift(self, offs):
         self._par_offset += offs
@@ -224,7 +238,8 @@ class c_mark:
         else:
             s = cls(None, 0)
             s._mod = bytearray(self.BYTES(pos, length))
-            s._par_offset = self.real_offset + pos
+            s._buf_offset = self.offset + pos
+            s._buf_real_offset = self.real_offset + pos
         return s
 
     def concat(self, dst, pos = None):
