@@ -84,6 +84,10 @@ class c_mark:
             po += self.parent.par_offset
         return po
 
+    @property
+    def real_offset(self):
+        return self.par_offset + self.offset
+
     def shift(self, offs):
         self._par_offset += offs
 
@@ -164,8 +168,22 @@ class c_mark:
             self.extendto(pos + cnt)
         return self.raw[st: ed]
 
+    def WBYTES(self, dst, pos):
+        st = self.offset + pos
+        cnt = len(dst)
+        ed = st + cnt
+        self.extendto(pos + cnt)
+        self.mod[st: ed] = dst
+        return cnt
+
     def STR(self, pos, cnt, codec = 'utf8'):
         return self.BYTES(pos, cnt).split(b'\0')[0].decode(codec)
+
+    def WSTR(self, dst, pos, codec = 'utf8'):
+        b = dst.encode(codec)
+        if b[-1] != 0:
+            b += b'\0'
+        return self.WBYTES(b, pos)
 
     def BYTESN(self, pos):
         st = self.offset + pos
@@ -197,16 +215,16 @@ class c_mark:
     def FSTR(self, dst, pos, stp = 1, codec = 'utf8'):
         return self.FBYTES(dst.encode(codec), pos, stp)
 
-    def sub(self, pos, length = -1, cls = None):
+    def sub(self, pos, length = None, cls = None):
         if not cls:
             cls = c_mark
-        if length >= 0:
-            s = cls(None, 0)
-            s._mod = bytearray(self.BYTES(pos, length))
-            s._par_offset = self.par_offset + pos
-        else:
+        if length is None:
             s = cls(None, self.offset + pos)
             s.parent = self
+        else:
+            s = cls(None, 0)
+            s._mod = bytearray(self.BYTES(pos, length))
+            s._par_offset = self.real_offset + pos
         return s
 
     def concat(self, dst, pos = None):
@@ -326,6 +344,25 @@ def tabitm(ofs):
         return _wrap
     return _mod
 
+def tabkey(key):
+    mn = 'get_' + key
+    def _mod(cls):
+        def _getkey(self, k):
+            if hasattr(self, '_tab_cch'):
+                cch = self._tab_cch
+            else:
+                cch = {}
+                self._tab_cch = cch
+            if k in cch:
+                val = cch[k]
+            else:
+                val = getattr(self, mn)(k)
+                cch[k] = val
+            return val
+        cls.__getitem__ = _getkey
+        return cls
+    return _mod
+
 class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     
     _TAB_DESC = [4]
@@ -353,12 +390,14 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
             yield idx, pid, li, pi
             idx += 1
 
+@tabkey('page')
 class c_ffta_sect_scene_text(c_ffta_sect_tab):
     _TAB_DESC = [4, 1]
     @tabitm(0)
     def get_page(self, ofs):
         return self.sub(ofs, cls = c_ffta_sect_scene_text_page)
 
+@tabkey('line')
 class c_ffta_sect_scene_text_page(c_ffta_sect_tab):
     _TAB_DESC = [2, 1]
     @tabitm(0)
@@ -498,7 +537,7 @@ if __name__ == '__main__':
     def enum_text():
         for page in range(2):
             for line in range(5):
-                tl = txt.get_page(page).get_line(line)
+                tl = txt[page][line]
                 tl.parse()
                 print(f'page: 0x{page:x} line: 0x{line:x} cmpr: {tl.compressed}')
                 hd(tl.text.BYTES(0, 0x20))
