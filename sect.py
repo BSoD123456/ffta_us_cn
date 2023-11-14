@@ -551,20 +551,20 @@ class c_ffta_sect_font(c_ffta_sect_tab):
         return (byt >> bshft) & ((1 << blen) - 1)
 
     @tabitm(0)
-    def get_char(self, ofs, half = False):
+    def gen_char(self, ofs, half = False):
         bs, cl, rl, bl = self.char_shape
         rvs = self.rvs_byte
         if half:
             bl = self.half_blks
-        dat = bytearray()
         cch = {}
         for r in range(rl):
-            for b in range(bl):
-                for c in range(cl):
-                    pos = ((b * rl + r) * cl + c) * bs
-                    val = self._get_bits(ofs, pos, bs, rvs, cch)
-                    dat.append(val)
-        return dat
+            def _rowgen():
+                for b in range(bl):
+                    for c in range(cl):
+                        pos = ((b * rl + r) * cl + c) * bs
+                        val = self._get_bits(ofs, pos, bs, rvs, cch)
+                        yield val
+            yield _rowgen()
 
 # ===============
 #      rom
@@ -595,32 +595,33 @@ class c_ffta_sect_rom(c_ffta_sect):
 #      main
 # ===============
 
+def main():
+    global rom_us, rom_cn, rom_jp
+    with open('fftaus.gba', 'rb') as fd:
+        rom_us = c_ffta_sect_rom(fd.read(), 0).parse({
+            's_fat': (0x009a20, c_ffta_sect_scene_fat),
+            's_text': (0x009a88, c_ffta_sect_scene_text),
+            'font': (0x013474, c_ffta_sect_font, {
+                'shape': (4, 8, 16, 2),
+                'rvsbyt': False,
+                'half': 1,
+            }),
+        })
+    with open('fftacns.gba', 'rb') as fd:
+        rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
+            's_fat': (0x009a70, c_ffta_sect_scene_fat),
+            's_text': (0x009ad8, c_ffta_sect_scene_text),
+        })
+    with open('fftajp.gba', 'rb') as fd:
+        rom_jp = c_ffta_sect_rom(fd.read(), 0).parse({
+            's_fat': (0x009a70, c_ffta_sect_scene_fat),
+            's_text': (0x009ad8, c_ffta_sect_scene_text),
+        })
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
     
-    def main():
-        global rom_us, rom_cn, rom_jp
-        with open('fftaus.gba', 'rb') as fd:
-            rom_us = c_ffta_sect_rom(fd.read(), 0).parse({
-                's_fat': (0x009a20, c_ffta_sect_scene_fat),
-                's_text': (0x009a88, c_ffta_sect_scene_text),
-                'font': (0x013474, c_ffta_sect_font, {
-                    'shape': (4, 8, 16, 2),
-                    'rvsbyt': False,
-                    'half': 1,
-                }),
-            })
-        with open('fftacns.gba', 'rb') as fd:
-            rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
-                's_fat': (0x009a70, c_ffta_sect_scene_fat),
-                's_text': (0x009ad8, c_ffta_sect_scene_text),
-            })
-        with open('fftajp.gba', 'rb') as fd:
-            rom_jp = c_ffta_sect_rom(fd.read(), 0).parse({
-                's_fat': (0x009a70, c_ffta_sect_scene_fat),
-                's_text': (0x009ad8, c_ffta_sect_scene_text),
-            })
     main()
     fat = rom_us.tabs['s_fat']
     txt = rom_us.tabs['s_text']
