@@ -534,7 +534,7 @@ class c_ffta_sect_scene_text_buf(c_ffta_sect):
         elif c == 0:
             return 'EOS', 0
         elif self._half:
-            return 'CHR_HALF', c
+            return 'CHR_HALF', c - 1
         elif c == 0x40:
             c = self._gc() - 0x21
             if 0 <= c < 0x58:
@@ -651,11 +651,21 @@ def main():
         rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
             's_text': (0x009ad8, c_ffta_sect_scene_text),
+            'font': (0x0133f4, c_ffta_sect_font, {
+                'shape': (4, 8, 16, 2),
+                'rvsbyt': False,
+                'half': 1,
+            }),
         })
     with open('fftajp.gba', 'rb') as fd:
         rom_jp = c_ffta_sect_rom(fd.read(), 0).parse({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
             's_text': (0x009ad8, c_ffta_sect_scene_text),
+            'font': (0x0133f4, c_ffta_sect_font, {
+                'shape': (4, 8, 16, 2),
+                'rvsbyt': False,
+                'half': 1,
+            }),
         })
 
 if __name__ == '__main__':

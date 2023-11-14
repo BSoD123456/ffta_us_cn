@@ -17,7 +17,7 @@ python -m pip install pillow''')
 
 class c_font_drawer:
 
-    PAL = [(255, 255, 255), (200, 200, 200), (150, 150, 150), (0, 0, 0)]
+    PAL = [(255, 255, 255), (200, 200, 200), (150, 150, 150), (0, 0, 0), (255, 0, 0)]
 
     def __init__(self, font):
         self.sect = font
@@ -29,6 +29,8 @@ class c_font_drawer:
         for line in sect.gen_char(cidx, *args, **kargs):
             rline = []
             for v in line:
+                if v > 3:
+                    v = 4
                 rline.append(pal[v])
             if cw is None:
                 cw = len(rline)
@@ -40,13 +42,13 @@ class c_font_drawer:
             yield rline, False
 
     @staticmethod
-    def draw_comment(txt):
+    def draw_comment(txt, pal_sel = 2):
         pal = c_font_drawer.PAL
         ifnt = ImageFont.load_default()
         bbox = ifnt.getbbox(txt)
         im = Image.new('RGB', bbox[2:4], pal[0])
         dr = ImageDraw.Draw(im)
-        dr.text((0, 0), txt, fill = pal[2], font = ifnt)
+        dr.text((0, 0), txt, fill = pal[pal_sel], font = ifnt)
         sq = im.getdata()
         w = im.width
         h = im.height
@@ -162,41 +164,63 @@ class c_ffta_font_drawer(c_font_drawer):
         blks = []
         for ttyp, tchr in toks:
             if ttyp == 'CHR_FULL':
-                is_half = False
+                blk = self.draw_char(tchr, False)
             elif ttyp == 'CHR_HALF':
-                is_half = True
+                blk = self.draw_char(tchr, True)
+            elif ttyp == 'CTR_FUNC':
+                blk = self.draw_comment(f'[{tchr:x}]')
             else:
                 continue
-            blks.append(self.draw_char(tchr, is_half))
+            blks.append(blk)
         return self.draw_horiz(*blks, pad = pad)
 
 if __name__ == '__main__':
     
     from sect import main as sect_main
     sect_main()
-    from sect import rom_us
+    from sect import rom_us as rom
 
     def get_scene_text_toks(page, line):
-        txt = rom_us.tabs['s_text']
+        txt = rom.tabs['s_text']
         tl = txt[page][line]
         tl.parse()
         tb = tl.text
         tb.parse()
-        return tb.tokens
+        return tb
 
     def draw_texts(dr, prng, lrng):
         blks = []
         for page in range(*prng):
             for line in range(*lrng):
+                tb = get_scene_text_toks(page, line)
                 blks.append(dr.draw_vert(
-                    dr.draw_comment(f'page 0x{page:x} line 0x{line:x}'),
-                    dr.draw_tokens(get_scene_text_toks(page, line)),
+                    dr.draw_comment(f'page 0x{page:x} line 0x{line:x} ofs 0x{tb.real_offset:x}'),
+                    dr.draw_tokens(tb.tokens),
                 ))
         return dr.make_img(dr.draw_vert(*blks))
 
+    def draw_fat(dr):
+        fat = rom.tabs['s_fat']
+        blks = []
+        for idx, page1, line, page2 in fat.iter_lines():
+            page = page2
+            try:
+                tb = get_scene_text_toks(page, line)
+                blk = dr.draw_tokens(tb.tokens)
+                ofs = tb.real_offset
+            except:
+                blk = dr.draw_comment('error!', pal_sel = 4)
+                ofs = 0
+            blks.append(dr.draw_vert(
+                dr.draw_comment(f'page 0x{page:x} line 0x{line:x} ofs 0x{ofs:x}'),
+                blk,
+            ))
+        return dr.make_img(dr.draw_vert(*blks))
+
     def main():
-        dr = c_ffta_font_drawer(rom_us.tabs['font'])
-        im = draw_texts(dr, (0x20, 0x30), (0, 3))
+        dr = c_ffta_font_drawer(rom.tabs['font'])
+        #im = draw_texts(dr, (0x20, 0x30), (0, 3))
+        im = draw_fat(dr)
         return im
     
     main().show()
