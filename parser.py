@@ -527,12 +527,13 @@ class c_ffta_sect_font(c_ffta_sect_tab):
     def parse(self, info):
         self.char_shape = info['shape']
         self.half_blks = info['half']
+        self.rvs_byte = info['rvsbyt']
         char_bits = 1
         for v in self.char_shape:
             char_bits *= v
         self._TAB_DESC = [char_bits // 8]
 
-    def _get_bits(self, ofs, bidx, blen, cch):
+    def _get_bits(self, ofs, bidx, blen, rvs, cch):
         bb = 8
         bpos = bidx // bb
         bst = bidx % bb
@@ -543,13 +544,16 @@ class c_ffta_sect_font(c_ffta_sect_tab):
         else:
             byt = self.U8(ofs + bpos)
             cch[bpos] = byt
-        #bshft = bst
-        bshft = bed
+        if rvs:
+            bshft = bed
+        else:
+            bshft = bst
         return (byt >> bshft) & ((1 << blen) - 1)
 
     @tabitm(0)
     def get_char(self, ofs, half = False):
         bs, cl, rl, bl = self.char_shape
+        rvs = self.rvs_byte
         if half:
             bl = self.half_blks
         dat = bytearray()
@@ -558,7 +562,7 @@ class c_ffta_sect_font(c_ffta_sect_tab):
             for b in range(bl):
                 for c in range(cl):
                     pos = ((b * rl + r) * cl + c) * bs
-                    val = self._get_bits(ofs, pos, bs, cch)
+                    val = self._get_bits(ofs, pos, bs, rvs, cch)
                     dat.append(val)
         return dat
 
@@ -603,6 +607,7 @@ if __name__ == '__main__':
                 's_text': (0x009a88, c_ffta_sect_scene_text),
                 'font': (0x013474, c_ffta_sect_font, {
                     'shape': (4, 8, 16, 2),
+                    'rvsbyt': False,
                     'half': 1,
                 }),
             })
