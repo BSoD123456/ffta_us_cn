@@ -2,7 +2,7 @@
 # coding: utf-8
 
 try:
-    from PIL import Image, ImageDraw
+    from PIL import Image, ImageDraw, ImageFont
 except:
     print('''
 please install Pillow with
@@ -17,16 +17,16 @@ python -m pip install pillow''')
 
 class c_font_drawer:
 
-    PAL = [(255, 255, 255), (100, 100, 100), (200, 200, 200), (0, 0, 0)]
+    PAL = [(255, 255, 255), (200, 200, 200), (150, 150, 150), (0, 0, 0)]
 
     def __init__(self, font):
         self.sect = font
 
-    def draw_char(self, cidx, half = False):
+    def draw_char(self, cidx, *args, **kargs):
         pal = self.PAL
         sect = self.sect
         cw = None
-        for line in sect.gen_char(cidx, half):
+        for line in sect.gen_char(cidx, *args, **kargs):
             rline = []
             for v in line:
                 rline.append(pal[v])
@@ -39,11 +39,14 @@ class c_font_drawer:
                 rline.append(pal[0])
             yield rline, False
 
-    def _draw_comment(self, width, height, txt):
-        pal = self.PAL
-        im = Image.new('RGB', (width, height), pal[0])
+    @staticmethod
+    def draw_comment(txt):
+        pal = c_font_drawer.PAL
+        ifnt = ImageFont.load_default()
+        bbox = ifnt.getbbox(txt)
+        im = Image.new('RGB', bbox[2:4], pal[0])
         dr = ImageDraw.Draw(im)
-        dr.text((0, 0), txt, fill = pal[2])
+        dr.text((0, 0), txt, fill = pal[2], font = ifnt)
         sq = im.getdata()
         w = im.width
         h = im.height
@@ -59,11 +62,6 @@ class c_font_drawer:
             for x in range(w):
                 rline.append(pal[0])
             yield rline, False
-
-    def draw_comment(self, txt):
-        fw = 8
-        fh = 12
-        return self._draw_comment(fw*len(txt), fh, txt)
 
     @staticmethod
     def draw_padding(width, height):
@@ -158,17 +156,47 @@ class c_font_drawer:
         im.putdata(dat)
         return im
 
+class c_ffta_font_drawer(c_font_drawer):
+
+    def draw_tokens(self, toks, pad = 3):
+        blks = []
+        for ttyp, tchr in toks:
+            if ttyp == 'CHR_FULL':
+                is_half = False
+            elif ttyp == 'CHR_HALF':
+                is_half = True
+            else:
+                continue
+            blks.append(self.draw_char(tchr, is_half))
+        return self.draw_horiz(*blks, pad = pad)
+
 if __name__ == '__main__':
     
-    from sect import main
-    main()
+    from sect import main as sect_main
+    sect_main()
     from sect import rom_us
-    dr = c_font_drawer(rom_us.tabs['font'])
-    im = dr.make_img(
-        dr.draw_vert(
-            dr.draw_comment('comment'),
-            dr.draw_horiz(
-                dr.draw_char(1), dr.draw_char(10),
-            )
-        )
-    )
+
+    def get_scene_text_toks(page, line):
+        txt = rom_us.tabs['s_text']
+        tl = txt[page][line]
+        tl.parse()
+        tb = tl.text
+        tb.parse()
+        return tb.tokens
+
+    def draw_texts(dr, prng, lrng):
+        blks = []
+        for page in range(*prng):
+            for line in range(*lrng):
+                blks.append(dr.draw_vert(
+                    dr.draw_comment(f'page 0x{page:x} line 0x{line:x}'),
+                    dr.draw_tokens(get_scene_text_toks(page, line)),
+                ))
+        return dr.make_img(dr.draw_vert(*blks))
+
+    def main():
+        dr = c_ffta_font_drawer(rom_us.tabs['font'])
+        im = draw_texts(dr, (0x20, 0x30), (0, 3))
+        return im
+    
+    main().show()

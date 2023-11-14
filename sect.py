@@ -516,7 +516,47 @@ class c_ffta_sect_scene_text_line(c_ffta_sect):
 class c_ffta_sect_scene_text_buf(c_ffta_sect):
 
     def parse(self):
-        pass
+        self._cidx = 0
+        self._half = False
+        self._decode()
+        self.raw_len = self._cidx
+
+    def _gc(self):
+        c = self.U8(self._cidx)
+        self._cidx += 1
+        return c
+
+    def _getc(self):
+        c = self._gc()
+        if c == 1:
+            self._half = True
+            return self._getc()
+        elif c == 0:
+            return 'EOS', 0
+        elif self._half:
+            return 'CHR_HALF', c
+        elif c == 0x40:
+            c = self._gc() - 0x21
+            if 0 <= c < 0x58:
+                return 'CTR_FUNC', c
+            else:
+                return 'ERR_CFUNC', c
+        elif c & 0x80:
+            c &= 0x7f
+            c <<= 8
+            c |= self._gc()
+            return 'CHR_FULL', c
+        else:
+            return 'ERR_UNKNOWN', c
+
+    def _decode(self):
+        toks = []
+        while True:
+            typ, val = self._getc()
+            if typ == 'EOS':
+                break
+            toks.append((typ, val))
+        self.tokens = toks
 
 # ===============
 #      font
