@@ -264,7 +264,7 @@ def clsdec(hndl, *args, **kargs):
     return _dec
 
 # ===============
-# ffta desc
+#   ffta spec
 # ===============
 
 class c_ffta_sect(c_mark):
@@ -291,6 +291,10 @@ class c_ffta_sect(c_mark):
         if typ[0] == 'a':
             ptr = self._addr2offs(ptr)
         return self._aot(self.U32(ptr), typ[1:])
+
+# ===============
+#    commands
+# ===============
 
 def cmdc(code):
     def _hndl(cls, mname, mth):
@@ -325,6 +329,10 @@ class c_ffta_sect_scene_cmd(c_ffta_sect_cmd):
     def cmd_text(self, params):
         pass
 
+# ===============
+#      tabs
+# ===============
+
 class c_ffta_sect_tab(c_ffta_sect):
     _TAB_DESC = []
     def tbase(self, idx):
@@ -354,8 +362,8 @@ class c_ffta_sect_tab(c_ffta_sect):
 
 def tabitm(ofs):
     def _mod(mth):
-        def _wrap(self, idx):
-            return mth(self, self.tbase(idx) + ofs)
+        def _wrap(self, idx, *args, **kargs):
+            return mth(self, self.tbase(idx) + ofs, *args, **kargs)
         return _wrap
     return _mod
 
@@ -377,6 +385,10 @@ def tabkey(key):
         cls.__getitem__ = _getkey
         return cls
     return _mod
+
+# ===============
+#      fat
+# ===============
 
 class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     
@@ -404,6 +416,10 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
                 break
             yield idx, pid, li, pi
             idx += 1
+
+# ===============
+#      text
+# ===============
 
 @tabkey('page')
 class c_ffta_sect_scene_text(c_ffta_sect_tab):
@@ -502,6 +518,54 @@ class c_ffta_sect_scene_text_buf(c_ffta_sect):
     def parse(self):
         pass
 
+# ===============
+#      font
+# ===============
+
+class c_ffta_sect_font(c_ffta_sect_tab):
+
+    def parse(self, info):
+        self.char_shape = info['shape']
+        self.half_blks = info['half']
+        char_bits = 1
+        for v in self.char_shape:
+            char_bits *= v
+        self._TAB_DESC = [char_bits // 8]
+
+    def _get_bits(self, ofs, bidx, blen, cch):
+        bb = 8
+        bpos = bidx // bb
+        bst = bidx % bb
+        bed = bst + blen
+        assert(bed <= bb)
+        if bpos in cch:
+            byt = cch[bpos]
+        else:
+            byt = self.U8(ofs + bpos)
+            cch[bpos] = byt
+        #bshft = bst
+        bshft = bed
+        return (byt >> bshft) & ((1 << blen) - 1)
+
+    @tabitm(0)
+    def get_char(self, ofs, half = False):
+        bs, cl, rl, bl = self.char_shape
+        if half:
+            bl = self.half_blks
+        dat = bytearray()
+        cch = {}
+        for r in range(rl):
+            for b in range(bl):
+                for c in range(cl):
+                    pos = ((b * rl + r) * cl + c) * bs
+                    val = self._get_bits(ofs, pos, bs, cch)
+                    dat.append(val)
+        return dat
+
+# ===============
+#      rom
+# ===============
+
 class c_ffta_sect_rom(c_ffta_sect):
 
     def parse(self, tabs_info):
@@ -515,15 +579,17 @@ class c_ffta_sect_rom(c_ffta_sect):
 
     def _add_tabs(self, tabs_info):
         tabs = {}
-        for tab_name, (tab_ptr, tab_cls) in tabs_info.items():
-            tabs[tab_name] = self._subsect(tab_ptr, tab_cls)
+        for tab_name, tab_info in tabs_info.items():
+            tab_ptr, tab_cls = tab_info[:2]
+            subsect = self._subsect(tab_ptr, tab_cls)
+            if len(tab_info) > 2:
+                subsect.parse(tab_info[2])
+            tabs[tab_name] = subsect
         self.tabs = tabs
 
-    def tst_txtdump(self, pg, ln, cnt):
-        ent = self.tabs['s_fat'].get_entry(pg)
-        tp = self.tabs['s_text'].get_page(ent)
-        ofs = tp.tbase(ln)
-        return self.tabs['s_text'].BYTES(ofs, cnt)
+# ===============
+#      main
+# ===============
 
 if __name__ == '__main__':
     import pdb
@@ -535,6 +601,10 @@ if __name__ == '__main__':
             rom_us = c_ffta_sect_rom(fd.read(), 0).parse({
                 's_fat': (0x009a20, c_ffta_sect_scene_fat),
                 's_text': (0x009a88, c_ffta_sect_scene_text),
+                'font': (0x013474, c_ffta_sect_font, {
+                    'shape': (4, 8, 16, 2),
+                    'half': 1,
+                }),
             })
         with open('fftacns.gba', 'rb') as fd:
             rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
