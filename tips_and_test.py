@@ -12,6 +12,15 @@
 # load [81223c0] = 89a5d54 <- scen dat base
 # call 8009a14 -> load [8009a20] = 8a19970 <- scen fat base
 
+# 8011d28: bl 8013e9c
+#   -> 8013ede: bl 543c decompress (some branch)
+
+# 801206c: bl 80cb8b4
+#   -> ? 543c decompress
+# 8022af4: bl 802292c
+#   -> ? 543c decompress
+# 8006a34: bl 814224c ...
+
 # ===
 # cnjp:
 # rom end: 9bb3d0
