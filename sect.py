@@ -341,39 +341,57 @@ class c_ffta_sect_tab(c_ffta_sect):
         ii += 1
         lst_stp = None
         for td in self._TAB_DESC:
+            # tab desc:
+            # cur_step
+            # (cur_step, offset, last_cur_step, nidx_step, last_ptr_bits)
+            ti = 0
             try:
-                stp = td[0]
+                stp = td[ti]
+                ti += 1
             except:
                 stp = td
             try:
-                nstp = td[1]
+                ofs = td[ti]
+                ti += 1
+            except:
+                ofs = 0
+            try:
+                lst_cur_stp = td[ti]
+                ti += 1
+            except:
+                lst_cur_stp = 0
+            try:
+                nstp = td[ti]
+                ti += 1
             except:
                 nstp = 0
+            lst_cur = cur
             #if not lst_stp is None:
             if lst_stp: # lst_stp == 0 skip
-                #print(f'(lst_stp)[0x{cur:x}] = ', end = '')
                 cur = self.readval(cur, lst_stp, False)
-                #print(f'0x{cur:x}')
             if nstp:
                 nidxofs = idxs[ii] * nstp
                 ii += 1
             else:
                 nidxofs = 0
-            cur = cur * stp + nidxofs
+            print(f'cur(0x{cur:x}) * stp(0x{stp:x}) + ofs(0x{ofs:x}) + lst_cur(0x{lst_cur:x}) * lst_cur_stp(0x{lst_cur_stp:x}) + nidxofs(0x{nidxofs:x}) = ', end = '')
+            cur = cur * stp + ofs + lst_cur * lst_cur_stp + nidxofs
+            print(f'0x{cur:x}')
             try:
-                lst_stp = td[2]
+                lst_stp = td[ti]
+                ti += 1
             except:
                 lst_stp = stp
         return cur, ii
     def tbase(self, *idxs):
-        return _tbase(self, *idxs)[0]
+        return self._tbase(*idxs)[0]
 
 def tabitm(ofs):
     def _mod(mth):
         def _wrap(self, *idxs, **kargs):
             bs, ri = self._tbase(*idxs)
-            if ri > len(idxs):
-                return mth(self, bs + ofs, idxs[ri:], **kargs)
+            if ri < len(idxs):
+                return mth(self, bs + ofs, *idxs[ri:], **kargs)
             else:
                 return mth(self, bs + ofs, **kargs)
         return _wrap
@@ -409,6 +427,7 @@ def tabkey(key):
 #      fat
 # ===============
 
+@tabkey('entry')
 class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     
     _TAB_DESC = [4]
@@ -418,15 +437,15 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
         return self.U8(ofs), self.U8(ofs+1), self.U8(ofs+2)
 
     @tabitm(0)
-    def get_page_id(self, ofs):
+    def get_script_page(self, ofs):
         return self.U8(ofs)
 
     @tabitm(1)
-    def get_line_idx(self, ofs):
+    def get_script_idx(self, ofs):
         return self.U8(ofs)
 
     @tabitm(2)
-    def get_page_idx(self, ofs):
+    def get_text_page(self, ofs):
         return self.U8(ofs)
 
     def iter_lines(self):
@@ -442,15 +461,16 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
 #     script
 # ===============
 
-@tabkey('cmd')
 class c_ffta_sect_scene_script(c_ffta_sect_tab):
-    _TAB_DESC = [4, (1, 4)]
+    _TAB_DESC = [(4, -4), 1, (1, 0, 1, 4)]
+
     @tabitm(0)
-    def get_cmd(self, ofs):
-        return self.U8(ofs)
+    def get_cmdop(self, ofs, cmd_ofs):
+        return self.U8(ofs + cmd_ofs)
+    
     @tabitm(1)
-    def get_cmdprms(self, ofs, prm_len = 0):
-        return self.BYTES(ofs, prm_len)
+    def get_cmdprms_and_step(self, ofs, cmd_ofs, prm_len = 0):
+        return self.BYTES(ofs + 1 + cmd_ofs, prm_len), cmd_ofs + prm_len
 
 class c_ffta_sect_scene_script_cmds(c_ffta_sect_tab):
     _TAB_DESC = [6]
