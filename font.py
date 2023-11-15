@@ -202,7 +202,7 @@ if __name__ == '__main__':
     def draw_fat(dr):
         fat = rom.tabs['s_fat']
         blks = []
-        for idx, page1, line, page2 in fat.iter_lines():
+        for page1, line, page2 in fat.iter_lines():
             page = page2
             try:
                 tb = get_scene_text_toks(page, line)
@@ -223,4 +223,4 @@ if __name__ == '__main__':
         im = draw_fat(dr)
         return im
     
-    main().show()
+    #main().show()

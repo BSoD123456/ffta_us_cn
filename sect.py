@@ -335,8 +335,10 @@ class c_ffta_sect_scene_cmd(c_ffta_sect_cmd):
 
 class c_ffta_sect_tab(c_ffta_sect):
     _TAB_DESC = []
-    def tbase(self, idx):
-        cur = idx
+    def _tbase(self, *idxs):
+        ii = 0
+        cur = idxs[ii]
+        ii += 1
         lst_stp = None
         for td in self._TAB_DESC:
             try:
@@ -344,26 +346,36 @@ class c_ffta_sect_tab(c_ffta_sect):
             except:
                 stp = td
             try:
-                ofs = td[1]
+                nstp = td[1]
             except:
-                ofs = 0
-            if not lst_stp is None:
+                nstp = 0
+            #if not lst_stp is None:
+            if lst_stp: # lst_stp == 0 skip
                 #print(f'(lst_stp)[0x{cur:x}] = ', end = '')
                 cur = self.readval(cur, lst_stp, False)
                 #print(f'0x{cur:x}')
-            #print(f'0x{cur:x} * {stp} + {ofs} = ', end = '')
-            cur = cur * stp + ofs
-            #print(f'0x{cur:x}')
+            if nstp:
+                nidxofs = idxs[ii] * nstp
+                ii += 1
+            else:
+                nidxofs = 0
+            cur = cur * stp + nidxofs
             try:
                 lst_stp = td[2]
             except:
                 lst_stp = stp
-        return cur
+        return cur, ii
+    def tbase(self, *idxs):
+        return _tbase(self, *idxs)[0]
 
 def tabitm(ofs):
     def _mod(mth):
-        def _wrap(self, idx, *args, **kargs):
-            return mth(self, self.tbase(idx) + ofs, *args, **kargs)
+        def _wrap(self, *idxs, **kargs):
+            bs, ri = self._tbase(*idxs)
+            if ri > len(idxs):
+                return mth(self, bs + ofs, idxs[ri:], **kargs)
+            else:
+                return mth(self, bs + ofs, **kargs)
         return _wrap
     return _mod
 
@@ -379,12 +391,19 @@ def tabkey(key):
             if k in cch:
                 val = cch[k]
             else:
-                val = getattr(self, mn)(k)
+                if isinstance(k, tuple):
+                    val = getattr(self, mn)(*k)
+                else:
+                    val = getattr(self, mn)(k)
                 cch[k] = val
             return val
         cls.__getitem__ = _getkey
         return cls
     return _mod
+
+# ===============
+#     scene
+# ===============
 
 # ===============
 #      fat
@@ -393,6 +412,10 @@ def tabkey(key):
 class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     
     _TAB_DESC = [4]
+
+    @tabitm(0)
+    def get_entry(self, ofs):
+        return self.U8(ofs), self.U8(ofs+1), self.U8(ofs+2)
 
     @tabitm(0)
     def get_page_id(self, ofs):
@@ -409,13 +432,34 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     def iter_lines(self):
         idx = 1
         while True:
-            pid = self.get_page_id(idx)
-            li = self.get_line_idx(idx)
-            pi = self.get_page_idx(idx)
-            if pi == 0:
+            sp, si, tp = self.get_entry(idx)
+            if tp == 0:
                 break
-            yield idx, pid, li, pi
+            yield sp, si, tp
             idx += 1
+
+# ===============
+#     script
+# ===============
+
+@tabkey('cmd')
+class c_ffta_sect_scene_script(c_ffta_sect_tab):
+    _TAB_DESC = [4, (1, 4)]
+    @tabitm(0)
+    def get_cmd(self, ofs):
+        return self.U8(ofs)
+    @tabitm(1)
+    def get_cmdprms(self, ofs, prm_len = 0):
+        return self.BYTES(ofs, prm_len)
+
+class c_ffta_sect_scene_script_cmds(c_ffta_sect_tab):
+    _TAB_DESC = [6]
+    @tabitm(2)
+    def get_cmd_addr(self, ofs):
+        return self.U32(ofs)
+    @tabitm(0)
+    def get_prm_len(self, ofs):
+        return self.U16(ofs)
 
 # ===============
 #      text
@@ -640,6 +684,8 @@ def main():
     with open('fftaus.gba', 'rb') as fd:
         rom_us = c_ffta_sect_rom(fd.read(), 0).parse({
             's_fat': (0x009a20, c_ffta_sect_scene_fat),
+            's_scrpt': (0x1223c0, c_ffta_sect_scene_script),
+            's_cmds': (0x122b10, c_ffta_sect_scene_script_cmds),
             's_text': (0x009a88, c_ffta_sect_scene_text),
             'font': (0x013474, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
@@ -674,6 +720,8 @@ if __name__ == '__main__':
     
     main()
     fat = rom_us.tabs['s_fat']
+    scr = rom_us.tabs['s_scrpt']
+    cmd = rom_us.tabs['s_cmds']
     txt = rom_us.tabs['s_text']
     def enum_text():
         for page in range(2):
