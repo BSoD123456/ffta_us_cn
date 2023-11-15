@@ -337,51 +337,46 @@ class c_ffta_sect_tab(c_ffta_sect):
     _TAB_DESC = []
     def _tbase(self, *idxs):
         ii = 0
-        cur = idxs[ii]
-        ii += 1
         lst_stp = None
+        val_cch = []
         for td in self._TAB_DESC:
             # tab desc:
-            # cur_step
-            # (cur_step, offset, last_cur_step, nidx_step, last_ptr_bits)
-            ti = 0
-            try:
-                stp = td[ti]
-                ti += 1
-            except:
-                stp = td
-            try:
-                ofs = td[ti]
-                ti += 1
-            except:
-                ofs = 0
-            try:
-                lst_cur_stp = td[ti]
-                ti += 1
-            except:
-                lst_cur_stp = 0
-            try:
-                nstp = td[ti]
-                ti += 1
-            except:
-                nstp = 0
-            lst_cur = cur
-            #if not lst_stp is None:
-            if lst_stp: # lst_stp == 0 skip
-                cur = self.readval(cur, lst_stp, False)
-            if nstp:
-                nidxofs = idxs[ii] * nstp
-                ii += 1
-            else:
-                nidxofs = 0
-            print(f'cur(0x{cur:x}) * stp(0x{stp:x}) + ofs(0x{ofs:x}) + lst_cur(0x{lst_cur:x}) * lst_cur_stp(0x{lst_cur_stp:x}) + nidxofs(0x{nidxofs:x}) = ', end = '')
-            cur = cur * stp + ofs + lst_cur * lst_cur_stp + nidxofs
-            print(f'0x{cur:x}')
-            try:
-                lst_stp = td[ti]
-                ti += 1
-            except:
-                lst_stp = stp
+            # step of (offset, cur_idx, *-1_val, -1_val, *-2_val, -2_val, ...)
+            if not isinstance(td, tuple):
+                if val_cch:
+                    td = (0, 0, td)
+                else:
+                    td = (0, td)
+            cur = 0
+            all_stp = 1
+            for i, stp in enumerate(td):
+                if stp == 0:
+                    continue
+                bi = i // 2
+                is_stp = True
+                if i % 2:
+                    if bi == 0:
+                        cval = idxs[ii]
+                        ii += 1
+                    else:
+                        cval = val_cch[-bi][0]
+                else:
+                    if bi == 0:
+                        cval = 1
+                        is_stp = False
+                    else:
+                        _lv, _lb = val_cch[-bi]
+                        if isinstance(stp, tuple):
+                            _lb = stp[1]
+                            stp = stp[0]
+                        cval = self.readval(_lv, _lb, False)
+                        print(f'({_lb})[0x{_lv:x}] == 0x{cval:x}')
+                if is_stp:
+                    all_stp *= stp
+                print(f'typ({len(val_cch)}:{bi}/{i%2}) cur(0x{cur:x}) + stp({stp}) * cval(0x{cval:x}) = ', end = '')
+                cur += stp * cval
+                print(f'cur(0x{cur:x}) all_stp(0x{all_stp:x})')
+            val_cch.append((cur, all_stp))
         return cur, ii
     def tbase(self, *idxs):
         return self._tbase(*idxs)[0]
@@ -462,7 +457,7 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
 # ===============
 
 class c_ffta_sect_scene_script(c_ffta_sect_tab):
-    _TAB_DESC = [(4, -4), 1, (1, 0, 1, 4)]
+    _TAB_DESC = [(-4, 4), 1, (0, 4, 0, 1), (0, 0, 1, 0, 0, 1)]
 
     @tabitm(0)
     def get_cmdop(self, ofs, cmd_ofs):
