@@ -370,12 +370,12 @@ class c_ffta_sect_tab(c_ffta_sect):
                             _lb = stp[1]
                             stp = stp[0]
                         cval = self.readval(_lv, _lb, False)
-                        print(f'({_lb})[0x{_lv:x}] == 0x{cval:x}')
+                        #print(f'({_lb})[0x{_lv:x}] == 0x{cval:x}')
                 if is_stp:
                     all_stp *= stp
-                print(f'typ({len(val_cch)}:{bi}/{i%2}) cur(0x{cur:x}) + stp({stp}) * cval(0x{cval:x}) = ', end = '')
+                #print(f'typ({len(val_cch)}:{bi}/{i%2}) cur(0x{cur:x}) + stp({stp}) * cval(0x{cval:x}) = ', end = '')
                 cur += stp * cval
-                print(f'cur(0x{cur:x}) all_stp(0x{all_stp:x})')
+                #print(f'cur(0x{cur:x}) all_stp(0x{all_stp:x})')
             val_cch.append((cur, all_stp))
         return cur, ii
     def tbase(self, *idxs):
@@ -464,8 +464,8 @@ class c_ffta_sect_scene_script(c_ffta_sect_tab):
         return self.U8(ofs + cmd_ofs)
     
     @tabitm(1)
-    def get_cmdprms_and_step(self, ofs, cmd_ofs, prm_len = 0):
-        return self.BYTES(ofs + 1 + cmd_ofs, prm_len), cmd_ofs + prm_len
+    def get_cmdprms_and_step(self, ofs, cmd_len, cmd_ofs):
+        return self.BYTES(ofs + cmd_ofs, cmd_len - 1), cmd_ofs + cmd_len
 
 class c_ffta_sect_scene_script_cmds(c_ffta_sect_tab):
     _TAB_DESC = [6]
@@ -473,7 +473,7 @@ class c_ffta_sect_scene_script_cmds(c_ffta_sect_tab):
     def get_cmd_addr(self, ofs):
         return self.U32(ofs)
     @tabitm(0)
-    def get_prm_len(self, ofs):
+    def get_cmd_len(self, ofs):
         return self.U16(ofs)
 
 # ===============
@@ -745,3 +745,14 @@ if __name__ == '__main__':
                 tl.parse()
                 print(f'page: 0x{page:x} line: 0x{line:x} cmpr: {tl.compressed}')
                 hd(tl.text.BYTES(0, 0x20))
+    def enum_script(fat_idx, ln = 0x10):
+        si = fat.get_entry(fat_idx)[:2]
+        pcmd = 0
+        for i in range(ln):
+            cmdop = scr.get_cmdop(*si, pcmd)
+            cmd_addr = cmd.get_cmd_addr(cmdop)
+            cmd_len = cmd.get_cmd_len(cmdop)
+            prms, pcmd = scr.get_cmdprms_and_step(*si, cmd_len, pcmd)
+            print(f'0x{cmdop:x}(0x{cmd_addr:x}) {cmd_len-1} prms:')
+            hd(prms)
+            
