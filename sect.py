@@ -293,43 +293,6 @@ class c_ffta_sect(c_mark):
         return self._aot(self.U32(ptr), typ[1:])
 
 # ===============
-#    commands
-# ===============
-
-def cmdc(code):
-    def _hndl(cls, mname, mth):
-        #if not hasattr(cls, '_cmd_tab'):
-        # in __dict__ is the same as js hasOwnProperty
-        # but hasattr check parents
-        if not '_cmd_tab' in cls.__dict__:
-            cls._cmd_tab = {}
-        cls._cmd_tab[code] = mth
-    return clsdec(_hndl)
-
-class c_ffta_sect_cmd(c_ffta_sect):
-
-    _cmd_tab = {}
-
-    def _cmd(self, code):
-        if not code in self._cmd_tab:
-            return None
-        return self._cmd_tab[code].__get__(self, type(self))
-
-    def exec(self, params):
-        pass
-
-class c_ffta_sect_scene_cmd(c_ffta_sect_cmd):
-
-    #cmd: text window
-    #params: p1(c) p2(c) p3(c)
-    #p1: index of text on this page
-    #p2: index of portrait
-    #p3: flags, 80: left, 82: right
-    @cmdc(0x0f)
-    def cmd_text(self, params):
-        pass
-
-# ===============
 #      tabs
 # ===============
 
@@ -456,16 +419,46 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
 #     script
 # ===============
 
+@tabkey('page')
 class c_ffta_sect_scene_script(c_ffta_sect_tab):
     _TAB_DESC = [(-4, 4), 1, (0, 4, 0, 1), (0, 0, 1, 0, 0, 1)]
-
     @tabitm(0)
-    def get_cmdop(self, ofs, cmd_ofs):
-        return self.U8(ofs + cmd_ofs)
-    
-    @tabitm(1)
-    def get_cmdprms_and_step(self, ofs, cmd_len, cmd_ofs):
-        return self.BYTES(ofs + cmd_ofs, cmd_len - 1), cmd_ofs + cmd_len
+    def get_page(self, ofs):
+        page = self.sub(ofs, cls = c_ffta_sect_scene_script_page)
+        page.parse()
+        return page
+
+class c_ffta_sect_scene_script_page(c_ffta_sect):
+
+    def parse(self):
+        self._line_ofs = [0]
+
+    def _get_cmd(self, idx):
+        ent = self._line_ofs[idx]
+        ln = self._line_ofs[idx + 1] - ent
+        cmdop = self.U8(ent)
+        prms = self.BYTES(ent + 1, ln - 1)
+        return cmdop, prms
+
+    def _has_idx(self, idx):
+        return idx < len(self._line_ofs) - 1
+
+    def get_cmd(self, idx):
+        if self._has_idx(idx):
+            return self._get_cmd(idx)
+        else:
+            return None, None
+
+    def extend_line(self):
+        lst_ent = self._line_ofs[-1]
+        cmdop = self.U8(lst_ent)
+        cmdlen = yield cmdop
+        self._line_ofs.append(lst_ent + cmdlen)
+
+    def extend_to(self, idx):
+        while not self._has_idx(idx):
+            yield from self.extend_line()
+        yield None
 
 class c_ffta_sect_scene_script_cmds(c_ffta_sect_tab):
     _TAB_DESC = [6]
@@ -747,12 +740,14 @@ if __name__ == '__main__':
                 hd(tl.text.BYTES(0, 0x20))
     def enum_script(fat_idx, ln = 0x10):
         si = fat.get_entry(fat_idx)[:2]
-        pcmd = 0
+        spage = scr[si[0], si[1]]
+        ctx = spage.extend_to(ln - 1)
+        cmdop = next(ctx)
+        while not cmdop is None:
+            cmdop = ctx.send(cmd.get_cmd_len(cmdop))
         for i in range(ln):
-            cmdop = scr.get_cmdop(*si, pcmd)
+            cmdop, prms = spage.get_cmd(i)
             cmd_addr = cmd.get_cmd_addr(cmdop)
-            cmd_len = cmd.get_cmd_len(cmdop)
-            prms, pcmd = scr.get_cmdprms_and_step(*si, cmd_len, pcmd)
-            print(f'0x{cmdop:x}(0x{cmd_addr:x}) {cmd_len-1} prms:')
+            print(f'0x{cmdop:x}(0x{cmd_addr:x}) {len(prms)} prms:')
             hd(prms)
             
