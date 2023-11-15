@@ -4,7 +4,7 @@
 import os, os.path
 
 # ===============
-# common
+#     common
 # ===============
 
 def report(*args):
@@ -252,17 +252,6 @@ class c_mark:
             self.mod[pos:] = db
         return self
 
-def clsdec(hndl, *args, **kargs):
-    class _dec:
-        def __init__(self, mth):
-            self.mth = mth
-        def __set_name__(self, cls, mname):
-            nmth = hndl(cls, mname, self.mth, *args, **kargs)
-            if nmth is None:
-                nmth = self.mth
-            setattr(cls, mname, nmth)
-    return _dec
-
 # ===============
 #   ffta spec
 # ===============
@@ -385,7 +374,6 @@ def tabkey(key):
 #      fat
 # ===============
 
-@tabkey('entry')
 class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     
     _TAB_DESC = [4]
@@ -448,6 +436,12 @@ class c_ffta_sect_scene_script_page(c_ffta_sect):
             return self._get_cmd(idx)
         else:
             return None, None
+
+    def get_last_cmd(self):
+        if len(self._line_ofs) < 2:
+            return None, None
+        else:
+            return self._get_cmd(-2)
 
     def extend_line(self):
         lst_ent = self._line_ofs[-1]
