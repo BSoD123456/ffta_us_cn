@@ -176,9 +176,9 @@ class c_ffta_font_drawer(c_font_drawer):
 
 if __name__ == '__main__':
     
-    from sect import main as sect_main
+    from ffta_sect import main as sect_main
     sect_main()
-    from sect import rom_us as rom
+    from ffta_sect import rom_us as rom
 
     def get_scene_text_toks(page, line):
         txt = rom.tabs['s_text']
@@ -223,7 +223,7 @@ if __name__ == '__main__':
         im = draw_fat(dr)
         return im
 
-    from .parser import c_ffta_script_parser
+    from ffta_parser import c_ffta_script_parser
 
     def psr_main():
         global spsr

@@ -131,9 +131,9 @@ class c_ffta_script_parser:
 
 if __name__ == '__main__':
 
-    from sect import main as sect_main
+    from ffta_sect import main as sect_main
     sect_main()
-    from sect import rom_us as rom
+    from ffta_sect import rom_us as rom
 
     def main():
         global spsr
