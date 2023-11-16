@@ -24,14 +24,14 @@ def clsdec(hndl, *args, **kargs):
 #    scripts
 # ===============
 
-def cmdc(code):
+def cmdc(code, typ = 'unknown'):
     def _hndl(cls, mname, mth):
         #if not hasattr(cls, '_cmd_tab'):
         # in __dict__ is the same as js hasOwnProperty
         # but hasattr check parents
         if not '_cmd_tab' in cls.__dict__:
             cls._cmd_tab = {}
-        cls._cmd_tab[code] = mth
+        cls._cmd_tab[code] = (mth, typ)
     return clsdec(_hndl)
 
 class c_ffta_cmd:
@@ -42,13 +42,19 @@ class c_ffta_cmd:
         self.op = op
         self.prms = prms
 
-    def _cmd(self, op):
-        if not op in self._cmd_tab:
-            return None
-        return self._cmd_tab[op].__get__(self, type(self))
-
-    def exec(self, params):
-        pass
+    def exec(self, psr):
+        rslt = {
+            'step': 1,
+            'valid': False,
+            'type': 'unknown',
+        }
+        if self.op in self._cmd_tab:
+            # self._cmd_tab[op][0].__get__(self, type(self)) to bind cmdfunc
+            cmdfunc, cmdtyp = self._cmd_tab[self.op]
+            rslt['valid'] = True
+            rslt['type'] = cmdtyp
+            rslt['output'] = cmdfunc(self, self.prms, psr, rslt)
+        return rslt
 
     def __repr__(self):
         #prms_rpr = bytearray.hex(self.prms)
@@ -63,9 +69,9 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p1: index of text on this page
     #p2: index of portrait
     #p3: flags, 80: left, 82: right
-    @cmdc(0x0f)
-    def cmd_text(self, params):
-        pass
+    @cmdc(0x0f, 'text')
+    def cmd_text(self, params, psr, rslt):
+        return 'show'
 
 class c_ffta_script_parser:
 
@@ -74,7 +80,8 @@ class c_ffta_script_parser:
         self.page_idx = None
 
     def enter_page(self, idx):
-        if idx <= 0 or idx == self.page_idx:
+        assert(idx > 0)
+        if idx == self.page_idx:
             return
         s_pi1, s_pi2, t_pi = self.sects['fat'].get_entry(idx)
         self.s_page = self.sects['script'][s_pi1, s_pi2]
@@ -99,6 +106,25 @@ class c_ffta_script_parser:
         self._extend_cmd_to(idx)
         return self.cmds[idx]
 
+    def exec(self, st_idx = 0, flt = None, flt_out = None, cb_pck = None):
+        nxt_idx = st_idx
+        while not nxt_idx is None:
+            rslt = self.get_cmd(nxt_idx).exec(self)
+            lst_idx = nxt_idx
+            nxt_idx += rslt['step']
+            if not rslt['valid']:
+                continue
+            typ = rslt['type']
+            if not flt is None and not typ in flt:
+                continue
+            if not flt_out is None and typ in flt_out:
+                continue
+            if callable(cb_pck):
+                ro = cb_pck(lst_idx, rslt)
+            else:
+                ro = rslt['output']
+            yield ro
+
 if __name__ == '__main__':
 
     from sect import main as sect_main
@@ -113,4 +139,8 @@ if __name__ == '__main__':
             'cmds':     rom.tabs['s_cmds'],
             'text':     rom.tabs['s_text'],
         })
-    main()
+        spsr.enter_page(1)
+        def _idx_pck(idx, rslt):
+            return (idx, rslt['type'], rslt['output'])
+        return spsr.exec(cb_pck = _idx_pck)
+    ctx = main()
