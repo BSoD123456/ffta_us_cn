@@ -36,9 +36,13 @@ def cmdc(code, typ = 'unknown'):
 
 class c_ffta_cmd:
 
+    _CMDC_TOP = 0xff
+
     _cmd_tab = {}
 
     def __init__(self, op, prms):
+        if not 0 <= op < self._CMDC_TOP:
+            raise ValueError('invalid opcode')
         self.op = op
         self.prms = prms
 
@@ -63,6 +67,8 @@ class c_ffta_cmd:
         return f'<{self.op:X}: {prms_rpr.upper()}>'
 
 class c_ffta_scene_cmd(c_ffta_cmd):
+
+    _CMDC_TOP = 0x72
 
     #cmd: text window
     #params: p1(c) p2(c) p3(c)
@@ -94,26 +100,58 @@ class c_ffta_script_parser:
 
     def _new_cmd(self, cmdtpl):
         cmdop, prms = cmdtpl
-        return c_ffta_scene_cmd(cmdop, prms)
+        if cmdop is None:
+            return None, False
+        try:
+            return c_ffta_scene_cmd(cmdop, prms), True
+        except ValueError:
+            return None, True
 
     def _extend_cmd_to(self, idx):
-        sect_cmds = self.sects['cmds']
+        cmds = self.cmds
+        if idx < len(cmds):
+            return True
+        elif cmds and cmds[-1] is None:
+            # at the end of scripts
+            return False
         sect_spage = self.s_page
+        while True:
+            lst_ci = len(cmds)
+            if idx < lst_ci:
+                return True
+            cmd, in_sect = self._new_cmd(sect_spage.get_cmd(lst_ci))
+            if not in_sect:
+                break
+            cmds.append(cmd)
+            if cmd is None:
+                return False
+        sect_cmds = self.sects['cmds']
         ctx = sect_spage.extend_to(idx)
         cmdop = next(ctx)
         while not cmdop is None:
             cmdop = ctx.send(sect_cmds.get_cmd_len(cmdop))
-            cmd = self._new_cmd(sect_spage.get_last_cmd())
+            cmd, in_sect = self._new_cmd(sect_spage.get_last_cmd())
+            assert(in_sect)
             self.cmds.append(cmd)
+            if cmd is None:
+                if cmdop is None:
+                    break
+                return False
+        return True
 
     def get_cmd(self, idx):
-        self._extend_cmd_to(idx)
-        return self.cmds[idx]
+        if self._extend_cmd_to(idx):
+            return self.cmds[idx]
+        else:
+            return None
 
     def exec(self, st_idx = 0, flt = None, flt_out = None, cb_pck = None):
         nxt_idx = st_idx
         while not nxt_idx is None:
-            rslt = self.get_cmd(nxt_idx).exec(self)
+            cmd = self.get_cmd(nxt_idx)
+            if cmd is None:
+                break
+            rslt = cmd.exec(self)
             lst_idx = nxt_idx
             nxt_idx += rslt['step']
             if not rslt['valid']:
