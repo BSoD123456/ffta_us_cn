@@ -424,9 +424,24 @@ class c_ffta_sect_scene_script(c_ffta_sect_tab):
     _TAB_DESC = [(-4, 4), 1, (0, 4, 0, 1), (0, 0, 1, 0, 0, 1)]
     @tabitm(0)
     def get_page(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect_scene_script_page)
+        return self.sub_wp(ofs, cls = c_ffta_sect_script_page)
 
-class c_ffta_sect_scene_script_page(c_ffta_sect):
+# ===============
+#     battle
+# ===============
+
+@tabkey('page')
+class c_ffta_sect_battle_script(c_ffta_sect_tab):
+    _TAB_DESC = [2, 1, (0, 2, 0, 1), (0, 0, 1, 0, 0, 1)]
+    @tabitm(0)
+    def get_page(self, ofs):
+        return self.sub_wp(ofs, cls = c_ffta_sect_script_page)
+
+# ===============
+#   script page
+# ===============
+
+class c_ffta_sect_script_page(c_ffta_sect):
 
     def parse(self):
         self._line_ofs = [0]
@@ -465,25 +480,10 @@ class c_ffta_sect_scene_script_page(c_ffta_sect):
         yield None
 
 # ===============
-#     battle
-# ===============
-
-# ===============
-#     script
-# ===============
-
-@tabkey('page')
-class c_ffta_sect_battle_script(c_ffta_sect_tab):
-    _TAB_DESC = [2, 1, (0, 2, 0, 1), (0, 0, 1, 0, 0, 1)]
-    @tabitm(0)
-    def get_page(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect)
-
-# ===============
 #    commands
 # ===============
 
-class c_ffta_sect_scene_script_cmds(c_ffta_sect_tab):
+class c_ffta_sect_script_cmds(c_ffta_sect_tab):
     _TAB_DESC = [6]
     @tabitm(2)
     def get_cmd_addr(self, ofs):
@@ -497,20 +497,20 @@ class c_ffta_sect_scene_script_cmds(c_ffta_sect_tab):
 # ===============
 
 @tabkey('page')
-class c_ffta_sect_scene_text(c_ffta_sect_tab):
+class c_ffta_sect_text(c_ffta_sect_tab):
     _TAB_DESC = [4, 1]
     @tabitm(0)
     def get_page(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect_scene_text_page)
+        return self.sub_wp(ofs, cls = c_ffta_sect_text_page)
 
 @tabkey('line')
-class c_ffta_sect_scene_text_page(c_ffta_sect_tab):
+class c_ffta_sect_text_page(c_ffta_sect_tab):
     _TAB_DESC = [2, 1]
     @tabitm(0)
     def get_line(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect_scene_text_line)
+        return self.sub_wp(ofs, cls = c_ffta_sect_text_line)
 
-class c_ffta_sect_scene_text_line(c_ffta_sect):
+class c_ffta_sect_text_line(c_ffta_sect):
     
     def _gc(self, si):
         c = self.U8(si)
@@ -581,14 +581,14 @@ class c_ffta_sect_scene_text_line(c_ffta_sect):
         self.compressed = cmpr
         if cmpr:
             dst_len = rvs_endian(self.U32(2), 4, False)
-            subsect = self.sub(2, 0, cls = c_ffta_sect_scene_text_buf)
+            subsect = self.sub(2, 0, cls = c_ffta_sect_text_buf)
             buf = self._decompress(subsect.mod, 6, dst_len)
             subsect.parse()
         else:
-            subsect = self.sub_wp(2, cls = c_ffta_sect_scene_text_buf)
+            subsect = self.sub_wp(2, cls = c_ffta_sect_text_buf)
         self.text = subsect
 
-class c_ffta_sect_scene_text_buf(c_ffta_sect):
+class c_ffta_sect_text_buf(c_ffta_sect):
 
     def parse(self):
         self._cidx = 0
@@ -735,10 +735,10 @@ def main():
         rom_us = c_ffta_sect_rom(fd.read(), 0).parse({
             's_fat': (0x009a20, c_ffta_sect_scene_fat),
             's_scrpt': (0x1223c0, c_ffta_sect_scene_script),
-            's_cmds': (0x122b10, c_ffta_sect_scene_script_cmds),
-            's_text': (0x009a88, c_ffta_sect_scene_text),
+            's_cmds': (0x122b10, c_ffta_sect_script_cmds),
+            's_text': (0x009a88, c_ffta_sect_text),
             'b_scrpt': (0x00a148, c_ffta_sect_battle_script),
-            'b_cmds': (0x00a19c, c_ffta_sect_scene_script_cmds),
+            'b_cmds': (0x00a19c, c_ffta_sect_script_cmds),
             'font': (0x013474, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
@@ -748,7 +748,7 @@ def main():
     with open('fftacns.gba', 'rb') as fd:
         rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
-            's_text': (0x009ad8, c_ffta_sect_scene_text),
+            's_text': (0x009ad8, c_ffta_sect_text),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
@@ -758,7 +758,7 @@ def main():
     with open('fftajp.gba', 'rb') as fd:
         rom_jp = c_ffta_sect_rom(fd.read(), 0).parse({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
-            's_text': (0x009ad8, c_ffta_sect_scene_text),
+            's_text': (0x009ad8, c_ffta_sect_text),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
@@ -794,6 +794,17 @@ if __name__ == '__main__':
         for i in range(ln):
             cmdop, prms = spage.get_cmd(i)
             cmd_addr = cmd.get_cmd_addr(cmdop)
+            print(f'0x{cmdop:x}(0x{cmd_addr:x}) {len(prms)} prms:')
+            hd(prms)
+    def enum_b_script(p_idx, ln = 0x10):
+        spage = bat[p_idx, 1]
+        ctx = spage.extend_to(ln - 1)
+        cmdop = next(ctx)
+        while not cmdop is None:
+            cmdop = ctx.send(bcm.get_cmd_len(cmdop))
+        for i in range(ln):
+            cmdop, prms = spage.get_cmd(i)
+            cmd_addr = bcm.get_cmd_addr(cmdop)
             print(f'0x{cmdop:x}(0x{cmd_addr:x}) {len(prms)} prms:')
             hd(prms)
             
