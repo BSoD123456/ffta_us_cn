@@ -160,13 +160,13 @@ class c_font_drawer:
 
 class c_ffta_font_drawer(c_font_drawer):
 
-    def draw_tokens(self, toks, pad = 3):
+    def draw_tokens(self, toks, pad = 3, auto_trim = False):
         blks = []
         for ttyp, tchr in toks:
             if ttyp == 'CHR_FULL':
-                blk = self.draw_char(tchr, False)
+                blk = self.draw_char(tchr, False, auto_trim)
             elif ttyp == 'CHR_HALF':
-                blk = self.draw_char(tchr, True)
+                blk = self.draw_char(tchr, True, auto_trim)
             elif ttyp == 'CTR_FUNC':
                 blk = self.draw_comment(f'[{tchr:x}]')
             else:
@@ -246,7 +246,7 @@ if __name__ == '__main__':
             for i, r in zip(range(n), ctx):
                 ri, rt, ro = r
                 blks.append(dr.draw_comment(f'0x{ri:x} {rt}'))
-                blks.append(dr.draw_tokens(ro))
+                blks.append(dr.draw_tokens(ro, auto_trim = False))
             if not blks:
                 break
             nn = yield dr.make_img(dr.draw_vert(*blks))
