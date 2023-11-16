@@ -80,7 +80,7 @@ class c_font_drawer:
             yield rline, False
 
     @staticmethod
-    def draw_horiz(*blks, pad = 5):
+    def draw_horiz(*blks, pad = 5, trim = 0):
         clr_blank = c_font_drawer.PAL[0]
         rwidth = 0
         while True:
@@ -92,6 +92,8 @@ class c_font_drawer:
                 rl, uf = next(blk)
                 if uf:
                     unfinished = True
+                if trim > 0:
+                    rl = rl[:-trim]
                 rline.extend(rl)
                 if i < blen -1:
                     for x in range(pad):
@@ -160,19 +162,19 @@ class c_font_drawer:
 
 class c_ffta_font_drawer(c_font_drawer):
 
-    def draw_tokens(self, toks, pad = 3, auto_trim = False):
+    def draw_tokens(self, toks, pad = 3, trim = 0, **kargs):
         blks = []
         for ttyp, tchr in toks:
             if ttyp == 'CHR_FULL':
-                blk = self.draw_char(tchr, False, auto_trim)
+                blk = self.draw_char(tchr, False, **kargs)
             elif ttyp == 'CHR_HALF':
-                blk = self.draw_char(tchr, True, auto_trim)
+                blk = self.draw_char(tchr, True, **kargs)
             elif ttyp == 'CTR_FUNC':
                 blk = self.draw_comment(f'[{tchr:x}]')
             else:
                 continue
             blks.append(blk)
-        return self.draw_horiz(*blks, pad = pad)
+        return self.draw_horiz(*blks, pad = pad, trim = trim)
 
 if __name__ == '__main__':
     
@@ -246,7 +248,7 @@ if __name__ == '__main__':
             for i, r in zip(range(n), ctx):
                 ri, rt, ro = r
                 blks.append(dr.draw_comment(f'0x{ri:x} {rt}'))
-                blks.append(dr.draw_tokens(ro, auto_trim = False))
+                blks.append(dr.draw_tokens(ro, pad = 1, trim = 7))
             if not blks:
                 break
             nn = yield dr.make_img(dr.draw_vert(*blks))
