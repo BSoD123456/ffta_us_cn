@@ -49,13 +49,11 @@ class c_ffta_cmd:
     def exec(self, psr):
         rslt = {
             'step': 1,
-            'valid': False,
             'type': 'unknown',
         }
         if self.op in self._cmd_tab:
             # self._cmd_tab[op][0].__get__(self, type(self)) to bind cmdfunc
             cmdfunc, cmdtyp = self._cmd_tab[self.op]
-            rslt['valid'] = True
             rslt['type'] = cmdtyp
             rslt['output'] = cmdfunc(self, self.prms, psr, rslt)
         return rslt
@@ -145,7 +143,7 @@ class c_ffta_script_parser:
         else:
             return None
 
-    def exec(self, st_idx = 0, flt = None, flt_out = None, cb_pck = None):
+    def exec(self, st_idx = 0, flt = None, flt_out = ['unknown'], cb_pck = None):
         nxt_idx = st_idx
         while not nxt_idx is None:
             cmd = self.get_cmd(nxt_idx)
@@ -154,8 +152,6 @@ class c_ffta_script_parser:
             rslt = cmd.exec(self)
             lst_idx = nxt_idx
             nxt_idx += rslt['step']
-            if not rslt['valid']:
-                continue
             typ = rslt['type']
             if not flt is None and not typ in flt:
                 continue
@@ -185,4 +181,7 @@ if __name__ == '__main__':
         def _idx_pck(idx, rslt):
             return (idx, rslt['type'], rslt['output'])
         return spsr.exec(cb_pck = _idx_pck)
+    def list_cmds(st, ed):
+        for i in range(st, ed):
+            print(hex(i), spsr.get_cmd(i))
     ctx = main()

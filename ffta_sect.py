@@ -464,6 +464,25 @@ class c_ffta_sect_scene_script_page(c_ffta_sect):
             yield from self.extend_line()
         yield None
 
+# ===============
+#     battle
+# ===============
+
+# ===============
+#     script
+# ===============
+
+@tabkey('page')
+class c_ffta_sect_battle_script(c_ffta_sect_tab):
+    _TAB_DESC = [2, 1, (0, 2, 0, 1), (0, 0, 1, 0, 0, 1)]
+    @tabitm(0)
+    def get_page(self, ofs):
+        return self.sub_wp(ofs, cls = c_ffta_sect)
+
+# ===============
+#    commands
+# ===============
+
 class c_ffta_sect_scene_script_cmds(c_ffta_sect_tab):
     _TAB_DESC = [6]
     @tabitm(2)
@@ -718,6 +737,8 @@ def main():
             's_scrpt': (0x1223c0, c_ffta_sect_scene_script),
             's_cmds': (0x122b10, c_ffta_sect_scene_script_cmds),
             's_text': (0x009a88, c_ffta_sect_scene_text),
+            'b_scrpt': (0x00a148, c_ffta_sect_battle_script),
+            'b_cmds': (0x00a19c, c_ffta_sect_scene_script_cmds),
             'font': (0x013474, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
@@ -754,6 +775,8 @@ if __name__ == '__main__':
     scr = rom_us.tabs['s_scrpt']
     cmd = rom_us.tabs['s_cmds']
     txt = rom_us.tabs['s_text']
+    bat = rom_us.tabs['b_scrpt']
+    bcm = rom_us.tabs['b_cmds']
     def enum_text():
         for page in range(2):
             for line in range(5):

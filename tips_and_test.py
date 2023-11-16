@@ -21,6 +21,14 @@
 #   -> ? 543c decompress
 # 8006a34: bl 814224c ...
 
+
+# script:1 after cmd: 0x158 <2F: 0F 04 03> return 11d next 0x162 <1A: 02 00 00> then goto script:6
+# set script_hndl:page_base at 8122052
+
+# 58a4:  58e0: bl-> bx[r3] r3 = 8121fb9 (-1 script main loop upper)
+
+# 800a154: battle script parser and exec main loop
+
 # ===
 # cnjp:
 # rom end: 9bb3d0
