@@ -173,7 +173,7 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_us as rom
 
-    def main():
+    def main(page_idx = 1):
         global spsr
         spsr = c_ffta_script_parser({
             'fat':      rom.tabs['s_fat'],
@@ -181,7 +181,7 @@ if __name__ == '__main__':
             'cmds':     rom.tabs['s_cmds'],
             'text':     rom.tabs['s_text'],
         })
-        spsr.enter_page(1)
+        spsr.enter_page(page_idx)
         def _idx_pck(idx, rslt):
             return (idx, rslt['type'], rslt['output'])
         return spsr.exec(cb_pck = _idx_pck)
