@@ -217,10 +217,36 @@ if __name__ == '__main__':
             ))
         return dr.make_img(dr.draw_vert(*blks))
 
-    def main():
+    def _main():
         dr = c_ffta_font_drawer(rom.tabs['font'])
         #im = draw_texts(dr, (0x20, 0x30), (0, 3))
         im = draw_fat(dr)
         return im
+
+    from .parser import c_ffta_script_parser
+
+    def psr_main():
+        global spsr
+        spsr = c_ffta_script_parser({
+            'fat':      rom.tabs['s_fat'],
+            'script':   rom.tabs['s_scrpt'],
+            'cmds':     rom.tabs['s_cmds'],
+            'text':     rom.tabs['s_text'],
+        })
+        spsr.enter_page(1)
+        def _idx_pck(idx, rslt):
+            return (idx, rslt['type'], rslt['output'])
+        return spsr.exec(cb_pck = _idx_pck)
+
+    def main(n = 10):
+        dr = c_ffta_font_drawer(rom.tabs['font'])
+        ctx = psr_main()
+        while True:
+            blks = []
+            for i, r in zip(range(n), ctx):
+                ri, rt, ro = r
+                blks.append(dr.draw_comment(f'0x{ri:x} {rt}'))
+                blks.append(dr.draw_tokens(ro))
+            yield dr.make_img(dr.draw_vert(*blks))
     
-    #main().show()
+    drc = main()
