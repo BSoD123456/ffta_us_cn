@@ -260,6 +260,18 @@ class c_ffta_sect(c_mark):
 
     ADDR_BASE = 0x8000000
 
+    def parse(self):
+        pass
+
+    def sub_wp(self, pos, length = None, cls = None, parse_args = None):
+        s = self.sub(pos, length, cls)
+        if issubclass(cls, c_ffta_sect):
+            if parse_args:
+                s.parse(*parse_args)
+            else:
+                s.parse()
+        return s
+
     def _offs2addr(self, offs):
         return offs + self.ADDR_BASE
 
@@ -412,9 +424,7 @@ class c_ffta_sect_scene_script(c_ffta_sect_tab):
     _TAB_DESC = [(-4, 4), 1, (0, 4, 0, 1), (0, 0, 1, 0, 0, 1)]
     @tabitm(0)
     def get_page(self, ofs):
-        page = self.sub(ofs, cls = c_ffta_sect_scene_script_page)
-        page.parse()
-        return page
+        return self.sub_wp(ofs, cls = c_ffta_sect_scene_script_page)
 
 class c_ffta_sect_scene_script_page(c_ffta_sect):
 
@@ -472,14 +482,14 @@ class c_ffta_sect_scene_text(c_ffta_sect_tab):
     _TAB_DESC = [4, 1]
     @tabitm(0)
     def get_page(self, ofs):
-        return self.sub(ofs, cls = c_ffta_sect_scene_text_page)
+        return self.sub_wp(ofs, cls = c_ffta_sect_scene_text_page)
 
 @tabkey('line')
 class c_ffta_sect_scene_text_page(c_ffta_sect_tab):
     _TAB_DESC = [2, 1]
     @tabitm(0)
     def get_line(self, ofs):
-        return self.sub(ofs, cls = c_ffta_sect_scene_text_line)
+        return self.sub_wp(ofs, cls = c_ffta_sect_scene_text_line)
 
 class c_ffta_sect_scene_text_line(c_ffta_sect):
     
@@ -554,10 +564,10 @@ class c_ffta_sect_scene_text_line(c_ffta_sect):
             dst_len = rvs_endian(self.U32(2), 4, False)
             subsect = self.sub(2, 0, cls = c_ffta_sect_scene_text_buf)
             buf = self._decompress(subsect.mod, 6, dst_len)
+            subsect.parse()
         else:
-            subsect = self.sub(2, cls = c_ffta_sect_scene_text_buf)
+            subsect = self.sub_wp(2, cls = c_ffta_sect_scene_text_buf)
         self.text = subsect
-        self.text.parse()
 
 class c_ffta_sect_scene_text_buf(c_ffta_sect):
 
@@ -662,18 +672,20 @@ class c_ffta_sect_rom(c_ffta_sect):
         self._add_tabs(tabs_info)
         return self
 
-    def _subsect(self, offs_ptr, c_sect):
+    def _subsect(self, offs_ptr, c_sect, pargs):
         offs_base = self.rdptr(offs_ptr, 'oao')
-        sect = self.sub(offs_base, cls = c_sect)
+        sect = self.sub_wp(offs_base, cls = c_sect, parse_args = pargs)
         return sect
 
     def _add_tabs(self, tabs_info):
         tabs = {}
         for tab_name, tab_info in tabs_info.items():
             tab_ptr, tab_cls = tab_info[:2]
-            subsect = self._subsect(tab_ptr, tab_cls)
             if len(tab_info) > 2:
-                subsect.parse(tab_info[2])
+                pargs = (tab_info[2],)
+            else:
+                pargs = None
+            subsect = self._subsect(tab_ptr, tab_cls, pargs)
             tabs[tab_name] = subsect
         self.tabs = tabs
 

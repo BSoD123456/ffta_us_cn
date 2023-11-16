@@ -70,8 +70,12 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p2: index of portrait
     #p3: flags, 80: left, 82: right
     @cmdc(0x0f, 'text')
-    def cmd_text(self, params, psr, rslt):
-        return 'show'
+    def cmd_text(self, prms, psr, rslt):
+        tidx = prms[0]
+        cpidx = prms[1]
+        t_line = psr.t_page[tidx]
+        toks = psr.t_page[tidx].text.tokens
+        return toks
 
 class c_ffta_script_parser:
 
