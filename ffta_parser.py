@@ -69,7 +69,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     _CMDC_TOP = 0x72
 
     #cmd: text window
-    #params: p1(c) p2(c) p3(c)
+    #params: p1(u8) p2(u8) p3(u8)
     #p1: index of text on this page
     #p2: index of portrait
     #p3: flags, 80: left, 82: right
@@ -80,6 +80,35 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         t_line = psr.t_page[tidx]
         toks = psr.t_page[tidx].text.tokens
         return toks
+
+class c_ffta_battle_cmd(c_ffta_cmd):
+
+    _CMDC_TOP = 0x12
+
+    #cmd: nop
+    #params:
+    @cmdc(0x00, 'none')
+    def cmd_nop(self, prms, psr, rslt):
+        return None
+
+    #cmd: jump
+    #params: p1(u16)
+    #p1: cur cmd offset increment
+    @cmdc(0x01, 'flow')
+    def cmd_jump(self, prms, psr, rslt):
+        pass
+
+    #cmd: test jump
+    #params: ?
+    @cmdc(0x04, 'flow')
+    def cmd_test_jump(self, prms, psr, rslt):
+        pass
+
+    #cmd: load scene
+    #params: ?
+    @cmdc(0x05, 'load')
+    def cmd_test_jump(self, prms, psr, rslt):
+        pass
 
 class c_ffta_script_parser:
 

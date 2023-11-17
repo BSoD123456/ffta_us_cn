@@ -28,6 +28,7 @@
 # 58a4:  58e0: bl-> bx[r3] r3 = 8121fb9 (-1 script main loop upper)
 
 # 800a154: battle script parser and exec main loop
+# 800a164: break here for cmd repr. r0:cmd_op r1:cmd_ofs
 
 # ===
 # cnjp:
