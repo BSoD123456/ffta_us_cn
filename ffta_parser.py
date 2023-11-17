@@ -5,6 +5,8 @@
 #     common
 # ===============
 
+INF = float('inf')
+
 def clsdec(hndl, *args, **kargs):
     class _dec:
         def __init__(self, mth):
@@ -19,6 +21,33 @@ def clsdec(hndl, *args, **kargs):
 # ===============
 #   ffta spec
 # ===============
+
+def guess_tab_size(sect, ent_width):
+    rdofs = lambda pos: sect.readval(pos, ent_width, False)
+    cur_ent = 0
+    ofs_min = INF
+    ofs_max = 0
+    ofs_ord = []
+    ofs_sort = set()
+    while cur_ent < ofs_min:
+        ofs = rdofs(cur_ent)
+        cur_ent += ent_width
+        if ofs < ofs_min:
+            ofs_min = ofs
+        if ofs > ofs_max:
+            ofs_max = ofs
+        ofs_ord.append(ofs)
+        ofs_sort.add(ofs)
+    ofs_sort = sorted(ofs_sort)
+    rslt = []
+    for ofs in ofs_ord:
+        i = ofs_sort.index(ofs)
+        try:
+            sz = ofs_sort[i+1] - ofs
+        except:
+            sz = None
+        rslt.append((ofs, sz))
+    return rslt, ofs_min, ofs_max
 
 # ===============
 #    scripts
@@ -121,6 +150,29 @@ class c_ffta_script_parser:
     def __init__(self, sects):
         self.sects = sects
         self.page_idx = None
+        self.page_info = self._guess_size()
+
+    def _guess_size(self):
+        sect = self.sects['script']
+        ew = sect.ENT_WIDTH
+        eb = sect.ENT_BOT
+        grps, head_sz, last_grp = guess_tab_size(sect, ew)
+        rslt = []
+        for i in range(eb):
+            rslt.append([])
+        for i, (grp_ofs, grp_sz) in enumerate(grps):
+            gidx = i + eb
+            assert(grp_ofs == sect.tbase_group(gidx))
+            subsect = sect.get_group(gidx)
+            pages, grp_head_sz, last_page = guess_tab_size(subsect, ew)
+            rslt_grp = []
+            for page_ofs, page_sz in pages:
+                if page_sz is None:
+                    if not grp_sz is None:
+                        page_sz = grp_sz - page_ofs
+                rslt_grp.append((grp_ofs + page_ofs, page_sz))
+            rslt.append(rslt_grp)
+        return rslt
 
     def enter_page(self, idx):
         assert(idx > 0)
@@ -199,6 +251,9 @@ class c_ffta_script_parser:
             yield ro
 
 if __name__ == '__main__':
+    import pdb
+    from hexdump import hexdump as hd
+    from pprint import pprint as ppr
 
     from ffta_sect import main as sect_main
     sect_main()
@@ -216,7 +271,14 @@ if __name__ == '__main__':
         def _idx_pck(idx, rslt):
             return (idx, rslt['type'], rslt['output'])
         return spsr.exec(cb_pck = _idx_pck)
+    ctx = main()
+    def main():
+        global spsr
+        spsr = c_ffta_script_parser({
+            'script':   rom.tabs['b_scrpt'],
+            'cmds':     rom.tabs['b_cmds'],
+        })
+    #main()
     def list_cmds(st, ed):
         for i in range(st, ed):
             print(hex(i), spsr.get_cmd(i))
-    ctx = main()

@@ -428,13 +428,17 @@ class c_ffta_sect_script(c_ffta_sect_tab):
     def get_page(self, ofs):
         return self.sub_wp(ofs, cls = c_ffta_sect_script_page)
     @tabitm(0, 2)
+    def tbase_group(self, ofs):
+        return ofs
+    @tabitm(0, 2)
     def get_group(self, ofs):
         return self.sub(ofs)
 
 @tabkey('page')
 class c_ffta_sect_scene_script(c_ffta_sect_script):
+    ENT_BOT = 1
     ENT_WIDTH = 4
-    _TAB_DESC = [(-ENT_WIDTH, ENT_WIDTH), 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
+    _TAB_DESC = [(-ENT_BOT * ENT_WIDTH, ENT_WIDTH), 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
 
 # ===============
 #     battle
@@ -442,6 +446,7 @@ class c_ffta_sect_scene_script(c_ffta_sect_script):
 
 @tabkey('page')
 class c_ffta_sect_battle_script(c_ffta_sect_script):
+    ENT_BOT = 0
     ENT_WIDTH = 2
     _TAB_DESC = [ENT_WIDTH, 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
 
