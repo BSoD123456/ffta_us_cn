@@ -15,6 +15,8 @@ or
 python -m pip install pillow''')
     raise
 
+INF = float('inf')
+
 class c_font_drawer:
 
     PAL = [(255, 255, 255), (200, 200, 200), (150, 150, 150), (0, 0, 0), (255, 0, 0)]
@@ -77,6 +79,71 @@ class c_font_drawer:
             rline = []
             for x in range(width):
                 rline.append(clr_blank)
+            yield rline, False
+
+    @staticmethod
+    def draw_trim(blk, pad_left = 0, pad_right = 0,
+                  trim_empty = False, trim_val = 0):
+        clr_blank = c_font_drawer.PAL[0]
+        clr_trim = c_font_drawer.PAL[trim_val]
+        cchl = []
+        lmin = INF
+        rmin = INF
+        for rl, uf in blk:
+            if not uf:
+                break
+            cchl.append(rl)
+            if lmin > 0:
+                lblnk = 0
+                for v in rl:
+                    if v != clr_trim:
+                        break
+                    lblnk += 1
+                else:
+                    # all blank
+                    continue
+                if lblnk < lmin:
+                    lmin = lblnk
+            if rmin > 0:
+                rblnk = 0
+                for v in reversed(rl):
+                    if v != clr_trim:
+                        break
+                    rblnk += 1
+                else:
+                    # all blank
+                    continue
+                if rblnk < rmin:
+                    rmin = rblnk
+        if rmin == INF:
+            assert(lmin == INF)
+            if trim_empty:
+                lmin = rmin = 0
+            else:
+                lmin = 0
+                rmin = None
+        elif rmin == 0:
+            rmin = None
+        else:
+            rmin = -rmin
+        if pad_left > 0:
+            pll = []
+            for _ in range(pad_left):
+                pll.append(clr_blank)
+        w = 0
+        for rl in cchl:
+            rl = rl[lmin:rmin]
+            if pad_left > 0:
+                rl = pll + rl
+            if pad_right > 0:
+                for _ in range(pad_right):
+                    rl.append(clr_blank)
+            w = len(rl)
+            yield rl, True
+        rline = []
+        for x in range(w):
+            rline.append(clr_blank)
+        while True:
             yield rline, False
 
     @staticmethod
@@ -162,11 +229,18 @@ class c_font_drawer:
 
 class c_ffta_font_drawer(c_font_drawer):
 
-    def draw_tokens(self, toks, pad = 3, trim = 0, **kargs):
+    def draw_tokens(self, toks, pad = 2, trim = -1, **kargs):
+        if trim < 0:
+            trim = 0
+            autotrim = True
+        else:
+            autotrim = False
         blks = []
         for ttyp, tchr in toks:
             if ttyp.startswith('CHR_'):
                 blk = self.draw_char(tchr, **kargs)
+                if autotrim:
+                    blk = self.draw_trim(blk)
             elif ttyp == 'CTR_FUNC':
                 blk = self.draw_comment(f'[{tchr:x}]')
             else:
@@ -175,6 +249,9 @@ class c_ffta_font_drawer(c_font_drawer):
         return self.draw_horiz(*blks, pad = pad, trim = trim)
 
 if __name__ == '__main__':
+    import pdb
+    from hexdump import hexdump as hd
+    from pprint import pprint as ppr
     
     from ffta_sect import main as sect_main
     sect_main()
@@ -247,7 +324,7 @@ if __name__ == '__main__':
                 ri, rt, ro = r
                 if rt == 'text':
                     blks.append(dr.draw_comment(f'0x{ri:x} {rt}'))
-                    blks.append(dr.draw_tokens(ro, pad = 1, trim = 7))
+                    blks.append(dr.draw_tokens(ro))
                 else:
                     blks.append(dr.draw_comment(f'0x{ri:x} {rt}: {ro}'))
             if not blks:

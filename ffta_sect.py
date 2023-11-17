@@ -762,6 +762,7 @@ def main():
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
+    from pprint import pprint as ppr
     
     main()
     fat = rom_us.tabs['s_fat']
