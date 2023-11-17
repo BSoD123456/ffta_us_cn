@@ -30,6 +30,9 @@
 # 800a154: battle script parser and exec main loop
 # 800a164: break here for cmd repr. r0:cmd_op r1:cmd_ofs
 
+# 800a06c: break load battle script
+# 800a210: break load scene script in battle
+
 # ===
 # cnjp:
 # rom end: 9bb3d0

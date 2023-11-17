@@ -81,6 +81,12 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         toks = psr.t_page[tidx].text.tokens
         return toks
 
+    #cmd: load scene
+    #params: ?
+    @cmdc(0x1c, 'load')
+    def cmd_load_scene(self, prms, psr, rslt):
+        pass
+
 class c_ffta_battle_cmd(c_ffta_cmd):
 
     _CMDC_TOP = 0x12
@@ -107,7 +113,7 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #cmd: load scene
     #params: ?
     @cmdc(0x05, 'load')
-    def cmd_test_jump(self, prms, psr, rslt):
+    def cmd_load_scene(self, prms, psr, rslt):
         pass
 
 class c_ffta_script_parser:
