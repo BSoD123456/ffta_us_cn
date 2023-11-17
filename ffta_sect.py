@@ -657,7 +657,6 @@ class c_ffta_sect_font(c_ffta_sect_tab):
 
     def parse(self, info):
         self.char_shape = info['shape']
-        self.half_blks = info['half']
         self.rvs_byte = info['rvsbyt']
         char_bits = 1
         for v in self.char_shape:
@@ -682,29 +681,10 @@ class c_ffta_sect_font(c_ffta_sect_tab):
         return (byt >> bshft) & ((1 << blen) - 1)
 
     @tabitm()
-    def gen_char(self, ofs, half = False, auto_trim = False):
+    def gen_char(self, ofs):
         bs, cl, rl, bl = self.char_shape
         rvs = self.rvs_byte
         cch = {}
-        if not half and auto_trim:
-            bst = self.half_blks
-            has_content = False
-            for r in range(rl):
-                for b in range(bst, bl):
-                    for c in range(cl):
-                        pos = ((b * rl + r) * cl + c) * bs
-                        val = self._get_bits(ofs, pos, bs, rvs, cch)
-                        if val:
-                            has_content = True
-                            break
-                    if has_content:
-                        break
-                if has_content:
-                    break
-            if not has_content:
-                half = True
-        if half:
-            bl = self.half_blks
         for r in range(rl):
             def _rowgen():
                 for b in range(bl):
@@ -758,7 +738,6 @@ def main():
             'font': (0x013474, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
-                'half': 1,
             }),
         })
     with open('fftacns.gba', 'rb') as fd:
@@ -768,7 +747,6 @@ def main():
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
-                'half': 1,
             }),
         })
     with open('fftajp.gba', 'rb') as fd:
@@ -778,7 +756,6 @@ def main():
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
-                'half': 1,
             }),
         })
 

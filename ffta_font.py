@@ -165,12 +165,8 @@ class c_ffta_font_drawer(c_font_drawer):
     def draw_tokens(self, toks, pad = 3, trim = 0, **kargs):
         blks = []
         for ttyp, tchr in toks:
-            if ttyp == 'CHR_FULL':
-                blk = self.draw_char(tchr, False, **kargs)
-            elif ttyp == 'CHR_HALF':
-                # half is not means half char tile
-                # so it's the same as full char
-                blk = self.draw_char(tchr, False, **kargs)
+            if ttyp.startswith('CHR_'):
+                blk = self.draw_char(tchr, **kargs)
             elif ttyp == 'CTR_FUNC':
                 blk = self.draw_comment(f'[{tchr:x}]')
             else:
