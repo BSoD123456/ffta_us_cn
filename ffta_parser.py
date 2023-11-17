@@ -149,19 +149,15 @@ class c_ffta_script_parser:
 
     def __init__(self, sects):
         self.sects = sects
-        self.page_idx = None
         self.page_info = self._guess_size()
+        self.s_page = None
 
     def _guess_size(self):
         sect = self.sects['script']
         ew = sect.ENT_WIDTH
-        eb = sect.ENT_BOT
         grps, head_sz, last_grp = guess_tab_size(sect, ew)
         rslt = []
-        for i in range(eb):
-            rslt.append([])
-        for i, (grp_ofs, grp_sz) in enumerate(grps):
-            gidx = i + eb
+        for gidx, (grp_ofs, grp_sz) in enumerate(grps):
             assert(grp_ofs == sect.tbase_group(gidx))
             subsect = sect.get_group(gidx)
             pages, grp_head_sz, last_page = guess_tab_size(subsect, ew)
@@ -174,14 +170,13 @@ class c_ffta_script_parser:
             rslt.append(rslt_grp)
         return rslt
 
-    def enter_page(self, idx):
-        assert(idx > 0)
-        if idx == self.page_idx:
-            return
-        s_pi1, s_pi2, t_pi = self.sects['fat'].get_entry(idx)
-        self.s_page = self.sects['script'][s_pi1, s_pi2]
-        self.t_page = self.sects['text'][t_pi]
+    def enter_page(self, i1, i2):
+        s_page = self.sects['script'][i1, i2]
+        if self.s_page is s_page:
+            return False
+        self.s_page = s_page
         self.cmds = []
+        return True
 
     def _new_cmd(self, cmdtpl):
         cmdop, prms = cmdtpl
@@ -250,6 +245,14 @@ class c_ffta_script_parser:
                 ro = rslt['output']
             yield ro
 
+class c_ffta_scene_script_parser(c_ffta_script_parser):
+
+    def enter_page(self, idx):
+        assert(idx > 0)
+        s_pi1, s_pi2, t_pi = self.sects['fat'].get_entry(idx)
+        if super().enter_page(s_pi1, s_pi2):
+            self.t_page = self.sects['text'][t_pi]
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
@@ -261,7 +264,7 @@ if __name__ == '__main__':
 
     def main(page_idx = 1):
         global spsr
-        spsr = c_ffta_script_parser({
+        spsr = c_ffta_scene_script_parser({
             'fat':      rom.tabs['s_fat'],
             'script':   rom.tabs['s_scrpt'],
             'cmds':     rom.tabs['s_cmds'],

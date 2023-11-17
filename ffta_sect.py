@@ -395,19 +395,7 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
 
     @tabitm()
     def get_entry(self, ofs):
-        return self.U8(ofs), self.U8(ofs+1), self.U8(ofs+2)
-
-    @tabitm(0)
-    def get_script_page(self, ofs):
-        return self.U8(ofs)
-
-    @tabitm(1)
-    def get_script_idx(self, ofs):
-        return self.U8(ofs)
-
-    @tabitm(2)
-    def get_text_page(self, ofs):
-        return self.U8(ofs)
+        return self.U8(ofs) - 1, self.U8(ofs+1), self.U8(ofs+2)
 
     def iter_lines(self):
         idx = 1
@@ -436,9 +424,8 @@ class c_ffta_sect_script(c_ffta_sect_tab):
 
 @tabkey('page')
 class c_ffta_sect_scene_script(c_ffta_sect_script):
-    ENT_BOT = 1
     ENT_WIDTH = 4
-    _TAB_DESC = [(-ENT_BOT * ENT_WIDTH, ENT_WIDTH), 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
+    _TAB_DESC = [ENT_WIDTH, 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
 
 # ===============
 #     battle
@@ -446,7 +433,6 @@ class c_ffta_sect_scene_script(c_ffta_sect_script):
 
 @tabkey('page')
 class c_ffta_sect_battle_script(c_ffta_sect_script):
-    ENT_BOT = 0
     ENT_WIDTH = 2
     _TAB_DESC = [ENT_WIDTH, 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
 
