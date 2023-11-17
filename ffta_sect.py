@@ -471,6 +471,8 @@ class c_ffta_sect_script_page(c_ffta_sect):
         cmdlen_ctx = [None]
         def prmsfunc(n):
             cmdlen_ctx[0] = n
+            if n is None:
+                return None
             return self._get_prms(lst_ent, n)
         yield False, lst_ent, cmdop, prmsfunc
         cmdlen = cmdlen_ctx[0]
@@ -485,10 +487,10 @@ class c_ffta_sect_script_page(c_ffta_sect):
         if llen > 1:
             for cur_ln in range(llen - 1):
                 cur_ofs = ln_ofs[cur_ln]
-                if cur_ofs > ofs:
+                if not ofs is None and cur_ofs > ofs:
                     return
                 yield True, *self._get_cmd(cur_ln)
-        while ln_ofs[-1] <= ofs:
+        while ofs is None or ln_ofs[-1] <= ofs:
             _done = yield from self._extend_line()
             if not _done:
                 break

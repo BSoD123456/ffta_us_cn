@@ -75,6 +75,9 @@ class c_ffta_cmd:
         self.op = op
         self.prms = prms
 
+    def __len__(self):
+        return 1 + len(self.prms)
+
     def exec(self, psr):
         rslt = {
             'step': 1,
@@ -170,60 +173,55 @@ class c_ffta_script_parser:
             rslt.append(rslt_grp)
         return rslt
 
-    def enter_page(self, i1, i2):
-        s_page = self.sects['script'][i1, i2]
-        if self.s_page is s_page:
-            return False
-        self.s_page = s_page
-        self.cmds = []
-        return True
+    def new_program(self, pi1, pi2):
+        sects = self.sects
+        return c_ffta_script_program({
+            'script': sects['script'][pi1, pi2],
+            'cmds': sects['cmds'],
+        }, None)
 
-    def _new_cmd(self, cmdtpl):
-        cmdop, prms = cmdtpl
-        if cmdop is None:
-            return None, False
+class c_ffta_script_program:
+
+    def __init__(self, sects, page_size):
+        self.sects = sects
+        self.page_size = page_size
+        self._parse_cmds_page()
+
+    def _new_cmd(self, cmdop, prms):
         try:
-            return c_ffta_scene_cmd(cmdop, prms), True
+            return c_ffta_scene_cmd(cmdop, prms)
         except ValueError:
-            return None, True
-
-    def _extend_cmd_to(self, idx):
-        cmds = self.cmds
-        if idx < len(cmds):
-            return True
-        elif cmds and cmds[-1] is None:
-            # at the end of scripts
-            return False
-        sect_spage = self.s_page
-        while True:
-            lst_ci = len(cmds)
-            if idx < lst_ci:
-                return True
-            cmd, in_sect = self._new_cmd(sect_spage.get_cmd(lst_ci))
-            if not in_sect:
-                break
-            cmds.append(cmd)
-            if cmd is None:
-                return False
-        sect_cmds = self.sects['cmds']
-        ctx = sect_spage.extend_to(idx)
-        cmdop = next(ctx)
-        while not cmdop is None:
-            cmdop = ctx.send(sect_cmds.get_cmd_len(cmdop))
-            cmd, in_sect = self._new_cmd(sect_spage.get_last_cmd())
-            assert(in_sect)
-            self.cmds.append(cmd)
-            if cmd is None:
-                if cmdop is None:
-                    break
-                return False
-        return True
-
-    def get_cmd(self, idx):
-        if self._extend_cmd_to(idx):
-            return self.cmds[idx]
-        else:
             return None
+
+    def _parse_cmds_page(self):
+        sect_spage = self.sects['script']
+        sect_cmds = self.sects['cmds']
+        if self.page_size is None:
+            max_ofs = None
+        else:
+            max_ofs = self.page_size - 1
+        cmds_tab = {}
+        all_size = 0
+        for rdy, cofs, cop, cprms_or_cb in sect_spage.iter_lines_to(max_ofs):
+            if rdy:
+                cprms = cprms_or_cb
+            else:
+                clen = sect_cmds.get_cmd_len(cop)
+                cprms = cprms_or_cb(clen)
+            cmd = self._new_cmd(cop, cprms)
+            if cmd is None:
+                assert(callable(cprms_or_cb))
+                cprms_or_cb(None)
+            else:
+                cmds_tab[cofs] = cmd
+                all_size = cofs + len(cmd)
+        self.cmds = cmds_tab
+        if self.page_size is None:
+            self.page_size = all_size
+        assert(all_size == self.page_size)
+
+    def get_cmd(self, ofs):
+        return self.cmds.get(ofs, None)
 
     def exec(self, st_idx = 0, flt = None, flt_out = ['unknown'], cb_pck = None):
         nxt_idx = st_idx
@@ -274,14 +272,14 @@ if __name__ == '__main__':
         def _idx_pck(idx, rslt):
             return (idx, rslt['type'], rslt['output'])
         return spsr.exec(cb_pck = _idx_pck)
-    ctx = main()
+    #ctx = main()
     def main():
         global spsr
         spsr = c_ffta_script_parser({
             'script':   rom.tabs['b_scrpt'],
             'cmds':     rom.tabs['b_cmds'],
         })
-    #main()
+    main()
     def list_cmds(st, ed):
         for i in range(st, ed):
             print(hex(i), spsr.get_cmd(i))
