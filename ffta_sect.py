@@ -445,38 +445,53 @@ class c_ffta_sect_script_page(c_ffta_sect):
     def parse(self):
         self._line_ofs = [0]
 
+    def _get_prms(self, cofs, clen):
+        return self.BYTES(cofs + 1, clen - 1)
+
     def _get_cmd(self, idx):
         ent = self._line_ofs[idx]
         ln = self._line_ofs[idx + 1] - ent
         cmdop = self.U8(ent)
-        prms = self.BYTES(ent + 1, ln - 1)
-        return cmdop, prms
+        prms = self._get_prms(ent, ln)
+        return ent, cmdop, prms
 
-    def _has_idx(self, idx):
-        return idx < len(self._line_ofs) - 1
+    def get_cmd(self, ofs):
+        ln_ofs = self._line_ofs
+        try:
+            idx = ln_ofs.index(ofs)
+        except:
+            return None, None, None
+        if idx >= len(ln_ofs) - 1:
+            return None, None, None
+        return self._get_cmd(idx)
 
-    def get_cmd(self, idx):
-        if self._has_idx(idx):
-            return self._get_cmd(idx)
-        else:
-            return None, None
-
-    def get_last_cmd(self):
-        if len(self._line_ofs) < 2:
-            return None, None
-        else:
-            return self._get_cmd(-2)
-
-    def extend_line(self):
+    def _extend_line(self):
         lst_ent = self._line_ofs[-1]
         cmdop = self.U8(lst_ent)
-        cmdlen = yield cmdop
+        cmdlen_ctx = [None]
+        def prmsfunc(n):
+            cmdlen_ctx[0] = n
+            return self._get_prms(lst_ent, n)
+        yield False, lst_ent, cmdop, prmsfunc
+        cmdlen = cmdlen_ctx[0]
+        if cmdlen is None:
+            return False
         self._line_ofs.append(lst_ent + cmdlen)
+        return True
 
-    def extend_to(self, idx):
-        while not self._has_idx(idx):
-            yield from self.extend_line()
-        yield None
+    def iter_lines_to(self, ofs):
+        ln_ofs = self._line_ofs
+        llen = len(ln_ofs)
+        if llen > 1:
+            for cur_ln in range(llen - 1):
+                cur_ofs = ln_ofs[cur_ln]
+                if cur_ofs > ofs:
+                    return
+                yield True, *self._get_cmd(cur_ln)
+        while ln_ofs[-1] <= ofs:
+            _done = yield from self._extend_line()
+            if not _done:
+                break
 
 # ===============
 #    commands
@@ -783,27 +798,23 @@ if __name__ == '__main__':
                 tl.parse()
                 print(f'page: 0x{page:x} line: 0x{line:x} cmpr: {tl.compressed}')
                 hd(tl.text.BYTES(0, 0x20))
-    def enum_script(fat_idx, ln = 0x10):
+    def enum_script(fat_idx, mofs = 0x3f):
         si = fat.get_entry(fat_idx)[:2]
         spage = scr[si[0], si[1]]
-        ctx = spage.extend_to(ln - 1)
-        cmdop = next(ctx)
-        while not cmdop is None:
-            cmdop = ctx.send(cmd.get_cmd_len(cmdop))
-        for i in range(ln):
-            cmdop, prms = spage.get_cmd(i)
-            cmd_addr = cmd.get_cmd_addr(cmdop)
-            print(f'0x{cmdop:x}(0x{cmd_addr:x}) {len(prms)} prms:')
-            hd(prms)
-    def enum_b_script(p_idx, ln = 0x10):
+        for rdy, cofs, cop, cprms in spage.iter_lines_to(mofs):
+            if not rdy:
+                clen = cmd.get_cmd_len(cop)
+                cprms = cprms(clen)
+            cmd_addr = cmd.get_cmd_addr(cop)
+            print(f'{str(rdy):>5s} 0x{cofs:x}: 0x{cop:x}(0x{cmd_addr:x}) {len(cprms)} cprms:')
+            hd(cprms)
+    def enum_b_script(p_idx, mofs = 0x3f):
         spage = bat[p_idx, 1]
-        ctx = spage.extend_to(ln - 1)
-        cmdop = next(ctx)
-        while not cmdop is None:
-            cmdop = ctx.send(bcm.get_cmd_len(cmdop))
-        for i in range(ln):
-            cmdop, prms = spage.get_cmd(i)
-            cmd_addr = bcm.get_cmd_addr(cmdop)
-            print(f'0x{cmdop:x}(0x{cmd_addr:x}) {len(prms)} prms:')
-            hd(prms)
+        for rdy, cofs, cop, cprms in spage.iter_lines_to(mofs):
+            if not rdy:
+                clen = bcm.get_cmd_len(cop)
+                cprms = cprms(clen)
+            cmd_addr = bcm.get_cmd_addr(cop)
+            print(f'{str(rdy):>5s} 0x{cofs:x}: 0x{cop:x}(0x{cmd_addr:x}) {len(cprms)} cprms:')
+            hd(cprms)
             
