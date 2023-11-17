@@ -356,7 +356,7 @@ if __name__ == '__main__':
             'cmds':     rom.tabs['s_cmds'],
             'text':     rom.tabs['s_text'],
         })
-        prog = spsr.get_program(1)
+        prog = spsr.get_program(page_idx)
         def _idx_pck(r):
             return r['offset'], r['type'], r['output']
         return prog.exec(cb_pck = _idx_pck)
