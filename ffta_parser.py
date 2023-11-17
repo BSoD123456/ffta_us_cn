@@ -80,7 +80,7 @@ class c_ffta_cmd:
 
     def exec(self, psr):
         rslt = {
-            'step': 1,
+            'step': [len(self)],
             'type': 'unknown',
         }
         if self.op in self._cmd_tab:
@@ -109,8 +109,9 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     def cmd_text(self, prms, psr, rslt):
         tidx = prms[0]
         cpidx = prms[1]
-        t_line = psr.t_page[tidx]
-        toks = psr.t_page[tidx].text.tokens
+        t_page = psr.sects['text']
+        t_line = t_page[tidx]
+        toks = t_page[tidx].text.tokens
         return toks
 
     #cmd: load scene
@@ -153,7 +154,7 @@ class c_ffta_script_parser:
     def __init__(self, sects):
         self.sects = sects
         self.page_info = self._guess_size()
-        self.s_page = None
+        self._progs = {}
 
     def _guess_size(self):
         sect = self.sects['script']
@@ -173,23 +174,42 @@ class c_ffta_script_parser:
             rslt.append(rslt_grp)
         return rslt
 
-    def new_program(self, pi1, pi2):
+    def _new_program(self, pi1, pi2, psz):
         sects = self.sects
         return c_ffta_script_program({
             'script': sects['script'][pi1, pi2],
             'cmds': sects['cmds'],
-        }, None)
+        }, psz, c_ffta_cmd)
+
+    def get_program(self, pi1, pi2, **kargs):
+        try:
+            pofs, psz = self.page_info[pi1][pi2]
+        except:
+            return None
+        pi = (pi1, pi2)
+        progs = self._progs
+        if pi in progs:
+            prog = progs[pi]
+        else:
+            prog = self._new_program(pi1, pi2, psz, **kargs)
+            assert(self.sects['script'].tbase(pi1, pi2) == pofs)
+            progs[pi] = prog
+        return prog
 
 class c_ffta_script_program:
 
-    def __init__(self, sects, page_size):
+    def __init__(self, sects, page_size, cls_cmd):
         self.sects = sects
         self.page_size = page_size
+        self._cls_cmd = cls_cmd
         self._parse_cmds_page()
+
+    def reset(self):
+        pass
 
     def _new_cmd(self, cmdop, prms):
         try:
-            return c_ffta_scene_cmd(cmdop, prms)
+            return self._cls_cmd(cmdop, prms)
         except ValueError:
             return None
 
@@ -223,33 +243,101 @@ class c_ffta_script_program:
     def get_cmd(self, ofs):
         return self.cmds.get(ofs, None)
 
-    def exec(self, st_idx = 0, flt = None, flt_out = ['unknown'], cb_pck = None):
-        nxt_idx = st_idx
-        while not nxt_idx is None:
-            cmd = self.get_cmd(nxt_idx)
+    def _raise_rslt(self, ofs, msg, **kargs):
+        kargs.update({
+            'type': 'error',
+            'offset': ofs,
+            'output': msg,
+        })
+        return kargs
+
+    def _hndl_rslt(self, rslt, flt, flt_out, cb_pck):
+        typ = rslt['type']
+        if not flt is None and not typ in flt:
+            return None
+        elif not flt_out is None and typ in flt_out:
+            return None
+        if callable(cb_pck):
+            ro = cb_pck(rslt)
+        else:
+            ro = rslt['output']
+        return ro
+
+    def exec(self, st_ofs = 0, flt = None, flt_out = ['unknown'], cb_pck = None, wk = None):
+        if wk is None:
+            wk = set()
+        cur_ofs = st_ofs
+        page_size = self.page_size
+        while True:
+            if cur_ofs >= page_size:
+                ro = self._hndl_rslt(
+                    self._raise_rslt(cur_ofs, f'overflow 0x{page_size:x}'),
+                    flt, flt_out, cb_pck)
+                if not ro is None:
+                    yield ro
+                break
+            elif cur_ofs in wk:
+                ro = self._hndl_rslt(
+                    self._raise_rslt(cur_ofs, 'walked skip'),
+                    flt, flt_out, cb_pck)
+                if not ro is None:
+                    yield ro
+                break
+            cmd = self.get_cmd(cur_ofs)
             if cmd is None:
+                ro = self._hndl_rslt(
+                    self._raise_rslt(cur_ofs, f'no valid cmd'),
+                    flt, flt_out, cb_pck)
+                if not ro is None:
+                    yield ro
                 break
             rslt = cmd.exec(self)
-            lst_idx = nxt_idx
-            nxt_idx += rslt['step']
-            typ = rslt['type']
-            if not flt is None and not typ in flt:
-                continue
-            if not flt_out is None and typ in flt_out:
-                continue
-            if callable(cb_pck):
-                ro = cb_pck(lst_idx, rslt)
-            else:
-                ro = rslt['output']
-            yield ro
+            rslt['offset'] = cur_ofs
+            wk.add(cur_ofs)
+            ro = self._hndl_rslt(rslt, flt, flt_out, cb_pck)
+            if not ro is None:
+                yield ro
+            stps = rslt['step']
+            if len(stps) == 0:
+                break
+            for stp in stps[:-1]:
+                nxt_ofs = cur_ofs + stp
+                yield from self.exec(
+                    nxt_ofs, flt, flt_out, cb_pck, wk)
+            cur_ofs += stps[-1]
+
+# ===============
+#     scene
+# ===============
 
 class c_ffta_scene_script_parser(c_ffta_script_parser):
 
-    def enter_page(self, idx):
+    def get_program(self, idx, **kargs):
         assert(idx > 0)
         s_pi1, s_pi2, t_pi = self.sects['fat'].get_entry(idx)
-        if super().enter_page(s_pi1, s_pi2):
-            self.t_page = self.sects['text'][t_pi]
+        stext = self.sects['text'][t_pi]
+        return super().get_program(s_pi1, s_pi2, sect_text = stext, **kargs)
+
+    def _new_program(self, pi1, pi2, psz, *, sect_text):
+        sects = self.sects
+        return c_ffta_script_program({
+            'script': sects['script'][pi1, pi2],
+            'cmds': sects['cmds'],
+            'text': sect_text,
+        }, psz, c_ffta_scene_cmd)
+
+# ===============
+#     battle
+# ===============
+
+class c_ffta_battle_script_parser(c_ffta_script_parser):
+
+    def _new_program(self, pi1, pi2, psz):
+        sects = self.sects
+        return c_ffta_script_program({
+            'script': sects['script'][pi1, pi2],
+            'cmds': sects['cmds'],
+        }, psz, c_ffta_battle_cmd)
 
 if __name__ == '__main__':
     import pdb
@@ -268,18 +356,18 @@ if __name__ == '__main__':
             'cmds':     rom.tabs['s_cmds'],
             'text':     rom.tabs['s_text'],
         })
-        spsr.enter_page(page_idx)
-        def _idx_pck(idx, rslt):
-            return (idx, rslt['type'], rslt['output'])
-        return spsr.exec(cb_pck = _idx_pck)
-    #ctx = main()
+        prog = spsr.get_program(1)
+        def _idx_pck(r):
+            return r['offset'], r['type'], r['output']
+        return prog.exec(cb_pck = _idx_pck)
+    ctx = main()
     def main():
         global spsr
         spsr = c_ffta_script_parser({
             'script':   rom.tabs['b_scrpt'],
             'cmds':     rom.tabs['b_cmds'],
         })
-    main()
+    #main()
     def list_cmds(st, ed):
         for i in range(st, ed):
             print(hex(i), spsr.get_cmd(i))

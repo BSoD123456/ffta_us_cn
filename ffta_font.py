@@ -168,7 +168,9 @@ class c_ffta_font_drawer(c_font_drawer):
             if ttyp == 'CHR_FULL':
                 blk = self.draw_char(tchr, False, **kargs)
             elif ttyp == 'CHR_HALF':
-                blk = self.draw_char(tchr, True, **kargs)
+                # half is not means half char tile
+                # so it's the same as full char
+                blk = self.draw_char(tchr, False, **kargs)
             elif ttyp == 'CTR_FUNC':
                 blk = self.draw_comment(f'[{tchr:x}]')
             else:
@@ -225,20 +227,20 @@ if __name__ == '__main__':
         im = draw_fat(dr)
         return im
 
-    from ffta_parser import c_ffta_script_parser
+    from ffta_parser import c_ffta_scene_script_parser
 
     def psr_main(page_idx = 1):
         global spsr
-        spsr = c_ffta_script_parser({
+        spsr = c_ffta_scene_script_parser({
             'fat':      rom.tabs['s_fat'],
             'script':   rom.tabs['s_scrpt'],
             'cmds':     rom.tabs['s_cmds'],
             'text':     rom.tabs['s_text'],
         })
-        spsr.enter_page(page_idx)
-        def _idx_pck(idx, rslt):
-            return (idx, rslt['type'], rslt['output'])
-        return spsr.exec(cb_pck = _idx_pck)
+        prog = spsr.get_program(1)
+        def _idx_pck(r):
+            return r['offset'], r['type'], r['output']
+        return prog.exec(cb_pck = _idx_pck, flt_out = ['unknown'])
 
     def main(pidx = 1, n = 100000):
         dr = c_ffta_font_drawer(rom.tabs['font'])
@@ -247,8 +249,11 @@ if __name__ == '__main__':
             blks = []
             for i, r in zip(range(n), ctx):
                 ri, rt, ro = r
-                blks.append(dr.draw_comment(f'0x{ri:x} {rt}'))
-                blks.append(dr.draw_tokens(ro, pad = 1, trim = 7))
+                if rt == 'text':
+                    blks.append(dr.draw_comment(f'0x{ri:x} {rt}'))
+                    blks.append(dr.draw_tokens(ro, pad = 1, trim = 7))
+                else:
+                    blks.append(dr.draw_comment(f'0x{ri:x} {rt}: {ro}'))
             if not blks:
                 break
             nn = yield dr.make_img(dr.draw_vert(*blks))
