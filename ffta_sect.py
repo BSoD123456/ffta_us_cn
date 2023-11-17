@@ -299,11 +299,14 @@ class c_ffta_sect(c_mark):
 
 class c_ffta_sect_tab(c_ffta_sect):
     _TAB_DESC = []
-    def _tbase(self, *idxs):
+    def _tbase(self, *idxs, part = None):
         ii = 0
         lst_stp = None
         val_cch = []
-        for td in self._TAB_DESC:
+        tabdesc = self._TAB_DESC
+        if part:
+            tabdesc = tabdesc[:part]
+        for td in tabdesc:
             # tab desc:
             # step of (offset, cur_idx, *-1_val, -1_val, *-2_val, -2_val, ...)
             if not isinstance(td, tuple):
@@ -342,13 +345,13 @@ class c_ffta_sect_tab(c_ffta_sect):
                 #print(f'cur(0x{cur:x}) all_stp(0x{all_stp:x})')
             val_cch.append((cur, all_stp))
         return cur, ii
-    def tbase(self, *idxs):
-        return self._tbase(*idxs)[0]
+    def tbase(self, *idxs, part = None):
+        return self._tbase(*idxs, part = part)[0]
 
-def tabitm(ofs):
+def tabitm(ofs = 0, part = None):
     def _mod(mth):
         def _wrap(self, *idxs, **kargs):
-            bs, ri = self._tbase(*idxs)
+            bs, ri = self._tbase(*idxs, part = part)
             if ri < len(idxs):
                 return mth(self, bs + ofs, *idxs[ri:], **kargs)
             else:
@@ -390,7 +393,7 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     
     _TAB_DESC = [4]
 
-    @tabitm(0)
+    @tabitm()
     def get_entry(self, ofs):
         return self.U8(ofs), self.U8(ofs+1), self.U8(ofs+2)
 
@@ -420,22 +423,27 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
 # ===============
 
 @tabkey('page')
-class c_ffta_sect_scene_script(c_ffta_sect_tab):
-    _TAB_DESC = [(-4, 4), 1, (0, 4, 0, 1), (0, 0, 1, 0, 0, 1)]
-    @tabitm(0)
+class c_ffta_sect_script(c_ffta_sect_tab):
+    @tabitm()
     def get_page(self, ofs):
         return self.sub_wp(ofs, cls = c_ffta_sect_script_page)
+    @tabitm(0, 2)
+    def get_group(self, ofs):
+        return self.sub(ofs)
+
+@tabkey('page')
+class c_ffta_sect_scene_script(c_ffta_sect_script):
+    ENT_WIDTH = 4
+    _TAB_DESC = [(-ENT_WIDTH, ENT_WIDTH), 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
 
 # ===============
 #     battle
 # ===============
 
 @tabkey('page')
-class c_ffta_sect_battle_script(c_ffta_sect_tab):
-    _TAB_DESC = [2, 1, (0, 2, 0, 1), (0, 0, 1, 0, 0, 1)]
-    @tabitm(0)
-    def get_page(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect_script_page)
+class c_ffta_sect_battle_script(c_ffta_sect_script):
+    ENT_WIDTH = 2
+    _TAB_DESC = [ENT_WIDTH, 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
 
 # ===============
 #   script page
@@ -499,14 +507,14 @@ class c_ffta_sect_script_cmds(c_ffta_sect_tab):
 @tabkey('page')
 class c_ffta_sect_text(c_ffta_sect_tab):
     _TAB_DESC = [4, 1]
-    @tabitm(0)
+    @tabitm()
     def get_page(self, ofs):
         return self.sub_wp(ofs, cls = c_ffta_sect_text_page)
 
 @tabkey('line')
 class c_ffta_sect_text_page(c_ffta_sect_tab):
     _TAB_DESC = [2, 1]
-    @tabitm(0)
+    @tabitm()
     def get_line(self, ofs):
         return self.sub_wp(ofs, cls = c_ffta_sect_text_line)
 
@@ -665,7 +673,7 @@ class c_ffta_sect_font(c_ffta_sect_tab):
             bshft = bst
         return (byt >> bshft) & ((1 << blen) - 1)
 
-    @tabitm(0)
+    @tabitm()
     def gen_char(self, ofs, half = False, auto_trim = False):
         bs, cl, rl, bl = self.char_shape
         rvs = self.rvs_byte
