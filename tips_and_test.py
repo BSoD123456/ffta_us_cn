@@ -33,6 +33,11 @@
 # 800a06c: break load battle script
 # 800a210: break load scene script in battle
 
+# 8013e9c: read text to buff with decompress: dst, src, decompr_buff, ...
+
+# 836d678 ~ 836d6e0: window text base tab, idx is type, empty then calc else, normal is 3
+# load at 8018028:801803c
+
 # ===
 # cnjp:
 # rom end: 9bb3d0

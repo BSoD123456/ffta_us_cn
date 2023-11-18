@@ -114,6 +114,36 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         toks = t_page[tidx].text.tokens
         return toks
 
+    #cmd: text window with yes or no
+    #params: p1(u8)
+    #p1: index of text on this page
+    @cmdc(0x12, 'text')
+    def cmd_text_yon(self, prms, psr, rslt):
+        tidx = prms[0]
+        t_page = psr.sects['text']
+        t_line = t_page[tidx]
+        toks = t_page[tidx].text.tokens
+        return toks
+
+    #cmd: jump
+    #params: p1(u16)
+    #p1: cur cmd offset increment
+    @cmdc(0x19, 'flow')
+    def cmd_jump(self, prms, psr, rslt):
+        pass
+
+    #cmd: new thread
+    #params: ?
+    @cmdc(0x04, 'thread')
+    def cmd_new_thread(self, prms, psr, rslt):
+        pass
+
+    #cmd: end thread
+    #params: ?
+    @cmdc(0x02, 'thread')
+    def cmd_end_thread(self, prms, psr, rslt):
+        pass
+
     #cmd: load scene
     #params: ?
     @cmdc(0x1c, 'load')
@@ -294,6 +324,7 @@ class c_ffta_script_program:
                 break
             rslt = cmd.exec(self)
             rslt['offset'] = cur_ofs
+            rslt['cmd'] = cmd
             wk.add(cur_ofs)
             ro = self._hndl_rslt(rslt, flt, flt_out, cb_pck)
             if not ro is None:
@@ -356,13 +387,23 @@ class c_ffta_script_log:
         if typ == 'text':
             toks = rslt['output']
             dec = bytes(c for c in self.charset.decode_tokens(toks))
-            return dec
-        return ' '
+            rs = dec.decode()
+        elif typ == 'error':
+            rs = rslt['output']
+        else:
+            rs = str(rslt['cmd'])
+        if 'cmd' in rslt:
+            cmdop = f"{rslt['cmd'].op:0>2X}"
+        else:
+            cmdop = '--'
+        return f'{rslt["offset"]:0>4x}({typ[:3]:<3s}:{cmdop}): {rs}'
 
     def _exec(self):
         log = []
         self.logs = log
-        for line in self.prog.exec(cb_pck = self._pck_rslt):
+        for line in self.prog.exec(
+                cb_pck = self._pck_rslt,
+                flt_out = None):
             log.append(line)
 
 # ===============
@@ -380,9 +421,14 @@ if __name__ == '__main__':
 
     from ffta_charset import c_ffta_charset_us_dummy as c_charset
 
-    def list_cmds(st, ed):
-        for i in range(st, ed):
-            print(hex(i), spsr.get_cmd(i))
+    def enum_text(page_idx, ln = 0x100):
+        t_page = spsr_s.sects['text'][page_idx]
+        charset = c_charset()
+        for i in range(ln):
+            toks = t_page[i].text.tokens
+            dec = bytes(c for c in charset.decode_tokens(toks))
+            print(hex(i), dec.decode())
+
     def main(page_idx = 1):
         global spsr_s, spsr_b
         spsr_s = c_ffta_scene_script_parser({
@@ -397,4 +443,4 @@ if __name__ == '__main__':
         })
         global slog_s
         slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), c_charset())
-    main()
+    main(6)
