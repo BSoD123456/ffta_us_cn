@@ -108,19 +108,27 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     @cmdc(0x0f, 'text')
     def cmd_text(self, prms, psr, rslt):
         tidx = prms[0]
-        cpidx = prms[1]
+        rslt['win_type'] = 'normal'
+        rslt['win_portrait'] = prms[1]
         t_page = psr.sects['text']
         t_line = t_page[tidx]
         toks = t_page[tidx].text.tokens
         return toks
 
-    #cmd: text window with yes or no
+    #cmd: text window with ask(yes or no) / notice
     #params: p1(u8)
     #p1: index of text on this page
     @cmdc(0x12, 'text')
     def cmd_text_yon(self, prms, psr, rslt):
         tidx = prms[0]
-        t_page = psr.sects['text']
+        if tidx > 0x80:
+            tidx -= 0x80
+            pidx = 1
+            rslt['win_type'] = 'ask'
+        else:
+            pidx = 2
+            rslt['win_type'] = 'notice'
+        t_page = psr.sects['fx_text'][pidx]
         t_line = t_page[tidx]
         toks = t_page[tidx].text.tokens
         return toks
@@ -357,6 +365,7 @@ class c_ffta_scene_script_parser(c_ffta_script_parser):
     def _new_program(self, pi1, pi2, psz, *, sect_text):
         prog = super()._new_program(pi1, pi2, psz)
         prog.sects['text'] = sect_text
+        prog.sects['fx_text'] = self.sects['fx_text']
         prog.parse(c_ffta_scene_cmd, self.sects['script'].ENT_WIDTH)
         return prog
 
@@ -421,11 +430,15 @@ if __name__ == '__main__':
 
     from ffta_charset import c_ffta_charset_us_dummy as c_charset
 
-    def enum_text(page_idx, ln = 0x100):
-        t_page = spsr_s.sects['text'][page_idx]
+    def enum_text(page_idx, ln = 0x100, tkey = 'text'):
+        t_page = spsr_s.sects[tkey][page_idx]
         charset = c_charset()
         for i in range(ln):
-            toks = t_page[i].text.tokens
+            try:
+                toks = t_page[i].text.tokens
+            except:
+                print(hex(i), '--failed--')
+                break
             dec = bytes(c for c in charset.decode_tokens(toks))
             print(hex(i), dec.decode())
 
@@ -436,6 +449,7 @@ if __name__ == '__main__':
             'script':   rom.tabs['s_scrpt'],
             'cmds':     rom.tabs['s_cmds'],
             'text':     rom.tabs['s_text'],
+            'fx_text':  rom.tabs['fx_text'],
         })
         spsr_b = c_ffta_battle_script_parser({
             'script':   rom.tabs['b_scrpt'],

@@ -273,12 +273,12 @@ class c_ffta_sect(c_mark):
         return s
 
     def _offs2addr(self, offs):
-        return offs + self.ADDR_BASE
+        return offs + self.real_offset + self.ADDR_BASE
 
     def _addr2offs(self, addr):
-        return addr - self.ADDR_BASE
+        return addr - self.ADDR_BASE - self.real_offset
 
-    def _aot(self, v, typ):
+    def aot(self, v, typ):
         if typ[0] == typ[1]:
             return v
         elif typ[0] == 'a':
@@ -291,7 +291,7 @@ class c_ffta_sect(c_mark):
     def rdptr(self, ptr, typ = 'oao'):
         if typ[0] == 'a':
             ptr = self._addr2offs(ptr)
-        return self._aot(self.U32(ptr), typ[1:])
+        return self.aot(self.U32(ptr), typ[1:])
 
 # ===============
 #      tabs
@@ -420,7 +420,7 @@ class c_ffta_sect_script(c_ffta_sect_tab):
         return ofs
     @tabitm(0, 2)
     def get_group(self, ofs):
-        return self.sub(ofs)
+        return self.sub_wp(ofs, cls = c_ffta_sect)
 
 @tabkey('page')
 class c_ffta_sect_scene_script(c_ffta_sect_script):
@@ -695,6 +695,30 @@ class c_ffta_sect_font(c_ffta_sect_tab):
             yield _rowgen()
 
 # ===============
+#    addresses
+# ===============
+
+@tabkey('ref')
+class c_ffta_sect_tab_addr(c_ffta_sect_tab):
+    _TAB_DESC = [4]
+    @tabitm()
+    def get_address(self, ofs):
+        return self.U32(ofs)
+    def parse(self, host, cls_sub, tlen):
+        refs = []
+        for i in range(tlen):
+            addr = self.get_address(i)
+            if addr:
+                ofs = host.aot(addr, 'ao')
+                ref = host.sub_wp(ofs, cls = cls_sub)
+            else:
+                ref = None
+            refs.append(ref)
+        self.refs = refs
+    def get_ref(self, idx):
+        return self.refs[idx]
+
+# ===============
 #      rom
 # ===============
 
@@ -714,7 +738,10 @@ class c_ffta_sect_rom(c_ffta_sect):
         for tab_name, tab_info in tabs_info.items():
             tab_ptr, tab_cls = tab_info[:2]
             if len(tab_info) > 2:
-                pargs = (tab_info[2],)
+                if issubclass(tab_cls, c_ffta_sect_tab_addr):
+                    pargs = (self, *tab_info[2:])
+                else:
+                    pargs = tab_info[2:]
             else:
                 pargs = None
             subsect = self._subsect(tab_ptr, tab_cls, pargs)
@@ -739,6 +766,9 @@ def main():
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
             }),
+            'fx_text': (0x018050, c_ffta_sect_tab_addr,
+                c_ffta_sect_text_page, 27
+            ),
         })
     with open('fftacns.gba', 'rb') as fd:
         rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
@@ -752,6 +782,9 @@ def main():
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
             }),
+            'fx_text': (0x017f6c, c_ffta_sect_tab_addr,
+                c_ffta_sect_text_page, 26
+            ),
         })
     with open('fftajp.gba', 'rb') as fd:
         rom_jp = c_ffta_sect_rom(fd.read(), 0).parse({
@@ -765,6 +798,9 @@ def main():
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
             }),
+            'fx_text': (0x017f6c, c_ffta_sect_tab_addr,
+                c_ffta_sect_text_page, 26
+            ),
         })
 
 if __name__ == '__main__':
