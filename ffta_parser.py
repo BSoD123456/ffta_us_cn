@@ -340,6 +340,35 @@ class c_ffta_battle_script_parser(c_ffta_script_parser):
         prog.parse(c_ffta_battle_cmd, self.sects['script'].ENT_WIDTH)
         return prog
 
+# ===============
+#      log
+# ===============
+
+class c_ffta_script_log:
+
+    def __init__(self, prog, charset):
+        self.prog = prog
+        self.charset = charset
+        self._exec()
+
+    def _pck_rslt(self, rslt):
+        typ = rslt['type']
+        if typ == 'text':
+            toks = rslt['output']
+            dec = bytes(c for c in self.charset.decode_tokens(toks))
+            return dec
+        return ' '
+
+    def _exec(self):
+        log = []
+        self.logs = log
+        for line in self.prog.exec(cb_pck = self._pck_rslt):
+            log.append(line)
+
+# ===============
+#      main
+# ===============
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
@@ -349,26 +378,23 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_us as rom
 
+    from ffta_charset import c_ffta_charset_us_dummy as c_charset
+
+    def list_cmds(st, ed):
+        for i in range(st, ed):
+            print(hex(i), spsr.get_cmd(i))
     def main(page_idx = 1):
-        global spsr
-        spsr = c_ffta_scene_script_parser({
+        global spsr_s, spsr_b
+        spsr_s = c_ffta_scene_script_parser({
             'fat':      rom.tabs['s_fat'],
             'script':   rom.tabs['s_scrpt'],
             'cmds':     rom.tabs['s_cmds'],
             'text':     rom.tabs['s_text'],
         })
-        prog = spsr.get_program(page_idx)
-        def _idx_pck(r):
-            return r['offset'], r['type'], r['output']
-        return prog.exec(cb_pck = _idx_pck)
-    #ctx = main()
-    def main():
-        global spsr
-        spsr = c_ffta_battle_script_parser({
+        spsr_b = c_ffta_battle_script_parser({
             'script':   rom.tabs['b_scrpt'],
             'cmds':     rom.tabs['b_cmds'],
         })
+        global slog_s
+        slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), c_charset())
     main()
-    def list_cmds(st, ed):
-        for i in range(st, ed):
-            print(hex(i), spsr.get_cmd(i))
