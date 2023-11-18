@@ -255,7 +255,7 @@ if __name__ == '__main__':
     
     from ffta_sect import main as sect_main
     sect_main()
-    from ffta_sect import rom_us as rom
+    from ffta_sect import rom_cn as rom
 
     def get_scene_text_toks(page, line):
         txt = rom.tabs['s_text']

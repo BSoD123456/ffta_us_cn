@@ -179,7 +179,7 @@ class c_ffta_script_parser:
         return c_ffta_script_program({
             'script': sects['script'][pi1, pi2],
             'cmds': sects['cmds'],
-        }, psz, c_ffta_cmd)
+        }, psz)
 
     def get_program(self, pi1, pi2, **kargs):
         try:
@@ -198,22 +198,23 @@ class c_ffta_script_parser:
 
 class c_ffta_script_program:
 
-    def __init__(self, sects, page_size, cls_cmd):
+    def __init__(self, sects, page_size):
         self.sects = sects
         self.page_size = page_size
-        self._cls_cmd = cls_cmd
-        self._parse_cmds_page()
+
+    def parse(self, cls_cmd, align_width):
+        self._parse_cmds_page(cls_cmd, align_width)
 
     def reset(self):
         pass
 
-    def _new_cmd(self, cmdop, prms):
+    def _new_cmd(self, cmdop, prms, cls_cmd):
         try:
-            return self._cls_cmd(cmdop, prms)
+            return cls_cmd(cmdop, prms)
         except ValueError:
             return None
 
-    def _parse_cmds_page(self):
+    def _parse_cmds_page(self, cls_cmd, align_width):
         sect_spage = self.sects['script']
         sect_cmds = self.sects['cmds']
         if self.page_size is None:
@@ -228,7 +229,7 @@ class c_ffta_script_program:
             else:
                 clen = sect_cmds.get_cmd_len(cop)
                 cprms = cprms_or_cb(clen)
-            cmd = self._new_cmd(cop, cprms)
+            cmd = self._new_cmd(cop, cprms, cls_cmd)
             if cmd is None:
                 assert(callable(cprms_or_cb))
                 cprms_or_cb(None)
@@ -238,7 +239,7 @@ class c_ffta_script_program:
         self.cmds = cmds_tab
         if self.page_size is None:
             self.page_size = all_size
-        assert(all_size == self.page_size)
+        assert(0 <= self.page_size - all_size < align_width)
 
     def get_cmd(self, ofs):
         return self.cmds.get(ofs, None)
@@ -312,19 +313,21 @@ class c_ffta_script_program:
 
 class c_ffta_scene_script_parser(c_ffta_script_parser):
 
-    def get_program(self, idx, **kargs):
+    def _get_fat_entry(self, idx):
         assert(idx > 0)
         s_pi1, s_pi2, t_pi = self.sects['fat'].get_entry(idx)
+        return s_pi1, s_pi2, t_pi
+
+    def get_program(self, idx, **kargs):
+        s_pi1, s_pi2, t_pi = self._get_fat_entry(idx)
         stext = self.sects['text'][t_pi]
         return super().get_program(s_pi1, s_pi2, sect_text = stext, **kargs)
 
     def _new_program(self, pi1, pi2, psz, *, sect_text):
-        sects = self.sects
-        return c_ffta_script_program({
-            'script': sects['script'][pi1, pi2],
-            'cmds': sects['cmds'],
-            'text': sect_text,
-        }, psz, c_ffta_scene_cmd)
+        prog = super()._new_program(pi1, pi2, psz)
+        prog.sects['text'] = sect_text
+        prog.parse(c_ffta_scene_cmd, self.sects['script'].ENT_WIDTH)
+        return prog
 
 # ===============
 #     battle
@@ -333,11 +336,9 @@ class c_ffta_scene_script_parser(c_ffta_script_parser):
 class c_ffta_battle_script_parser(c_ffta_script_parser):
 
     def _new_program(self, pi1, pi2, psz):
-        sects = self.sects
-        return c_ffta_script_program({
-            'script': sects['script'][pi1, pi2],
-            'cmds': sects['cmds'],
-        }, psz, c_ffta_battle_cmd)
+        prog = super()._new_program(pi1, pi2, psz)
+        prog.parse(c_ffta_battle_cmd, self.sects['script'].ENT_WIDTH)
+        return prog
 
 if __name__ == '__main__':
     import pdb
@@ -360,14 +361,14 @@ if __name__ == '__main__':
         def _idx_pck(r):
             return r['offset'], r['type'], r['output']
         return prog.exec(cb_pck = _idx_pck)
-    ctx = main()
+    #ctx = main()
     def main():
         global spsr
-        spsr = c_ffta_script_parser({
+        spsr = c_ffta_battle_script_parser({
             'script':   rom.tabs['b_scrpt'],
             'cmds':     rom.tabs['b_cmds'],
         })
-    #main()
+    main()
     def list_cmds(st, ed):
         for i in range(st, ed):
             print(hex(i), spsr.get_cmd(i))

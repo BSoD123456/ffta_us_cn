@@ -743,7 +743,11 @@ def main():
     with open('fftacns.gba', 'rb') as fd:
         rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
+            's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
+            's_cmds': (0x117f10, c_ffta_sect_script_cmds),
             's_text': (0x009ad8, c_ffta_sect_text),
+            'b_scrpt': (0x00a0dc, c_ffta_sect_battle_script),
+            'b_cmds': (0x00a130, c_ffta_sect_script_cmds),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
@@ -752,7 +756,11 @@ def main():
     with open('fftajp.gba', 'rb') as fd:
         rom_jp = c_ffta_sect_rom(fd.read(), 0).parse({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
+            's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
+            's_cmds': (0x117f10, c_ffta_sect_script_cmds),
             's_text': (0x009ad8, c_ffta_sect_text),
+            'b_scrpt': (0x00a0dc, c_ffta_sect_battle_script),
+            'b_cmds': (0x00a130, c_ffta_sect_script_cmds),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
