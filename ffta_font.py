@@ -309,6 +309,7 @@ if __name__ == '__main__':
             'script':   rom.tabs['s_scrpt'],
             'cmds':     rom.tabs['s_cmds'],
             'text':     rom.tabs['s_text'],
+            'fx_text':  rom.tabs['fx_text'],
         })
         prog = spsr.get_program(page_idx)
         def _idx_pck(r):
