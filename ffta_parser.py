@@ -399,6 +399,17 @@ if __name__ == '__main__':
             dec = charset.decode(toks)
             print(hex(i), dec)
 
+    def enum_all_text(tkey):
+        t_sect = spsr_s.sects[tkey]
+        charset = c_charset()
+        for pi, t_page in enumerate(t_sect):
+            if not t_page:
+                continue
+            for ti, t_line in enumerate(t_page):
+                toks = t_line.text.tokens
+                dec = charset.decode(toks)
+                print(f'{pi}/{ti}: {dec}')
+
     def main(page_idx = 1):
         global spsr_s, spsr_b
         spsr_s = c_ffta_scene_script_parser({

@@ -366,10 +366,12 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         ofs_ord = []
         ofs_sort = set()
         while cur_ent < self.tsize:
-            if upd_sz and cur_ent * self._TAB_WIDTH >= ofs_min:
+            ofs = self.get_entry(cur_ent)
+            if upd_sz and (
+                cur_ent * self._TAB_WIDTH >= ofs_min or
+                (not top_ofs is None and ofs >= top_ofs)):
                 self.tsize = cur_ent
                 break
-            ofs = self.get_entry(cur_ent)
             cur_ent += 1
             if ofs < ofs_min:
                 ofs_min = ofs
@@ -642,7 +644,10 @@ class c_ffta_sect_text_line(c_ffta_sect):
         if cmpr:
             dst_len = rvs_endian(self.U32(2), 4, False)
             subsect = self.sub(2, 0, cls = c_ffta_sect_text_buf)
-            buf = self._decompress(subsect.mod, 6, dst_len)
+            try:
+                buf = self._decompress(subsect.mod, 6, dst_len)
+            except:
+                raise ValueError('decompress error')
         else:
             subsect = self.sub(2, cls = c_ffta_sect_text_buf)
         subsect.parse()
