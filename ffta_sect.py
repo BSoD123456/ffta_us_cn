@@ -369,7 +369,9 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             ofs = self.get_entry(cur_ent)
             if upd_sz and (
                 cur_ent * self._TAB_WIDTH >= ofs_min or
-                (not top_ofs is None and ofs >= top_ofs)):
+                (not top_ofs is None and ofs >= top_ofs) or
+                # all F entry is invalid and last
+                (ofs == (1 << self._TAB_WIDTH * 8) - 1)):
                 self.tsize = cur_ent
                 break
             cur_ent += 1
