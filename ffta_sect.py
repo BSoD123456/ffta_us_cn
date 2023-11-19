@@ -54,6 +54,8 @@ def rvs_endian(src, size, dst_signed):
 
 INF = float('inf')
 
+c_symb = object
+
 class c_mark:
 
     def __init__(self, raw, offset):
@@ -263,15 +265,6 @@ class c_ffta_sect(c_mark):
     def parse(self):
         pass
 
-    def sub_wp(self, pos, length = None, cls = None, parse_args = None):
-        s = self.sub(pos, length, cls)
-        if issubclass(cls, c_ffta_sect):
-            if parse_args:
-                s.parse(*parse_args)
-            else:
-                s.parse()
-        return s
-
     def _offs2addr(self, offs):
         return offs + self.real_offset + self.ADDR_BASE
 
@@ -298,64 +291,16 @@ class c_ffta_sect(c_mark):
 # ===============
 
 class c_ffta_sect_tab(c_ffta_sect):
-    _TAB_DESC = []
-    def _tbase(self, *idxs, part = None):
-        ii = 0
-        lst_stp = None
-        val_cch = []
-        tabdesc = self._TAB_DESC
-        if part:
-            tabdesc = tabdesc[:part]
-        for td in tabdesc:
-            # tab desc:
-            # step of (offset, cur_idx, *-1_val, -1_val, *-2_val, -2_val, ...)
-            if not isinstance(td, tuple):
-                if val_cch:
-                    td = (0, 0, td)
-                else:
-                    td = (0, td)
-            cur = 0
-            all_stp = 1
-            for i, stp in enumerate(td):
-                if stp == 0:
-                    continue
-                bi = i // 2
-                is_stp = True
-                if i % 2:
-                    if bi == 0:
-                        cval = idxs[ii]
-                        ii += 1
-                    else:
-                        cval = val_cch[-bi][0]
-                else:
-                    if bi == 0:
-                        cval = 1
-                        is_stp = False
-                    else:
-                        _lv, _lb = val_cch[-bi]
-                        if isinstance(stp, tuple):
-                            _lb = stp[1]
-                            stp = stp[0]
-                        cval = self.readval(_lv, _lb, False)
-                        #print(f'({_lb})[0x{_lv:x}] == 0x{cval:x}')
-                if is_stp:
-                    all_stp *= stp
-                #print(f'typ({len(val_cch)}:{bi}/{i%2}) cur(0x{cur:x}) + stp({stp}) * cval(0x{cval:x}) = ', end = '')
-                cur += stp * cval
-                #print(f'cur(0x{cur:x}) all_stp(0x{all_stp:x})')
-            val_cch.append((cur, all_stp))
-        return cur, ii
-    def tbase(self, *idxs, part = None):
-        return self._tbase(*idxs, part = part)[0]
+    _TAB_WIDTH = 0
+    tsize = None
+    def tbase(self, idx):
+        return idx * self._TAB_WIDTH
 
 def tabitm(ofs = 0, part = None):
     def _mod(mth):
-        def _wrap(self, *idxs, **kargs):
-            bs, ri = self._tbase(*idxs, part = part)
-            if ri < len(idxs):
-                return mth(self, bs + ofs, *idxs[ri:], **kargs)
-            else:
-                return mth(self, bs + ofs, **kargs)
+        def _wrap(self, idx, *args, **kargs):
+            bs = self.tbase(idx)
+            return mth(self, bs + ofs, *args, **kargs)
         return _wrap
     return _mod
 
@@ -363,6 +308,9 @@ def tabkey(key):
     mn = 'get_' + key
     def _mod(cls):
         def _getkey(self, k):
+            sz = self.tsize
+            if not sz is None and k >= sz:
+                raise IndexError('overflow')
             if hasattr(self, '_tab_cch'):
                 cch = self._tab_cch
             else:
@@ -371,15 +319,45 @@ def tabkey(key):
             if k in cch:
                 val = cch[k]
             else:
-                if isinstance(k, tuple):
-                    val = getattr(self, mn)(*k)
-                else:
-                    val = getattr(self, mn)(k)
+                val = getattr(self, mn)(k)
                 cch[k] = val
             return val
         cls.__getitem__ = _getkey
         return cls
     return _mod
+
+@tabkey('ref')
+class c_ffta_sect_tab_ref(c_ffta_sect_tab):
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect
+    @tabitm()
+    def get_entry(self, ofs):
+        return self.readval(ofs, self._TAB_WIDTH, False)
+    def get_ref(self, idx):
+        ofs = self.get_entry(idx)
+        sub = self.sub(ofs, cls = self._TAB_REF_CLS())
+        sub.parse()
+        return sub
+
+class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
+    _TAB_WIDTH = 4
+    @tabitm()
+    def get_address(self, ofs):
+        return self.U32(ofs)
+    def parse(self, host, tlen):
+        self._tab_ref_host = host
+        self.tsize = tlen
+    def get_ref(self, idx):
+        host = self._tab_ref_host
+        addr = self.get_address(idx)
+        if addr:
+            ofs = host.aot(addr, 'ao')
+            ref = host.sub(ofs, cls = self._TAB_REF_CLS())
+            ref.parse()
+        else:
+            ref = None
+        return ref
 
 # ===============
 #     scene
@@ -391,7 +369,7 @@ def tabkey(key):
 
 class c_ffta_sect_scene_fat(c_ffta_sect_tab):
     
-    _TAB_DESC = [4]
+    _TAB_WIDTH = 4
 
     @tabitm()
     def get_entry(self, ofs):
@@ -410,31 +388,38 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
 #     script
 # ===============
 
-@tabkey('page')
-class c_ffta_sect_script(c_ffta_sect_tab):
-    @tabitm()
-    def get_page(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect_script_page)
-    @tabitm(0, 2)
-    def tbase_group(self, ofs):
-        return ofs
-    @tabitm(0, 2)
-    def get_group(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect)
+# ===============
+#     scene
+# ===============
 
-@tabkey('page')
-class c_ffta_sect_scene_script(c_ffta_sect_script):
-    ENT_WIDTH = 4
-    _TAB_DESC = [ENT_WIDTH, 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
+class c_ffta_sect_scene_script(c_ffta_sect_tab_ref):
+    _TAB_WIDTH = 4
+    # delay reference class symbol
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect_scene_script_group
+
+class c_ffta_sect_scene_script_group(c_ffta_sect_tab_ref):
+    _TAB_WIDTH = 4
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect_script_page
 
 # ===============
 #     battle
 # ===============
 
-@tabkey('page')
-class c_ffta_sect_battle_script(c_ffta_sect_script):
-    ENT_WIDTH = 2
-    _TAB_DESC = [ENT_WIDTH, 1, (0, ENT_WIDTH, 0, 1), (0, 0, 1, 0, 0, 1)]
+class c_ffta_sect_battle_script(c_ffta_sect_tab_ref):
+    _TAB_WIDTH = 2
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect_scene_script_group
+
+class c_ffta_sect_battle_script_group(c_ffta_sect_tab_ref):
+    _TAB_WIDTH = 2
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect_script_page
 
 # ===============
 #   script page
@@ -500,7 +485,7 @@ class c_ffta_sect_script_page(c_ffta_sect):
 # ===============
 
 class c_ffta_sect_script_cmds(c_ffta_sect_tab):
-    _TAB_DESC = [6]
+    _TAB_WIDTH = 6
     @tabitm(2)
     def get_cmd_addr(self, ofs):
         return self.U32(ofs)
@@ -512,19 +497,22 @@ class c_ffta_sect_script_cmds(c_ffta_sect_tab):
 #      text
 # ===============
 
-@tabkey('page')
-class c_ffta_sect_text(c_ffta_sect_tab):
-    _TAB_DESC = [4, 1]
-    @tabitm()
-    def get_page(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect_text_page)
+class c_ffta_sect_text(c_ffta_sect_tab_ref):
+    _TAB_WIDTH = 4
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect_text_page
 
-@tabkey('line')
-class c_ffta_sect_text_page(c_ffta_sect_tab):
-    _TAB_DESC = [2, 1]
-    @tabitm()
-    def get_line(self, ofs):
-        return self.sub_wp(ofs, cls = c_ffta_sect_text_line)
+class c_ffta_sect_fixed_text(c_ffta_sect_tab_ref_addr):
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect_text_page
+
+class c_ffta_sect_text_page(c_ffta_sect_tab_ref):
+    _TAB_WIDTH = 2
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect_text_line
 
 class c_ffta_sect_text_line(c_ffta_sect):
     
@@ -599,9 +587,9 @@ class c_ffta_sect_text_line(c_ffta_sect):
             dst_len = rvs_endian(self.U32(2), 4, False)
             subsect = self.sub(2, 0, cls = c_ffta_sect_text_buf)
             buf = self._decompress(subsect.mod, 6, dst_len)
-            subsect.parse()
         else:
-            subsect = self.sub_wp(2, cls = c_ffta_sect_text_buf)
+            subsect = self.sub(2, cls = c_ffta_sect_text_buf)
+        subsect.parse()
         self.text = subsect
 
 class c_ffta_sect_text_buf(c_ffta_sect):
@@ -715,7 +703,7 @@ class c_ffta_sect_font(c_ffta_sect_tab):
         char_bits = 1
         for v in self.char_shape:
             char_bits *= v
-        self._TAB_DESC = [char_bits // 8]
+        self._TAB_WIDTH = char_bits // 8
 
     def _get_bits(self, ofs, bidx, blen, rvs, cch):
         bb = 8
@@ -749,34 +737,12 @@ class c_ffta_sect_font(c_ffta_sect_tab):
             yield _rowgen()
 
 # ===============
-#    addresses
-# ===============
-
-@tabkey('ref')
-class c_ffta_sect_tab_addr(c_ffta_sect_tab):
-    _TAB_DESC = [4]
-    @tabitm()
-    def get_address(self, ofs):
-        return self.U32(ofs)
-    def parse(self, host, cls_sub, tlen):
-        refs = []
-        for i in range(tlen):
-            addr = self.get_address(i)
-            if addr:
-                ofs = host.aot(addr, 'ao')
-                ref = host.sub_wp(ofs, cls = cls_sub)
-            else:
-                ref = None
-            refs.append(ref)
-        self.refs = refs
-    def get_ref(self, idx):
-        return self.refs[idx]
-
-# ===============
 #      rom
 # ===============
 
 class c_ffta_sect_rom(c_ffta_sect):
+
+    ARG_SELF = c_symb()
 
     def parse(self, tabs_info):
         self._add_tabs(tabs_info)
@@ -784,20 +750,15 @@ class c_ffta_sect_rom(c_ffta_sect):
 
     def _subsect(self, offs_ptr, c_sect, pargs):
         offs_base = self.rdptr(offs_ptr, 'oao')
-        sect = self.sub_wp(offs_base, cls = c_sect, parse_args = pargs)
+        sect = self.sub(offs_base, cls = c_sect)
+        sect.parse(*pargs)
         return sect
 
     def _add_tabs(self, tabs_info):
         tabs = {}
         for tab_name, tab_info in tabs_info.items():
             tab_ptr, tab_cls = tab_info[:2]
-            if len(tab_info) > 2:
-                if issubclass(tab_cls, c_ffta_sect_tab_addr):
-                    pargs = (self, *tab_info[2:])
-                else:
-                    pargs = tab_info[2:]
-            else:
-                pargs = None
+            pargs = (self if a == self.ARG_SELF else a for a in tab_info[2:])
             subsect = self._subsect(tab_ptr, tab_cls, pargs)
             tabs[tab_name] = subsect
         self.tabs = tabs
@@ -820,8 +781,8 @@ def main():
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
             }),
-            'fx_text': (0x018050, c_ffta_sect_tab_addr,
-                c_ffta_sect_text_page, 27
+            'fx_text': (0x018050, c_ffta_sect_fixed_text,
+                c_ffta_sect_rom.ARG_SELF, 27
             ),
         })
     with open('fftacns.gba', 'rb') as fd:
@@ -836,8 +797,8 @@ def main():
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
             }),
-            'fx_text': (0x017f6c, c_ffta_sect_tab_addr,
-                c_ffta_sect_text_page, 26
+            'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
+                c_ffta_sect_rom.ARG_SELF, 26
             ),
         })
     with open('fftajp.gba', 'rb') as fd:
@@ -852,8 +813,8 @@ def main():
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
             }),
-            'fx_text': (0x017f6c, c_ffta_sect_tab_addr,
-                c_ffta_sect_text_page, 26
+            'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
+                c_ffta_sect_rom.ARG_SELF, 26
             ),
         })
 
