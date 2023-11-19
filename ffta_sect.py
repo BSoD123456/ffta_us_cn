@@ -265,6 +265,10 @@ class c_ffta_sect(c_mark):
     def parse(self):
         pass
 
+    def parse_size(self, top_ofs, align_width):
+        self._sect_top = top_ofs
+        self._sect_align = align_width
+
     def _offs2addr(self, offs):
         return offs + self.real_offset + self.ADDR_BASE
 
@@ -292,7 +296,12 @@ class c_ffta_sect(c_mark):
 
 class c_ffta_sect_tab(c_ffta_sect):
     _TAB_WIDTH = 0
-    tsize = None
+    def parse_size(self, top_ofs, align_width):
+        super().parse_size(top_ofs, align_width)
+        if top_ofs is None:
+            self.tsize = INF
+        else:
+            self.tsize = top_ofs // self._TAB_WIDTH
     def tbase(self, idx):
         return idx * self._TAB_WIDTH
 
@@ -308,8 +317,7 @@ def tabkey(key):
     mn = 'get_' + key
     def _mod(cls):
         def _getkey(self, k):
-            sz = self.tsize
-            if not sz is None and k >= sz:
+            if k >= self.tsize:
                 raise IndexError('overflow')
             if hasattr(self, '_tab_cch'):
                 cch = self._tab_cch
@@ -328,36 +336,82 @@ def tabkey(key):
 
 @tabkey('ref')
 class c_ffta_sect_tab_ref(c_ffta_sect_tab):
+    
     @staticmethod
     def _TAB_REF_CLS():
         return c_ffta_sect
+    
     @tabitm()
     def get_entry(self, ofs):
         return self.readval(ofs, self._TAB_WIDTH, False)
+
+    def _init_ref(self, sub, idx):
+        try:
+            top_ofs = self._tab_ref_size[idx]
+        except:
+            top_ofs = None
+        sub.parse_size(top_ofs, self._TAB_WIDTH)
+        sub.parse()
+    
     def get_ref(self, idx):
         ofs = self.get_entry(idx)
         sub = self.sub(ofs, cls = self._TAB_REF_CLS())
-        sub.parse()
+        self._init_ref(sub, idx)
         return sub
+
+    def _guess_size(self, top_ofs, upd_sz):
+        assert(upd_sz or self.tsize < INF)
+        cur_ent = 0
+        ofs_min = INF
+        ofs_ord = []
+        ofs_sort = set()
+        while cur_ent < self.tsize:
+            if upd_sz and cur_ent * self._TAB_WIDTH >= ofs_min:
+                self.tsize = cur_ent
+                break
+            ofs = self.get_entry(cur_ent)
+            cur_ent += 1
+            if ofs < ofs_min:
+                ofs_min = ofs
+            ofs_ord.append(ofs)
+            ofs_sort.add(ofs)
+        ofs_sort = sorted(ofs_sort)
+        rslt = []
+        for ofs in ofs_ord:
+            i = ofs_sort.index(ofs)
+            try:
+                nxt_ofs = ofs_sort[i+1]
+            except:
+                nxt_ofs = top_ofs
+            try:
+                sz = nxt_ofs - ofs
+            except:
+                sz = None
+            rslt.append(sz)
+        return rslt
+
+    def parse_size(self, top_ofs, align_width):
+        super().parse_size(top_ofs, align_width)
+        self._tab_ref_size = self._guess_size(top_ofs, True)
 
 class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
     _TAB_WIDTH = 4
-    @tabitm()
-    def get_address(self, ofs):
-        return self.U32(ofs)
-    def parse(self, host, tlen):
+    def set_info(self, host, tlen):
         self._tab_ref_host = host
         self.tsize = tlen
     def get_ref(self, idx):
         host = self._tab_ref_host
-        addr = self.get_address(idx)
+        addr = self.get_entry(idx)
         if addr:
             ofs = host.aot(addr, 'ao')
             ref = host.sub(ofs, cls = self._TAB_REF_CLS())
-            ref.parse()
+            self._init_ref(ref, idx)
         else:
             ref = None
         return ref
+    def parse_size(self, top_ofs, align_width):
+        super(c_ffta_sect_tab, self).parse_size(top_ofs, align_width)
+        self._tab_ref_size = self._guess_size(top_ofs, False)
 
 # ===============
 #     scene
@@ -428,6 +482,7 @@ class c_ffta_sect_battle_script_group(c_ffta_sect_tab_ref):
 class c_ffta_sect_script_page(c_ffta_sect):
 
     def parse(self):
+        super().parse()
         self._line_ofs = [0]
 
     def _get_prms(self, cofs, clen):
@@ -580,6 +635,7 @@ class c_ffta_sect_text_line(c_ffta_sect):
         assert(len(dst) == dst_len)
 
     def parse(self):
+        super().parse()
         flags = self.U16(0)
         cmpr = not not (flags & 0x2)
         self.compressed = cmpr
@@ -590,6 +646,7 @@ class c_ffta_sect_text_line(c_ffta_sect):
         else:
             subsect = self.sub(2, cls = c_ffta_sect_text_buf)
         subsect.parse()
+        subsect.parse_size(self._sect_top, min(self._sect_align, 2))
         self.text = subsect
 
 class c_ffta_sect_text_buf(c_ffta_sect):
@@ -606,6 +663,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
     ]
 
     def parse(self):
+        super().parse()
         self._cidx = 0
         self._half = False
         self._directly = 0
@@ -697,7 +755,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
 
 class c_ffta_sect_font(c_ffta_sect_tab):
 
-    def parse(self, info):
+    def set_info(self, info):
         self.char_shape = info['shape']
         self.rvs_byte = info['rvsbyt']
         char_bits = 1
@@ -744,21 +802,32 @@ class c_ffta_sect_rom(c_ffta_sect):
 
     ARG_SELF = c_symb()
 
-    def parse(self, tabs_info):
-        self._add_tabs(tabs_info)
+    def setup(self, tabs_info):
+        self.set_info(tabs_info)
+        self.parse_size(None, 1)
+        self.parse()
         return self
+
+    def set_info(self, tabs_info):
+        self._add_tabs(tabs_info)
 
     def _subsect(self, offs_ptr, c_sect, pargs):
         offs_base = self.rdptr(offs_ptr, 'oao')
         sect = self.sub(offs_base, cls = c_sect)
-        sect.parse(*pargs)
+        if pargs:
+            sect.set_info(*pargs)
+        sect.parse_size(None, 1)
+        sect.parse()
         return sect
 
     def _add_tabs(self, tabs_info):
         tabs = {}
         for tab_name, tab_info in tabs_info.items():
             tab_ptr, tab_cls = tab_info[:2]
-            pargs = (self if a == self.ARG_SELF else a for a in tab_info[2:])
+            if len(tab_info) > 2:
+                pargs = (self if a == self.ARG_SELF else a for a in tab_info[2:])
+            else:
+                pargs = None
             subsect = self._subsect(tab_ptr, tab_cls, pargs)
             tabs[tab_name] = subsect
         self.tabs = tabs
@@ -770,7 +839,7 @@ class c_ffta_sect_rom(c_ffta_sect):
 def main():
     global rom_us, rom_cn, rom_jp
     with open('fftaus.gba', 'rb') as fd:
-        rom_us = c_ffta_sect_rom(fd.read(), 0).parse({
+        rom_us = c_ffta_sect_rom(fd.read(), 0).setup({
             's_fat': (0x009a20, c_ffta_sect_scene_fat),
             's_scrpt': (0x1223c0, c_ffta_sect_scene_script),
             's_cmds': (0x122b10, c_ffta_sect_script_cmds),
@@ -786,7 +855,7 @@ def main():
             ),
         })
     with open('fftacns.gba', 'rb') as fd:
-        rom_cn = c_ffta_sect_rom(fd.read(), 0).parse({
+        rom_cn = c_ffta_sect_rom(fd.read(), 0).setup({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
             's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
             's_cmds': (0x117f10, c_ffta_sect_script_cmds),
@@ -802,7 +871,7 @@ def main():
             ),
         })
     with open('fftajp.gba', 'rb') as fd:
-        rom_jp = c_ffta_sect_rom(fd.read(), 0).parse({
+        rom_jp = c_ffta_sect_rom(fd.read(), 0).setup({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
             's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
             's_cmds': (0x117f10, c_ffta_sect_script_cmds),
