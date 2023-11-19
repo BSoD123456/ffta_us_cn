@@ -395,8 +395,7 @@ class c_ffta_script_log:
         typ = rslt['type']
         if typ == 'text':
             toks = rslt['output']
-            dec = bytes(c for c in self.charset.decode_tokens(toks))
-            rs = dec.decode()
+            rs = ''.join(c for c in self.charset.decode_tokens(toks))
         elif typ == 'error':
             rs = rslt['output']
         else:
@@ -439,8 +438,8 @@ if __name__ == '__main__':
             except:
                 print(hex(i), '--failed--')
                 break
-            dec = bytes(c for c in charset.decode_tokens(toks))
-            print(hex(i), dec.decode())
+            dec = ''.join(c for c in charset.decode_tokens(toks))
+            print(hex(i), dec)
 
     def main(page_idx = 1):
         global spsr_s, spsr_b
