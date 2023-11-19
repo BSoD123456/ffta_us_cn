@@ -617,6 +617,9 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         self._cidx += 1
         return c
 
+    def _bc(self):
+        self._cidx -= 1
+
     def _getc(self):
         c = self._gc()
         if c == 1:
@@ -628,10 +631,10 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             return 'CHR_HALF', c - 1
         elif c == 0x40:
             c = self._gc() - 0x21
-            if 0 <= c < 0x58:
+            if 0 <= c <= 0x58:
                 return 'CTR_FUNC', c
-            else:
-                return 'ERR_CFUNC', c
+            self._bc()
+            return 'ERR_CFUNC', c
         elif c & 0x80:
             c &= 0x7f
             c <<= 8
