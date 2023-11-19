@@ -22,33 +22,6 @@ def clsdec(hndl, *args, **kargs):
 #   ffta spec
 # ===============
 
-def guess_tab_size(sect, ent_width):
-    rdofs = lambda pos: sect.readval(pos, ent_width, False)
-    cur_ent = 0
-    ofs_min = INF
-    ofs_max = 0
-    ofs_ord = []
-    ofs_sort = set()
-    while cur_ent < ofs_min:
-        ofs = rdofs(cur_ent)
-        cur_ent += ent_width
-        if ofs < ofs_min:
-            ofs_min = ofs
-        if ofs > ofs_max:
-            ofs_max = ofs
-        ofs_ord.append(ofs)
-        ofs_sort.add(ofs)
-    ofs_sort = sorted(ofs_sort)
-    rslt = []
-    for ofs in ofs_ord:
-        i = ofs_sort.index(ofs)
-        try:
-            sz = ofs_sort[i+1] - ofs
-        except:
-            sz = None
-        rslt.append((ofs, sz))
-    return rslt, ofs_min, ofs_max
-
 # ===============
 #    scripts
 # ===============
@@ -191,57 +164,38 @@ class c_ffta_script_parser:
 
     def __init__(self, sects):
         self.sects = sects
-        self.page_info = self._guess_size()
         self._progs = {}
 
-    def _guess_size(self):
-        sect = self.sects['script']
-        ew = sect.ENT_WIDTH
-        grps, head_sz, last_grp = guess_tab_size(sect, ew)
-        rslt = []
-        for gidx, (grp_ofs, grp_sz) in enumerate(grps):
-            assert(grp_ofs == sect.tbase_group(gidx))
-            subsect = sect.get_group(gidx)
-            pages, grp_head_sz, last_page = guess_tab_size(subsect, ew)
-            rslt_grp = []
-            for page_ofs, page_sz in pages:
-                if page_sz is None:
-                    if not grp_sz is None:
-                        page_sz = grp_sz - page_ofs
-                rslt_grp.append((grp_ofs + page_ofs, page_sz))
-            rslt.append(rslt_grp)
-        return rslt
-
-    def _new_program(self, pi1, pi2, psz):
+    def _new_program(self, pi1, pi2):
         sects = self.sects
+        try:
+            spage = sects['script'][pi1][pi2]
+        except IndexError:
+            return None
         return c_ffta_script_program({
-            'script': sects['script'][pi1, pi2],
+            'script': spage,
             'cmds': sects['cmds'],
-        }, psz)
+        })
 
     def get_program(self, pi1, pi2, **kargs):
-        try:
-            pofs, psz = self.page_info[pi1][pi2]
-        except:
-            return None
         pi = (pi1, pi2)
         progs = self._progs
         if pi in progs:
             prog = progs[pi]
         else:
-            prog = self._new_program(pi1, pi2, psz, **kargs)
-            assert(self.sects['script'].tbase(pi1, pi2) == pofs)
+            prog = self._new_program(pi1, pi2, **kargs)
+            if prog is None:
+                return None
             progs[pi] = prog
         return prog
 
 class c_ffta_script_program:
 
-    def __init__(self, sects, page_size):
+    def __init__(self, sects):
         self.sects = sects
-        self.page_size = page_size
 
-    def parse(self, cls_cmd, align_width):
-        self._parse_cmds_page(cls_cmd, align_width)
+    def parse(self, cls_cmd):
+        self._parse_cmds_page(cls_cmd)
 
     def reset(self):
         pass
@@ -252,13 +206,12 @@ class c_ffta_script_program:
         except ValueError:
             return None
 
-    def _parse_cmds_page(self, cls_cmd, align_width):
+    def _parse_cmds_page(self, cls_cmd):
         sect_spage = self.sects['script']
         sect_cmds = self.sects['cmds']
-        if self.page_size is None:
-            max_ofs = None
-        else:
-            max_ofs = self.page_size - 1
+        max_ofs = sect_spage._sect_top
+        if not max_ofs is None:
+            max_ofs -= 1
         cmds_tab = {}
         all_size = 0
         for rdy, cofs, cop, cprms_or_cb in sect_spage.iter_lines_to(max_ofs):
@@ -275,9 +228,10 @@ class c_ffta_script_program:
                 cmds_tab[cofs] = cmd
                 all_size = cofs + len(cmd)
         self.cmds = cmds_tab
-        if self.page_size is None:
-            self.page_size = all_size
-        assert(0 <= self.page_size - all_size < align_width)
+        if max_ofs is None:
+            sect_spage._sect_top = all_size
+        assert(0 <= sect_spage._sect_top - all_size < sect_spage._sect_align)
+        self.page_size = all_size
 
     def get_cmd(self, ofs):
         return self.cmds.get(ofs, None)
@@ -362,11 +316,13 @@ class c_ffta_scene_script_parser(c_ffta_script_parser):
         stext = self.sects['text'][t_pi]
         return super().get_program(s_pi1, s_pi2, sect_text = stext, **kargs)
 
-    def _new_program(self, pi1, pi2, psz, *, sect_text):
-        prog = super()._new_program(pi1, pi2, psz)
+    def _new_program(self, pi1, pi2, *, sect_text):
+        prog = super()._new_program(pi1, pi2)
+        if prog is None:
+            return None
         prog.sects['text'] = sect_text
         prog.sects['fx_text'] = self.sects['fx_text']
-        prog.parse(c_ffta_scene_cmd, self.sects['script'].ENT_WIDTH)
+        prog.parse(c_ffta_scene_cmd)
         return prog
 
 # ===============
@@ -375,9 +331,11 @@ class c_ffta_scene_script_parser(c_ffta_script_parser):
 
 class c_ffta_battle_script_parser(c_ffta_script_parser):
 
-    def _new_program(self, pi1, pi2, psz):
-        prog = super()._new_program(pi1, pi2, psz)
-        prog.parse(c_ffta_battle_cmd, self.sects['script'].ENT_WIDTH)
+    def _new_program(self, pi1, pi2):
+        prog = super()._new_program(pi1, pi2)
+        if prog is None:
+            return None
+        prog.parse(c_ffta_battle_cmd)
         return prog
 
 # ===============
