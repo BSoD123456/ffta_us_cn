@@ -257,6 +257,8 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_cn as rom
 
+    dr = c_ffta_font_drawer(rom.tabs['font'])
+
     def get_scene_text_toks(page, line):
         txt = rom.tabs['s_text']
         tl = txt[page][line]
@@ -265,15 +267,14 @@ if __name__ == '__main__':
         tb.parse()
         return tb
 
-    def draw_texts(dr, prng, lrng):
+    def draw_texts(tkey, pidx):
         blks = []
-        for page in range(*prng):
-            for line in range(*lrng):
-                tb = get_scene_text_toks(page, line)
-                blks.append(dr.draw_vert(
-                    dr.draw_comment(f'page 0x{page:x} line 0x{line:x} ofs 0x{tb.real_offset:x}'),
-                    dr.draw_tokens(tb.tokens),
-                ))
+        t_page = rom.tabs[tkey + '_text'][pidx]
+        for i, tl in enumerate(t_page):
+            blks.append(dr.draw_vert(
+                dr.draw_comment(f'page 0x{pidx:x} line 0x{i:x} ofs 0x{tl.text.real_offset:x}'),
+                dr.draw_tokens(tl.text.tokens),
+            ))
         return dr.make_img(dr.draw_vert(*blks))
 
     def draw_fat(dr):
@@ -334,4 +335,4 @@ if __name__ == '__main__':
             if nn:
                 n = nn
     
-    next(main(1)).show()
+    #next(main(1)).show()
