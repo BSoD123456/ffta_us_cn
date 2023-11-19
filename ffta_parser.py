@@ -353,7 +353,7 @@ class c_ffta_script_log:
         typ = rslt['type']
         if typ == 'text':
             toks = rslt['output']
-            rs = ''.join(c for c in self.charset.decode_tokens(toks))
+            rs = self.charset.decode(toks)
         elif typ == 'error':
             rs = rslt['output']
         else:
@@ -396,7 +396,7 @@ if __name__ == '__main__':
             except:
                 print(hex(i), '--failed--')
                 break
-            dec = ''.join(c for c in charset.decode_tokens(toks))
+            dec = charset.decode(toks)
             print(hex(i), dec)
 
     def main(page_idx = 1):

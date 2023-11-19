@@ -22,6 +22,9 @@ class c_ffta_charset:
             if dc:
                 yield dc
 
+    def decode(self, toks):
+        return ''.join(self.decode_tokens(toks))
+
 class c_ffta_charset_us_dummy(c_ffta_charset):
 
     def _decode_unknown(self, typ, code):
