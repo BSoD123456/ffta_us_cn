@@ -606,11 +606,36 @@ class c_ffta_sect_text_line(c_ffta_sect):
 
 class c_ffta_sect_text_buf(c_ffta_sect):
 
+    _CTR_TOKLEN = [
+        # read 2
+        [0x40, 0x41, 0x42, 0x4a, 0x4d, 0x4f, 0x52, 0x54, 0x56, 0x57, 0x58],
+        # read 3
+        [0x00, 0x1b, 0x1d, 0x46, 0x4b, 0x51, 0x53],
+        # read 4
+        [0x45],
+        # read 3 but spec
+        [0x32, 0x04],
+    ]
+
     def parse(self):
         self._cidx = 0
         self._half = False
+        self._directly = 0
+        self._make_ctr_tab()
         self._decode()
         self.raw_len = self._cidx
+
+    def _make_ctr_tab(self):
+        ctr_tab = {}
+        ctr_spec_tab = {}
+        for i, ctis in enumerate(self._CTR_TOKLEN):
+            for cti in ctis:
+                if i == 3:
+                    ctr_spec_tab[cti] = getattr(self, f'_getc_{cti:0>2x}')
+                else:
+                    ctr_tab[cti] = i
+        self._ctr_tab = ctr_tab
+        self._ctr_spec_tab = ctr_spec_tab
 
     def _gc(self):
         c = self.U8(self._cidx)
@@ -620,18 +645,44 @@ class c_ffta_sect_text_buf(c_ffta_sect):
     def _bc(self):
         self._cidx -= 1
 
+    def _directly_mode(self, n):
+        assert(self._directly == 0)
+        self._directly = n
+
+    # replace ctrl, hero's name do nothing, but others fill dest buff
+    # only care src, ignore
+    def _getc_04(self):
+        return self._gc() | 0x400
+
+    # directly copy 2 strings
+    def _getc_32(self):
+        self._directly_mode(2)
+        return self._gc() | 0x3200
+
     def _getc(self):
         c = self._gc()
+        if c == 0:
+            if self._directly > 0:
+                self._directly -= 1
+                return 'CTR_EOS', 0
+            else:
+                return 'EOS', 0
         if c == 1:
             self._half = True
             return self._getc()
-        elif c == 0:
-            return 'EOS', 0
         elif self._half:
             return 'CHR_HALF', c - 1
         elif c == 0x40:
             c = self._gc() - 0x21
-            if 0 <= c <= 0x58:
+            if c in self._ctr_tab:
+                cmlen = self._ctr_tab[c]
+                for _ in range(cmlen):
+                    c <<= 8
+                    c |= self._gc()
+                return 'CTR_FUNC', c
+            elif c in self._ctr_spec_tab:
+                func = self._ctr_spec_tab[c]
+                c = func()
                 return 'CTR_FUNC', c
             self._bc()
             return 'ERR_CFUNC', c
