@@ -814,9 +814,9 @@ class c_ffta_sect_rom(c_ffta_sect):
 
     ARG_SELF = c_symb()
 
-    def setup(self, tabs_info):
+    def setup(self, tabs_info, rom_ed = None):
         self.set_info(tabs_info)
-        self.parse_size(None, 1)
+        self.parse_size(rom_ed, 1)
         self.parse()
         return self
 
@@ -868,7 +868,7 @@ def main():
             'nm_word': (0x016264, c_ffta_sect_words_text,
                 c_ffta_sect_rom.ARG_SELF, 0x6b,
             ),
-        })
+        }, 0xa39920)
     with open('fftacns.gba', 'rb') as fd:
         rom_cn = c_ffta_sect_rom(fd.read(), 0).setup({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
@@ -887,7 +887,7 @@ def main():
             'nm_word': (0x0161a8, c_ffta_sect_words_text,
                 c_ffta_sect_rom.ARG_SELF, 0x68,
             ),
-        })
+        }, 0x9e1aa0)
     with open('fftajp.gba', 'rb') as fd:
         rom_jp = c_ffta_sect_rom(fd.read(), 0).setup({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
@@ -906,7 +906,7 @@ def main():
             'nm_word': (0x0161a8, c_ffta_sect_words_text,
                 c_ffta_sect_rom.ARG_SELF, 0x68,
             ),
-        })
+        }, 0x9bb3d0)
 
 if __name__ == '__main__':
     import pdb
