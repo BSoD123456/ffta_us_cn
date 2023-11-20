@@ -24,7 +24,7 @@ class c_ffta_ref_tab_finder:
             itm_align = ent_width
         self.itm_align = itm_align
         self.ENT_A0 = 0
-        self.ENT_AF = (1 << self.wd) - 1
+        self.ENT_AF = (1 << self.wd * 8) - 1
         self.win = []
         self.win_st = st_ofs
         self.win_ed = st_ofs
@@ -41,7 +41,7 @@ class c_ffta_ref_tab_finder:
         return self.win_st + ent
 
     def _ofs2ent(self, ofs):
-        assert(ofs > self.win_st)
+        assert(ofs >= self.win_st)
         return ofs - self.win_st
 
     def _hndl_a0(self):
@@ -87,8 +87,8 @@ class c_ffta_ref_tab_finder:
         upd_max = (ent == self.win_max)
         if not (upd_min or upd_max):
             return self.ST_CHECK
-        wmin = self.win_min
-        wmax = self.win_max
+        wmin = INF
+        wmax = 0
         for ent in self.win:
             if ent == a0:
                 continue
@@ -98,16 +98,18 @@ class c_ffta_ref_tab_finder:
                 wmin = ent
             if upd_max and ent > wmax:
                 wmax = ent
-        self.win_min = wmin
-        self.win_max = wmax
+        if upd_min:
+            self.win_min = wmin
+        if upd_max:
+            self.win_max = wmax
         return self.ST_CHECK
 
     def _chk_itm_bot(self):
         ed_ent = self._ofs2ent(self.win_ed)
-        min_ofs = self._ent2ofs(self.win_min)
-        if ed_ent == min_ofs:
+        wmin = self.win_min
+        if ed_ent == wmin:
             return self.ST_FOUND
-        elif ed_ent > min_ofs:
+        elif ed_ent > wmin:
             return self.ST_SCAN_O
         return self.ST_SCAN_I
 
@@ -124,18 +126,24 @@ class c_ffta_ref_tab_finder:
             if self.win_ed % 0x10000 == 0:
                 print('scan', hex(self.win_ed))
             if st == self.ST_SCAN_I:
+                #print('in', hex(self.win_ed))
                 st = self._shift_in()
             if st == self.ST_SCAN_O:
+                #print('out', hex(self.win_ed))
                 st = self._shift_out()
             elif st == self.ST_CHECK:
+                #print('chk', hex(self.win_ed))
                 st = self._chk_itm_bot()
             elif st == self.ST_BYPASS:
+                #print('bp', hex(self.win_ed))
                 st = self.ST_SCAN_I
             elif st == self.ST_DROPALL:
+                #print('drp', hex(self.win_ed))
                 st = self._drop_all()
             elif st == self.ST_FOUND:
-                return True, self.win_st, self.win_ed
-        return False, self.win_st, self.win_ed
+                yield self.win_st, self.win_ed, self.win_len, self.win_max
+                st = self._shift_out()
+        #yield False, self.win_st, self.win_ed, self.win_len, self.win_max
 
 if __name__ == '__main__':
     import pdb
@@ -146,4 +154,10 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_us as rom
 
-    fnd2 = c_ffta_ref_tab_finder(rom, 0, rom._sect_top, 2)
+    #fnd2 = c_ffta_ref_tab_finder(rom, 0xa1a908, rom._sect_top, 2, 1)
+    #fnd2 = c_ffta_ref_tab_finder(rom, 0xa1a900, rom._sect_top, 2, 1)
+    def main(bs = 0):
+        global fnd2
+        fnd2 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 2, 1)
+        for st, ed, ln, mx in fnd2.scan():
+            print('found', hex(ln), hex(st), hex(ed), hex(mx))
