@@ -7,6 +7,25 @@ INF = float('inf')
 
 c_symb = object
 
+class c_ffta_ref_addr_finder:
+
+    def __init__(self, sect, st_ofs, top_ofs, itm_align = 1):
+        self.sect = sect
+        self.top_ofs = top_ofs
+        self.itm_align = itm_align
+        self.st_ofs = st_ofs
+
+    def scan(self):
+        cur_ofs = self.st_ofs
+        sect = self.sect
+        while cur_ofs + 4 <= self.top_ofs:
+            adr = sect.U32(cur_ofs)
+            ofs = sect._addr2offs(adr)
+            cur_ofs += 4
+            if 0 <= ofs < self.top_ofs:
+                yield ofs, adr, cur_ofs
+            
+
 class c_ffta_ref_tab_finder:
 
     ST_DROPALL = c_symb()
@@ -16,7 +35,7 @@ class c_ffta_ref_tab_finder:
     ST_SCAN_O = c_symb()
     ST_CHECK = c_symb()
 
-    def __init__(self, sect, st_ofs, top_ofs, ent_width, itm_align = None):
+    def __init__(self, sect, st_ofs, top_ofs, ent_width, itm_align = 1):
         self.sect = sect
         self.top_ofs = top_ofs
         self.wd = ent_width
@@ -25,11 +44,17 @@ class c_ffta_ref_tab_finder:
         self.itm_align = itm_align
         self.ENT_A0 = 0
         self.ENT_AF = (1 << self.wd * 8) - 1
+        st_ofs = (st_ofs // self.wd) * self.wd
         self.win = []
         self.win_st = st_ofs
         self.win_ed = st_ofs
         self.win_min = INF
         self.win_max = 0
+
+    def reset(self, st_ofs):
+        st_ofs = (st_ofs // self.wd) * self.wd
+        self.win_ed = st_ofs
+        self._drop_all()
 
     @property
     def win_len(self):
@@ -120,16 +145,18 @@ class c_ffta_ref_tab_finder:
         self.win_max = 0
         return self.ST_SCAN_I
 
-    def scan(self):
+    def _scan(self, brk_out):
         st = self.ST_SCAN_I
         while self.win_ed + self.wd <= self.top_ofs:
-            if self.win_ed % 0x10000 == 0:
-                print('scan', hex(self.win_ed))
+            #if self.win_ed % 0x10000 == 0:
+            #    print('scan', hex(self.win_ed))
             if st == self.ST_SCAN_I:
                 #print('in', hex(self.win_ed))
                 st = self._shift_in()
             if st == self.ST_SCAN_O:
                 #print('out', hex(self.win_ed))
+                if brk_out:
+                    break
                 st = self._shift_out()
             elif st == self.ST_CHECK:
                 #print('chk', hex(self.win_ed))
@@ -145,6 +172,17 @@ class c_ffta_ref_tab_finder:
                 st = self._shift_out()
         #yield False, self.win_st, self.win_ed, self.win_len, self.win_max
 
+    def scan(self):
+        yield from _scan(False)
+
+    def check(self, ofs):
+        if ofs % self.wd:
+            return False, 0, 0
+        self.reset(ofs)
+        for st, ed, ln, mx in self._scan(True):
+            return True, ln, mx
+        return False, 0, 0
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
@@ -154,10 +192,15 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_us as rom
 
-    #fnd2 = c_ffta_ref_tab_finder(rom, 0xa1a908, rom._sect_top, 2, 1)
-    #fnd2 = c_ffta_ref_tab_finder(rom, 0xa1a900, rom._sect_top, 2, 1)
     def main(bs = 0):
-        global fnd2
-        fnd2 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 2, 1)
-        for st, ed, ln, mx in fnd2.scan():
-            print('found', hex(ln), hex(st), hex(ed), hex(mx))
+        global fa, f2
+        fa = c_ffta_ref_addr_finder(rom, bs, rom._sect_top)
+        f2 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 2)
+        wk = set()
+        for ofs, ptr, ent in fa.scan():
+            if ofs in wk:
+                continue
+            wk.add(ofs)
+            fnd, ln, mx = f2.check(ofs)
+            if fnd:
+                print('found', hex(ln), hex(ptr), hex(ofs), hex(mx))
