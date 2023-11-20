@@ -130,11 +130,12 @@ class c_ffta_ref_tab_finder:
         return self.ST_CHECK
 
     def _chk_itm_bot(self):
-        ed_ent = self._ofs2ent(self.win_ed)
-        wmin = self.win_min
-        if ed_ent == wmin:
+        ed = self.win_ed
+        wmin = self._ent2ofs(self.win_min)
+        wmax = self._ent2ofs(self.win_max)
+        if ed == wmin:
             return self.ST_FOUND
-        elif ed_ent > wmin:
+        elif ed > wmin or wmax >= self.top_ofs:
             return self.ST_SCAN_O
         return self.ST_SCAN_I
 
@@ -193,14 +194,15 @@ if __name__ == '__main__':
     from ffta_sect import rom_us as rom
 
     def main(bs = 0):
-        global fa, f2
+        global fa, f2, f4
         fa = c_ffta_ref_addr_finder(rom, bs, rom._sect_top)
         f2 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 2)
+        f4 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 4)
         wk = set()
         for ofs, ptr, ent in fa.scan():
             if ofs in wk:
                 continue
             wk.add(ofs)
-            fnd, ln, mx = f2.check(ofs)
+            fnd, ln, mx = f4.check(ofs)
             if fnd:
-                print('found', hex(ln), hex(ptr), hex(ofs), hex(mx))
+                print('found', hex(ent), hex(ln), hex(ptr), hex(mx))
