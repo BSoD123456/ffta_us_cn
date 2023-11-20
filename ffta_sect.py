@@ -567,6 +567,11 @@ class c_ffta_sect_fixed_text(c_ffta_sect_tab_ref_addr):
     def _TAB_REF_CLS():
         return c_ffta_sect_text_page
 
+class c_ffta_sect_words_text(c_ffta_sect_tab_ref_addr):
+    @staticmethod
+    def _TAB_REF_CLS():
+        return c_ffta_sect_text_buf
+
 class c_ffta_sect_text_page(c_ffta_sect_tab_ref):
     _TAB_WIDTH = 2
     @staticmethod
@@ -858,7 +863,10 @@ def main():
                 'rvsbyt': False,
             }),
             'fx_text': (0x018050, c_ffta_sect_fixed_text,
-                c_ffta_sect_rom.ARG_SELF, 27
+                c_ffta_sect_rom.ARG_SELF, 27,
+            ),
+            'nm_word': (0x016264, c_ffta_sect_words_text,
+                c_ffta_sect_rom.ARG_SELF, 0x6b,
             ),
         })
     with open('fftacns.gba', 'rb') as fd:
@@ -874,7 +882,7 @@ def main():
                 'rvsbyt': False,
             }),
             'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
-                c_ffta_sect_rom.ARG_SELF, 26
+                c_ffta_sect_rom.ARG_SELF, 26,
             ),
         })
     with open('fftajp.gba', 'rb') as fd:
@@ -890,7 +898,7 @@ def main():
                 'rvsbyt': False,
             }),
             'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
-                c_ffta_sect_rom.ARG_SELF, 26
+                c_ffta_sect_rom.ARG_SELF, 26,
             ),
         })
 
