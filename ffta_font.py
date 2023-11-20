@@ -277,6 +277,16 @@ if __name__ == '__main__':
             ))
         return dr.make_img(dr.draw_vert(*blks))
 
+    def draw_words(wkey):
+        blks = []
+        w_page = rom.tabs[wkey + '_word']
+        for i, tb in enumerate(w_page):
+            blks.append(dr.draw_vert(
+                dr.draw_comment(f'line 0x{i:x} ofs 0x{tb.real_offset:x}'),
+                dr.draw_tokens(tb.tokens),
+            ))
+        return dr.make_img(dr.draw_vert(*blks))
+
     def draw_fat(dr):
         fat = rom.tabs['s_fat']
         blks = []

@@ -884,6 +884,9 @@ def main():
             'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
                 c_ffta_sect_rom.ARG_SELF, 26,
             ),
+            'nm_word': (0x0161a8, c_ffta_sect_words_text,
+                c_ffta_sect_rom.ARG_SELF, 0x68,
+            ),
         })
     with open('fftajp.gba', 'rb') as fd:
         rom_jp = c_ffta_sect_rom(fd.read(), 0).setup({
@@ -899,6 +902,9 @@ def main():
             }),
             'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
                 c_ffta_sect_rom.ARG_SELF, 26,
+            ),
+            'nm_word': (0x0161a8, c_ffta_sect_words_text,
+                c_ffta_sect_rom.ARG_SELF, 0x68,
             ),
         })
 
