@@ -11,6 +11,62 @@ INF = float('inf')
 
 c_symb = object
 
+class c_range_holder:
+
+    def __init__(self):
+        self.rngs = []
+
+    def _find_ridx(self, val):
+        lst_ridx = -1
+        lst_mx = None
+        for i, rng in enumerate(self.rngs):
+            mn, mx = rng
+            if val < mn:
+                return False, lst_ridx, i, lst_mx == val, val == mn - 1
+            elif mn <= val < mx:
+                return True, i, i, True, True
+            else:
+                lst_ridx = i
+                lst_mx = mx
+        return False, lst_ridx, len(self.rngs), lst_mx == val, False
+
+    def hold(self, rng):
+        rngs = self.rngs
+        mn, mx = rng
+        rm_ridx_rng = [None, None]
+        add_rng = [None, None]
+        cv1, prv_ri, nxt_ri, rm_prv, rm_nxt = self._find_ridx(mn)
+        if rm_prv:
+            rm_ridx_rng[0] = prv_ri
+            add_rng[0] = rngs[prv_ri][0]
+        else:
+            rm_ridx_rng[0] = nxt_ri
+            add_rng[0] = mn
+        cv2, prv_ri, nxt_ri, rm_prv, rm_nxt = self._find_ridx(mx-1)
+        if rm_nxt:
+            rm_ridx_rng[1] = nxt_ri
+            add_rng[1] = rngs[nxt_ri][1]
+        else:
+            rm_ridx_rng[1] = prv_ri
+            add_rng[1] = mx
+        rr_cmn, rr_cmx = rm_ridx_rng
+        add_rng = tuple(add_rng)
+        if rr_cmn == rr_cmx and cv1 and cv2:
+            assert(rngs[rr_cmn] == add_rng)
+            return True, True # cover, include
+        elif rr_cmn > rr_cmx:
+            assert(rr_cmn >= 0 and rr_cmn - rr_cmx == 1 and add_rng[0] == mn and add_rng[1] == mx)
+            rngs.insert(rr_cmn, add_rng)
+            return False, False # cover, include
+        else:
+            if rr_cmn < 0:
+                rr_cmn = 0
+            nrngs = rngs[:rr_cmn]
+            nrngs.append(add_rng)
+            nrngs.extend(rngs[rr_cmx+1:])
+            self.rngs = nrngs
+            return True, False # cover, include
+
 class c_ffta_ref_addr_finder:
 
     def __init__(self, sect, st_ofs, top_ofs, itm_align = 1):
@@ -215,7 +271,7 @@ class c_text_checker:
                 if not self._chk_line(tl):
                     err_cnt += 1
         except ValueError as ex:
-            if ex.args[0] == 'decompress error':
+            if ex.args[0].startswith('invalid text line:'):
                 return False
             raise
         return self._chk_thr(err_cnt, dsect.tsize, self._pg_thr)

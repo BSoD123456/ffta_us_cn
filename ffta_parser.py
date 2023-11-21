@@ -228,9 +228,8 @@ class c_ffta_script_program:
                 cmds_tab[cofs] = cmd
                 all_size = cofs + len(cmd)
         self.cmds = cmds_tab
-        if max_ofs is None:
-            sect_spage._sect_top = all_size
-        assert(0 <= sect_spage._sect_top - all_size < sect_spage._sect_align)
+        valid_top = sect_spage.set_real_top(all_size)
+        assert(valid_top)
         self.page_size = all_size
 
     def get_cmd(self, ofs):

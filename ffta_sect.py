@@ -267,7 +267,22 @@ class c_ffta_sect(c_mark):
 
     def parse_size(self, top_ofs, align_width):
         self._sect_top = top_ofs
+        self._sect_real_top = None
         self._sect_align = align_width
+
+    @property
+    def sect_top(self):
+        return self._sect_top
+
+    def set_real_top(self, real_top):
+        if self._sect_top is None:
+            self._sect_top = alignup(real_top, self._sect_align)
+            self._sect_real_top = real_top
+            return True
+        if 0 <= self._sect_top - real_top < self._sect_align:
+            self._sect_real_top = real_top
+            return True
+        return False
 
     def _offs2addr(self, offs):
         return offs + self.real_offset + self.ADDR_BASE
@@ -352,6 +367,20 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             top_ofs = None
         sub.parse_size(top_ofs, self._TAB_WIDTH)
         sub.parse()
+
+    @property
+    def sect_top(self):
+        if not self._sect_top is None:
+            return self._sect_top
+        if not self.tsize:
+            return None
+        lst_sub = self[self.tsize - 1]
+        lst_top = lst_sub.sect_top
+        if lst_top is None:
+            return None
+        real_top = lst_sub.real_offset - self.real_offset + lst_top
+        self.set_real_top(real_top)
+        return self._sect_top
     
     def get_ref(self, idx):
         ofs = self.get_entry(idx)
@@ -642,6 +671,7 @@ class c_ffta_sect_text_line(c_ffta_sect):
             else:
                 pass
         assert(len(dst) == dst_len)
+        return src_idx
 
     def parse(self):
         super().parse()
@@ -652,14 +682,19 @@ class c_ffta_sect_text_line(c_ffta_sect):
             dst_len = rvs_endian(self.U32(2), 4, False)
             subsect = self.sub(2, 0, cls = c_ffta_sect_text_buf)
             try:
-                buf = self._decompress(subsect.mod, 6, dst_len)
+                src_len = self._decompress(subsect.mod, 6, dst_len)
             except:
-                raise ValueError('decompress error')
+                raise ValueError('invalid text line: decompress error')
         else:
             subsect = self.sub(2, cls = c_ffta_sect_text_buf)
         subsect.parse()
         subsect.parse_size(self._sect_top, min(self._sect_align, 2))
         self.text = subsect
+        if not cmpr:
+            src_len = subsect.raw_len + 2
+        if not self.set_real_top(src_len):
+            raise ValueError('invalid text line: length unmatch')
+        self.raw_len = src_len
 
 class c_ffta_sect_text_buf(c_ffta_sect):
 
@@ -764,6 +799,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
                 break
             toks.append((typ, val))
         self.tokens = toks
+        self.raw_len = self._cidx
 
 # ===============
 #      font
