@@ -680,6 +680,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         self._half = False
         self._directly = 0
         self._make_ctr_tab()
+        self.dec_error_cnt = 0
         self._decode()
         self.raw_len = self._cidx
 
@@ -743,6 +744,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
                 c = func()
                 return 'CTR_FUNC', c
             self._bc()
+            self.dec_error_cnt += 1
             return 'ERR_CFUNC', c
         elif c & 0x80:
             c &= 0x7f
@@ -750,6 +752,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             c |= self._gc()
             return 'CHR_FULL', c
         else:
+            self.dec_error_cnt += 1
             return 'ERR_UNKNOWN', c
 
     def _decode(self):
@@ -823,14 +826,20 @@ class c_ffta_sect_rom(c_ffta_sect):
     def set_info(self, tabs_info):
         self._add_tabs(tabs_info)
 
-    def _subsect(self, offs_ptr, c_sect, pargs):
-        offs_base = self.rdptr(offs_ptr, 'oao')
-        sect = self.sub(offs_base, cls = c_sect)
+    def _subsect(self, offs, c_sect, pargs):
+        sect = self.sub(offs, cls = c_sect)
         if pargs:
             sect.set_info(*pargs)
         sect.parse_size(None, 1)
         sect.parse()
         return sect
+
+    def subsect(self, offs, c_sect, *pargs):
+        return self._subsect(offs, c_sect, pargs)
+
+    def _subsect_ptr(self, offs_ptr, c_sect, pargs):
+        offs_base = self.rdptr(offs_ptr, 'oao')
+        return self._subsect(offs_base, c_sect, pargs)
 
     def _add_tabs(self, tabs_info):
         tabs = {}
@@ -840,7 +849,7 @@ class c_ffta_sect_rom(c_ffta_sect):
                 pargs = (self if a == self.ARG_SELF else a for a in tab_info[2:])
             else:
                 pargs = None
-            subsect = self._subsect(tab_ptr, tab_cls, pargs)
+            subsect = self._subsect_ptr(tab_ptr, tab_cls, pargs)
             tabs[tab_name] = subsect
         self.tabs = tabs
 

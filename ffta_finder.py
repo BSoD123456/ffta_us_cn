@@ -1,7 +1,7 @@
 #! python3
 # coding: utf-8
 
-from ffta_sect import c_ffta_sect_tab_ref, c_ffta_sect_tab_ref_addr
+from ffta_sect import c_ffta_sect_tab_ref, c_ffta_sect_tab_ref_addr, c_ffta_sect_text_line, c_ffta_sect_text_buf
 
 INF = float('inf')
 
@@ -60,7 +60,7 @@ class c_ffta_ref_tab_finder:
     def win_len(self):
         l = self.win_ed - self.win_st
         assert(l == len(self.win) * self.wd)
-        return l
+        return l // self.wd
 
     def _ent2ofs(self, ent):
         return self.win_st + ent
@@ -151,6 +151,8 @@ class c_ffta_ref_tab_finder:
         while self.win_ed + self.wd <= self.top_ofs:
             #if self.win_ed % 0x10000 == 0:
             #    print('scan', hex(self.win_ed))
+            if self.win_ed == 0x9c1580:
+                breakpoint()
             if st == self.ST_SCAN_I:
                 #print('in', hex(self.win_ed))
                 st = self._shift_in()
@@ -176,13 +178,44 @@ class c_ffta_ref_tab_finder:
     def scan(self):
         yield from _scan(False)
 
-    def check(self, ofs):
+    def check(self, ofs = None):
+        if ofs is None:
+            ofs = self.win_ed
         if ofs % self.wd:
             return False, 0, 0
         self.reset(ofs)
         for st, ed, ln, mx in self._scan(True):
             return True, ln, mx
         return False, 0, 0
+
+def check_text(rom, ofs):
+    for cls in [c_ffta_sect_text_line, c_ffta_sect_text_buf]:
+        try:
+            sect = rom.subsect(ofs, cls)
+        except:
+            continue
+        try:
+            tb = sect.text
+        except:
+            tb = sect
+        if not tb.dec_error_cnt > 0:
+            return True
+    return False
+
+def check_text_tab(rom, ofs, wd):
+    if check_text(rom, ofs):
+        print('text', hex(ofs))
+        return True
+    print('enter', hex(ofs), wd)
+    sect = rom.sub(ofs, cls = c_ffta_sect_tab_ref)
+    sect._TAB_WIDTH = wd
+    sect.parse_size(None, 1)
+    for sub in sect:
+        if not check_text_tab(rom, sub.real_offset, 2):
+            return False
+        if not check_text_tab(rom, sub.real_offset, 4):
+            return False
+    return True
 
 if __name__ == '__main__':
     import pdb
@@ -193,6 +226,7 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_us as rom
 
+    f4 = c_ffta_ref_tab_finder(rom, 0x9c1484, rom._sect_top, 4)
     def main(bs = 0):
         global fa, f2, f4
         fa = c_ffta_ref_addr_finder(rom, bs, rom._sect_top)
