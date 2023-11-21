@@ -1,7 +1,11 @@
 #! python3
 # coding: utf-8
 
-from ffta_sect import c_ffta_sect_tab_ref, c_ffta_sect_tab_ref_addr, c_ffta_sect_text_line, c_ffta_sect_text_buf
+from ffta_sect import (
+    c_ffta_sect_tab_ref, c_ffta_sect_tab_ref_addr,
+    c_ffta_sect_text_line, c_ffta_sect_text_buf,
+    c_ffta_sect_text, c_ffta_sect_text_page,
+)
 
 INF = float('inf')
 
@@ -21,9 +25,9 @@ class c_ffta_ref_addr_finder:
         while cur_ofs + 4 <= self.top_ofs:
             adr = sect.U32(cur_ofs)
             ofs = sect._addr2offs(adr)
-            cur_ofs += 4
             if 0 <= ofs < self.top_ofs:
                 yield ofs, adr, cur_ofs
+            cur_ofs += 4
             
 
 class c_ffta_ref_tab_finder:
@@ -151,8 +155,6 @@ class c_ffta_ref_tab_finder:
         while self.win_ed + self.wd <= self.top_ofs:
             #if self.win_ed % 0x10000 == 0:
             #    print('scan', hex(self.win_ed))
-            if self.win_ed == 0x9c1580:
-                breakpoint()
             if st == self.ST_SCAN_I:
                 #print('in', hex(self.win_ed))
                 st = self._shift_in()
@@ -188,34 +190,65 @@ class c_ffta_ref_tab_finder:
             return True, ln, mx
         return False, 0, 0
 
-def check_text(rom, ofs):
-    for cls in [c_ffta_sect_text_line, c_ffta_sect_text_buf]:
-        try:
-            sect = rom.subsect(ofs, cls)
-        except:
-            continue
-        try:
-            tb = sect.text
-        except:
-            tb = sect
-        if not tb.dec_error_cnt > 0:
-            return True
-    return False
+class c_text_checker:
 
-def check_text_tab(rom, ofs, wd):
-    if check_text(rom, ofs):
-        print('text', hex(ofs))
-        return True
-    print('enter', hex(ofs), wd)
-    sect = rom.sub(ofs, cls = c_ffta_sect_tab_ref)
-    sect._TAB_WIDTH = wd
-    sect.parse_size(None, 1)
-    for sub in sect:
-        if not check_text_tab(rom, sub.real_offset, 2):
-            return False
-        if not check_text_tab(rom, sub.real_offset, 4):
-            return False
-    return True
+    def __init__(self, sect, tab_thrs = (0.1, 0.2, 0.2)):
+        self.sect = sect
+        self.rtf2 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 2)
+        self.rtf4 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 4)
+        self._bf_thr, self._pg_thr, self._tb_thr = tab_thrs
+
+    def _chk_thr(self, v1, v2, thr):
+        return v2 > 0 and v1 / v2 < thr
+
+    def _chk_line(self, dsect):
+        return self._chk_buf(dsect.text)
+
+    def _chk_buf(self, dsect):
+        return self._chk_thr(
+            dsect.dec_error_cnt, len(dsect.tokens), self._bf_thr)
+
+    def _chk_page(self, dsect):
+        err_cnt = 0
+        try:
+            for tl in dsect:
+                if not self._chk_line(tl):
+                    err_cnt += 1
+        except ValueError as ex:
+            if ex.args[0] == 'decompress error':
+                return False
+            raise
+        return self._chk_thr(err_cnt, dsect.tsize, self._pg_thr)
+
+    def _chk_tab(self, dsect):
+        err_cnt = 0
+        for tp in dsect:
+            if not self._chk_page(tp):
+                err_cnt += 1
+        return self._chk_thr(err_cnt, dsect.tsize, self._tb_thr)
+
+    def check(self, ofs):
+        host = self.sect
+        fnd, ln, mx = self.rtf4.check(ofs)
+        if fnd:
+            dst = host.subsect(ofs, c_ffta_sect_text)
+            if self._chk_tab(dst):
+                return 'tab'
+        fnd, ln, mx = self.rtf2.check(ofs)
+        if fnd:
+            dst = host.subsect(ofs, c_ffta_sect_text_page)
+            if self._chk_page(dst):
+                return 'page'
+        try:
+            dst = host.subsect(ofs, c_ffta_sect_text_line)
+        except:
+            dst = None
+        if dst and self._chk_line(dst):
+            return 'line'
+        dst = host.subsect(ofs, c_ffta_sect_text_buf)
+        if self._chk_buf(dst):
+            return 'buf'
+        return None
 
 if __name__ == '__main__':
     import pdb
@@ -226,17 +259,18 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_us as rom
 
-    f4 = c_ffta_ref_tab_finder(rom, 0x9c1484, rom._sect_top, 4)
     def main(bs = 0):
-        global fa, f2, f4
+        global fa, f2, f4, tc
         fa = c_ffta_ref_addr_finder(rom, bs, rom._sect_top)
         f2 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 2)
         f4 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 4)
+        tc = c_text_checker(rom)
         wk = set()
         for ofs, ptr, ent in fa.scan():
             if ofs in wk:
                 continue
             wk.add(ofs)
-            fnd, ln, mx = f4.check(ofs)
-            if fnd:
-                print('found', hex(ent), hex(ln), hex(ptr), hex(mx))
+            #if ofs == 0x9c1484: breakpoint()
+            r = tc.check(ofs)
+            if r and not r == 'line' and not r == 'buf':
+                print('found', hex(ent), hex(ptr), r)

@@ -705,7 +705,8 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         self._cidx -= 1
 
     def _directly_mode(self, n):
-        assert(self._directly == 0)
+        if self._directly != 0:
+            self.dec_error_cnt += 1
         self._directly = n
 
     # replace ctrl, hero's name do nothing, but others fill dest buff
