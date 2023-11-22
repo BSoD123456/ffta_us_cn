@@ -275,6 +275,10 @@ class c_ffta_sect(c_mark):
     def sect_top(self):
         return self._sect_top
 
+    @property
+    def sect_top_nondeterm(self):
+        return self._sect_top is None or self._sect_top_nondeterm
+
     def set_real_top(self, real_top, align = None):
         if align is None:
             align = self._sect_align
@@ -371,11 +375,13 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
     def _ref_top_nondeterm(self, idx):
         return self._sect_top_nondeterm and idx == self.tsize - 1
 
-    def _init_ref(self, sub, idx):
+    def _init_ref(self, sub, idx, ofs):
         try:
             top_ofs = self._tab_ref_size[idx]
         except:
             top_ofs = None
+        if isinstance(sub, c_ffta_sect_tab_ref_sub):
+            sub.set_sub_offset(ofs)
         sub.parse_size(top_ofs, self._TAB_WIDTH)
         if self._ref_top_nondeterm(idx):
             sub._sect_top_nondeterm = True
@@ -397,8 +403,23 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
     
     def get_ref(self, idx):
         ofs = self.get_entry(idx)
-        sub = self.sub(ofs, cls = self._TAB_REF_CLS())
-        self._init_ref(sub, idx)
+        clss = self._TAB_REF_CLS()
+        if isinstance(clss, list):
+            first_err = None
+            for cls in clss:
+                sub = self.sub(ofs, cls = cls)
+                try:
+                    self._init_ref(sub, idx, ofs)
+                    break
+                except ValueError as ex:
+                    if first_err is None:
+                        first_err = ex
+            else:
+                assert(first_err)
+                raise first_err
+        else:
+            sub = self.sub(ofs, cls = clss)
+            self._init_ref(sub, idx, ofs)
         return sub
 
     def _guess_size(self, top_ofs, upd_sz):
@@ -409,17 +430,21 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         ofs_sort = set()
         while cur_ent < self.tsize:
             ofs = self.get_entry(cur_ent)
+            if ofs < 0:
+                raise ValueError('invalid ref tab: tab entry not in range')
             skip = (ofs == 0)
-            if (cur_ent * self._TAB_WIDTH >= ofs_min or
-                (not top_ofs is None and ofs >= top_ofs) or
+            if (cur_ent * self._TAB_WIDTH == ofs_min or
+                (not top_ofs is None and ofs == top_ofs) or
                 # all F entry is invalid and last
                 (ofs == (1 << self._TAB_WIDTH * 8) - 1)):
                 if upd_sz:
                     self.tsize = cur_ent
                     break
                 else:
-                    breakpoint()
                     skip = True
+            elif (cur_ent * self._TAB_WIDTH > ofs_min or
+                (not top_ofs is None and ofs > top_ofs)):
+                raise ValueError('invalid ref tab: tab entry not in range')
             cur_ent += 1
             if 0 < ofs < ofs_min:
                 ofs_min = ofs
@@ -448,6 +473,25 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         super().parse_size(top_ofs, align_width)
         self._tab_ref_size = self._guess_size(top_ofs, True)
 
+    def _iter_item(self, path):
+        for i, sub in enumerate(self):
+            npath = path + [i]
+            if isinstance(sub, c_ffta_sect_tab_ref):
+                yield from sub._iter_item(npath)
+            else:
+                yield npath, sub
+
+    def iter_item(self):
+        yield from self._iter_item([])
+
+class c_ffta_sect_tab_ref_sub(c_ffta_sect_tab_ref):
+    def set_sub_offset(self, ofs):
+        self._tab_ref_sub_offset = ofs
+    @tabitm()
+    def get_entry(self, ofs):
+        return ( self.readval(ofs, self._TAB_WIDTH, False)
+            - self._tab_ref_sub_offset )
+
 class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
     _TAB_WIDTH = 4
     def set_info(self, host, tlen, hole_idxs = None):
@@ -464,7 +508,7 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         if addr:
             ofs = host.aot(addr, 'ao')
             ref = host.sub(ofs, cls = self._TAB_REF_CLS())
-            self._init_ref(ref, idx)
+            self._init_ref(ref, idx, ofs)
         else:
             ref = None
         return ref
@@ -620,6 +664,12 @@ class c_ffta_sect_text(c_ffta_sect_tab_ref):
     _TAB_WIDTH = 4
     @staticmethod
     def _TAB_REF_CLS():
+        return [c_ffta_sect_text_page, c_ffta_sect_text_sub]
+
+class c_ffta_sect_text_sub(c_ffta_sect_tab_ref_sub):
+    _TAB_WIDTH = 4
+    @staticmethod
+    def _TAB_REF_CLS():
         return c_ffta_sect_text_page
 
 class c_ffta_sect_fixed_text(c_ffta_sect_tab_ref_addr):
@@ -727,7 +777,7 @@ class c_ffta_sect_text_line(c_ffta_sect):
             else:
                 _st = self._sect_top - 2
             subsect.parse_size(_st, min(self._sect_align, 2))
-        subsect.parse(not cmpr and self._sect_top_nondeterm)
+        subsect.parse(not cmpr and self.sect_top_nondeterm)
         self.text = subsect
         if not cmpr and subsect:
             src_len = subsect.raw_len + 2

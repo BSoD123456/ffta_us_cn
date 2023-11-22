@@ -400,13 +400,13 @@ if __name__ == '__main__':
     def enum_all_text(tkey):
         t_sect = spsr_s.sects[tkey]
         charset = c_charset()
-        for pi, t_page in enumerate(t_sect):
-            if not t_page:
+        for path, t_line in t_sect.iter_item():
+            if t_line is None:
                 continue
-            for ti, t_line in enumerate(t_page):
-                toks = t_line.text.tokens
-                dec = charset.decode(toks)
-                print(f'{pi}/{ti}: {dec}')
+            toks = t_line.text.tokens
+            dec = charset.decode(toks)
+            rpath = '/'.join(str(i) for i in path)
+            print(f'{rpath}: {dec}')
 
     def main(page_idx = 1):
         global spsr_s, spsr_b
