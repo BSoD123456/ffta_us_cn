@@ -268,6 +268,7 @@ class c_ffta_sect(c_mark):
     def parse_size(self, top_ofs, align_width):
         self._sect_top = top_ofs
         self._sect_real_top = None
+        self._sect_top_nondeterm = False
         self._sect_align = align_width
 
     @property
@@ -280,11 +281,16 @@ class c_ffta_sect(c_mark):
         if self._sect_top is None:
             self._sect_top = alignup(real_top, align)
             self._sect_real_top = real_top
-            return True
+            return
         if 0 <= self._sect_top - real_top < align:
             self._sect_real_top = real_top
-            return True
-        return False
+            return
+        if self._sect_top_nondeterm:
+            self._sect_top = alignup(real_top, align)
+            self._sect_real_top = real_top
+            return
+        else:
+            raise ValueError('sect error: invalid real top')
 
     def _offs2addr(self, offs):
         return offs + self.real_offset + self.ADDR_BASE
@@ -362,12 +368,17 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
     def get_entry(self, ofs):
         return self.readval(ofs, self._TAB_WIDTH, False)
 
+    def _ref_top_nondeterm(self, idx):
+        return self._sect_top_nondeterm and idx == self.tsize - 1
+
     def _init_ref(self, sub, idx):
         try:
             top_ofs = self._tab_ref_size[idx]
         except:
             top_ofs = None
         sub.parse_size(top_ofs, self._TAB_WIDTH)
+        if self._ref_top_nondeterm(idx):
+            sub._sect_top_nondeterm = True
         sub.parse()
 
     @property
@@ -445,6 +456,8 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         if hole_idxs is None:
             hole_idxs = []
         self._tab_hole_idxs = hole_idxs
+    def _ref_top_nondeterm(self, idx):
+        return True
     def get_ref(self, idx):
         host = self._tab_ref_host
         addr = self.get_entry(idx)
@@ -462,6 +475,7 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
             if i < len(tbsz):
                 tbsz[i] = None
         self._tab_ref_size = tbsz
+        self._sect_top_nondeterm = True
 
 # ===============
 #     scene
@@ -713,12 +727,11 @@ class c_ffta_sect_text_line(c_ffta_sect):
             else:
                 _st = self._sect_top - 2
             subsect.parse_size(_st, min(self._sect_align, 2))
-        subsect.parse()
+        subsect.parse(not cmpr and self._sect_top_nondeterm)
         self.text = subsect
-        if not cmpr:
+        if not cmpr and subsect:
             src_len = subsect.raw_len + 2
-        if not self.set_real_top(src_len, 4):
-            raise ValueError('invalid text line: length unmatch')
+        self.set_real_top(src_len, 4)
         self.raw_len = src_len
         self.warn_cnt = warn_cnt
 
@@ -735,15 +748,14 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         [0x32, 0x04],
     ]
 
-    def parse(self):
+    def parse(self, ignore_dec_err = False):
         super().parse()
         self._cidx = 0
         self._half = False
         self._directly = 0
         self._make_ctr_tab()
         self.dec_error_cnt = 0
-        self._decode()
-        self.raw_len = self._cidx
+        self._decode(ignore_dec_err)
 
     def _make_ctr_tab(self):
         ctr_tab = {}
@@ -820,7 +832,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             self.dec_error_cnt += 1
             return 'ERR_UNKNOWN', c
 
-    def _decode(self):
+    def _decode(self, ignore_dec_err):
         toks = []
         while True:
             typ, val = self._getc()
@@ -829,7 +841,8 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             toks.append((typ, val))
         self.tokens = toks
         self.raw_len = self._cidx
-        assert(self.dec_error_cnt == 0)
+        if self.dec_error_cnt > 0 and not ignore_dec_err:
+            raise ValueError('invalid text buf: decode error')
 
 # ===============
 #      font
