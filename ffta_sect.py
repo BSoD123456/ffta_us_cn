@@ -889,6 +889,12 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             if typ == 'EOS':
                 break
             toks.append((typ, val))
+        if not self.sect_top is None:
+            while self._cidx < self.sect_top:
+                c = self._gc()
+                if c != 0:
+                    self._bc()
+                    break
         self.tokens = toks
         self.raw_len = self._cidx
         if self.dec_error_cnt > 0 and not ignore_dec_err:
