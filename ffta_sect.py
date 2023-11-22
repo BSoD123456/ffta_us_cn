@@ -754,33 +754,25 @@ class c_ffta_sect_text_line(c_ffta_sect):
         assert(len(dst) == dst_len)
         return src_idx
 
-    _PRDC_CTR_TAB = [
-        0x25, 0x67, 0x6c, 0x66,
-        0x66, 0x0,  0x74, 0x72,
-        0x6e, 0x73, 0x63, 0x78,
-        0x75, 0x61, 0x70, 0x62,
-        0x77, 0x6b, 0x0,  0x3c,
-        0x3e, 0x79, 0x21,
-    ]
-
     def parse(self):
         super().parse()
         flags = self.U16(0)
         cmpr = not not (flags & 0x2)
+        cls_buf = (c_ffta_sect_text_buf, c_ffta_sect_text_buf_ya)[flags & 0x1]
         self.compressed = cmpr
         warn_cnt = 0
         if cmpr:
             dst_len = rvs_endian(self.U32(2), 4, False)
             if dst_len == 0:
                 raise ValueError('invalid text line: decompress nothing')
-            subsect = self.sub(2, 0, cls = c_ffta_sect_text_buf)
+            subsect = self.sub(2, 0, cls = cls_buf)
             try:
                 src_len = self._decompress(subsect.mod, 6, dst_len)
             except:
                 raise ValueError('invalid text line: decompress error')
             subsect.parse_size(dst_len, min(self._sect_align, 2))
         else:
-            subsect = self.sub(2, cls = c_ffta_sect_text_buf)
+            subsect = self.sub(2, cls = cls_buf)
             if self.sect_top is None:
                 _st = None
             else:
@@ -801,12 +793,12 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         # read 2
         [0x40, 0x41, 0x42, 0x4a, 0x4d, 0x4f, 0x52, 0x54, 0x56, 0x57, 0x58],
         # read 3
-        [0x00, 0x1b, 0x1d, 0x46, 0x4b, 0x51, 0x53],
+        [0x00, 0x1b, 0x1d, 0x46, 0x4b, 0x51, 0x53, 0x32, 0x04],
         # read 4
         [0x45],
-        # read 3 but spec
-        [0x32, 0x04],
     ]
+    # read 3 but spec
+    _CTR_TOKSPEC = [0x32, 0x04]
 
     def parse(self, ignore_dec_err = False):
         super().parse()
@@ -822,10 +814,9 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         ctr_spec_tab = {}
         for i, ctis in enumerate(self._CTR_TOKLEN):
             for cti in ctis:
-                if i == 3:
-                    ctr_spec_tab[cti] = getattr(self, f'_get_ctr_{cti:0>2x}')
-                else:
-                    ctr_tab[cti] = i
+                ctr_tab[cti] = i
+        for cti in self._CTR_TOKSPEC:
+            ctr_spec_tab[cti] = getattr(self, f'_get_ctr_{cti:0>2x}')
         self._ctr_tab = ctr_tab
         self._ctr_spec_tab = ctr_spec_tab
 
@@ -867,15 +858,15 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             return 'CHR_HALF', c - 1
         elif c == 0x40:
             c = self._gc() - self._CTR_TOKBASE
-            if c in self._ctr_tab:
+            if c in self._ctr_spec_tab:
+                func = self._ctr_spec_tab[c]
+                c = func()
+                return 'CTR_FUNC', c
+            elif c in self._ctr_tab:
                 cmlen = self._ctr_tab[c]
                 for _ in range(cmlen):
                     c <<= 8
                     c |= self._gc()
-                return 'CTR_FUNC', c
-            elif c in self._ctr_spec_tab:
-                func = self._ctr_spec_tab[c]
-                c = func()
                 return 'CTR_FUNC', c
             self._bc()
             self.dec_error_cnt += 1
@@ -920,9 +911,42 @@ class c_ffta_sect_text_buf_ya(c_ffta_sect_text_buf):
         0x56, 0x4a, None, 0x1b,
         0x1d, 0x58, 0x0
     ]
+
+    _CTR_TOKSPEC = [0x3, 0x4]
+
+    def _get_ctr_03(self):
+        return self._gc() | 0x454c00
+
+    def _get_ctr_04(self):
+        return self._gc() | 0x455200
     
     def _get_tok(self):
-        pass
+        c = self._gc()
+        if c == 0xff:
+            return 'EOS', 0
+        if c & 0x80:
+            c -= 0x80
+            if c in self._ctr_spec_tab:
+                func = self._ctr_spec_tab[c]
+                c = func()
+                return 'CTR_FUNC', c
+            try:
+                c = self._CTR_TRANS[c]
+            except:
+                c = None
+            if c is None:
+                self.dec_error_cnt += 1
+                return 'ERR_CFUNC', c
+            if c in self._ctr_tab:
+                cmlen = self._ctr_tab[c]
+                for _ in range(cmlen):
+                    c <<= 8
+                    c |= self._gc()
+                return 'CTR_FUNC', c
+            self.dec_error_cnt += 1
+            return 'ERR_CFUNC', c
+        else:
+            return 'CHR_HALF', self._gc()
 
 # ===============
 #      font
