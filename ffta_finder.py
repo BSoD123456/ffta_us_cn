@@ -283,26 +283,41 @@ class c_text_checker:
                 err_cnt += 1
         return self._chk_thr(err_cnt, dsect.tsize, self._tb_thr)
 
-    def check(self, ofs):
-        host = self.sect
+    def check_tab(self, ofs):
         fnd, ln, mx = self.rtf4.check(ofs)
         if fnd:
-            dst = host.subsect(ofs, c_ffta_sect_text)
-            if self._chk_tab(dst):
-                return 'tab'
+            dst = self.sect.subsect(ofs, c_ffta_sect_text)
+            return self._chk_tab(dst)
+        return False
+
+    def check_page(self, ofs):
         fnd, ln, mx = self.rtf2.check(ofs)
         if fnd:
-            dst = host.subsect(ofs, c_ffta_sect_text_page)
-            if self._chk_page(dst):
-                return 'page'
+            dst = self.sect.subsect(ofs, c_ffta_sect_text_page)
+            return self._chk_page(dst)
+        return False
+
+    def check_line(self, ofs):
         try:
-            dst = host.subsect(ofs, c_ffta_sect_text_line)
-        except:
-            dst = None
-        if dst and self._chk_line(dst):
+            dst = self.sect.subsect(ofs, c_ffta_sect_text_line)
+        except ValueError as ex:
+            if ex.args[0].startswith('invalid text line:'):
+                return False
+            raise
+        return self._chk_line(dst)
+
+    def check_buf(self, ofs):
+        dst = self.sect.subsect(ofs, c_ffta_sect_text_buf)
+        return self._chk_buf(dst)
+
+    def check(self, ofs):
+        if self.check_tab(ofs):
+            return 'tab'
+        elif self.check_page(ofs):
+            return 'page'
+        elif self.check_line(ofs):
             return 'line'
-        dst = host.subsect(ofs, c_ffta_sect_text_buf)
-        if self._chk_buf(dst):
+        elif self.check_buf(ofs):
             return 'buf'
         return None
 

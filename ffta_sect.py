@@ -274,12 +274,14 @@ class c_ffta_sect(c_mark):
     def sect_top(self):
         return self._sect_top
 
-    def set_real_top(self, real_top):
+    def set_real_top(self, real_top, align = None):
+        if align is None:
+            align = self._sect_align
         if self._sect_top is None:
-            self._sect_top = alignup(real_top, self._sect_align)
+            self._sect_top = alignup(real_top, align)
             self._sect_real_top = real_top
             return True
-        if 0 <= self._sect_top - real_top < self._sect_align:
+        if 0 <= self._sect_top - real_top < align:
             self._sect_real_top = real_top
             return True
         return False
@@ -396,21 +398,29 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         ofs_sort = set()
         while cur_ent < self.tsize:
             ofs = self.get_entry(cur_ent)
-            if upd_sz and (
-                cur_ent * self._TAB_WIDTH >= ofs_min or
+            skip = (ofs == 0)
+            if (cur_ent * self._TAB_WIDTH >= ofs_min or
                 (not top_ofs is None and ofs >= top_ofs) or
                 # all F entry is invalid and last
                 (ofs == (1 << self._TAB_WIDTH * 8) - 1)):
-                self.tsize = cur_ent
-                break
+                if upd_sz:
+                    self.tsize = cur_ent
+                    break
+                else:
+                    breakpoint()
+                    skip = True
             cur_ent += 1
-            if ofs < ofs_min:
+            if 0 < ofs < ofs_min:
                 ofs_min = ofs
             ofs_ord.append(ofs)
-            ofs_sort.add(ofs)
+            if not skip:
+                ofs_sort.add(ofs)
         ofs_sort = sorted(ofs_sort)
         rslt = []
         for ofs in ofs_ord:
+            if ofs == 0:
+                rslt.append(0)
+                continue
             i = ofs_sort.index(ofs)
             try:
                 nxt_ofs = ofs_sort[i+1]
@@ -429,9 +439,12 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
 
 class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
     _TAB_WIDTH = 4
-    def set_info(self, host, tlen):
+    def set_info(self, host, tlen, hole_idxs = None):
         self._tab_ref_host = host
         self.tsize = tlen
+        if hole_idxs is None:
+            hole_idxs = []
+        self._tab_hole_idxs = hole_idxs
     def get_ref(self, idx):
         host = self._tab_ref_host
         addr = self.get_entry(idx)
@@ -444,7 +457,11 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         return ref
     def parse_size(self, top_ofs, align_width):
         super(c_ffta_sect_tab, self).parse_size(top_ofs, align_width)
-        self._tab_ref_size = self._guess_size(top_ofs, False)
+        tbsz = self._guess_size(top_ofs, False)
+        for i in self._tab_hole_idxs:
+            if i < len(tbsz):
+                tbsz[i] = None
+        self._tab_ref_size = tbsz
 
 # ===============
 #     scene
@@ -678,23 +695,32 @@ class c_ffta_sect_text_line(c_ffta_sect):
         flags = self.U16(0)
         cmpr = not not (flags & 0x2)
         self.compressed = cmpr
+        warn_cnt = 0
         if cmpr:
             dst_len = rvs_endian(self.U32(2), 4, False)
+            if dst_len == 0:
+                raise ValueError('invalid text line: decompress nothing')
             subsect = self.sub(2, 0, cls = c_ffta_sect_text_buf)
             try:
                 src_len = self._decompress(subsect.mod, 6, dst_len)
             except:
                 raise ValueError('invalid text line: decompress error')
+            subsect.parse_size(dst_len, min(self._sect_align, 2))
         else:
             subsect = self.sub(2, cls = c_ffta_sect_text_buf)
+            if self._sect_top is None:
+                _st = None
+            else:
+                _st = self._sect_top - 2
+            subsect.parse_size(_st, min(self._sect_align, 2))
         subsect.parse()
-        subsect.parse_size(self._sect_top, min(self._sect_align, 2))
         self.text = subsect
         if not cmpr:
             src_len = subsect.raw_len + 2
-        if not self.set_real_top(src_len):
+        if not self.set_real_top(src_len, 4):
             raise ValueError('invalid text line: length unmatch')
         self.raw_len = src_len
+        self.warn_cnt = warn_cnt
 
 class c_ffta_sect_text_buf(c_ffta_sect):
 
@@ -755,6 +781,9 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         return self._gc() | 0x3200
 
     def _getc(self):
+        if not self._sect_top is None and self._cidx >= self._sect_top:
+            self._cidx = self._sect_top
+            return 'EOS', 0
         c = self._gc()
         if c == 0:
             if self._directly > 0:
@@ -800,6 +829,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             toks.append((typ, val))
         self.tokens = toks
         self.raw_len = self._cidx
+        assert(self.dec_error_cnt == 0)
 
 # ===============
 #      font
