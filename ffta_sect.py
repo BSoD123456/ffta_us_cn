@@ -754,6 +754,15 @@ class c_ffta_sect_text_line(c_ffta_sect):
         assert(len(dst) == dst_len)
         return src_idx
 
+    _PRDC_CTR_TAB = [
+        0x25, 0x67, 0x6c, 0x66,
+        0x66, 0x0,  0x74, 0x72,
+        0x6e, 0x73, 0x63, 0x78,
+        0x75, 0x61, 0x70, 0x62,
+        0x77, 0x6b, 0x0,  0x3c,
+        0x3e, 0x79, 0x21,
+    ]
+
     def parse(self):
         super().parse()
         flags = self.U16(0)
@@ -787,6 +796,7 @@ class c_ffta_sect_text_line(c_ffta_sect):
 
 class c_ffta_sect_text_buf(c_ffta_sect):
 
+    _CTR_TOKBASE = 0x21
     _CTR_TOKLEN = [
         # read 2
         [0x40, 0x41, 0x42, 0x4a, 0x4d, 0x4f, 0x52, 0x54, 0x56, 0x57, 0x58],
@@ -813,7 +823,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         for i, ctis in enumerate(self._CTR_TOKLEN):
             for cti in ctis:
                 if i == 3:
-                    ctr_spec_tab[cti] = getattr(self, f'_getc_{cti:0>2x}')
+                    ctr_spec_tab[cti] = getattr(self, f'_get_ctr_{cti:0>2x}')
                 else:
                     ctr_tab[cti] = i
         self._ctr_tab = ctr_tab
@@ -834,18 +844,15 @@ class c_ffta_sect_text_buf(c_ffta_sect):
 
     # replace ctrl, hero's name do nothing, but others fill dest buff
     # only care src, ignore
-    def _getc_04(self):
+    def _get_ctr_04(self):
         return self._gc() | 0x400
 
     # directly copy 2 strings
-    def _getc_32(self):
+    def _get_ctr_32(self):
         self._directly_mode(2)
         return self._gc() | 0x3200
 
-    def _getc(self):
-        if not self.sect_top is None and self._cidx >= self.sect_top:
-            self._cidx = self.sect_top
-            return 'EOS', 0
+    def _get_tok(self):
         c = self._gc()
         if c == 0:
             if self._directly > 0:
@@ -855,11 +862,11 @@ class c_ffta_sect_text_buf(c_ffta_sect):
                 return 'EOS', 0
         if c == 1:
             self._half = True
-            return self._getc()
+            return self._get_tok()
         elif self._half:
             return 'CHR_HALF', c - 1
         elif c == 0x40:
-            c = self._gc() - 0x21
+            c = self._gc() - self._CTR_TOKBASE
             if c in self._ctr_tab:
                 cmlen = self._ctr_tab[c]
                 for _ in range(cmlen):
@@ -884,13 +891,16 @@ class c_ffta_sect_text_buf(c_ffta_sect):
 
     def _decode(self, ignore_dec_err):
         toks = []
-        while True:
-            typ, val = self._getc()
+        top_ofs = self.sect_top
+        while top_ofs is None or self._cidx < top_ofs:
+            typ, val = self._get_tok()
             if typ == 'EOS':
                 break
             toks.append((typ, val))
-        if not self.sect_top is None:
-            while self._cidx < self.sect_top:
+        if not top_ofs is None:
+            if self._cidx > top_ofs:
+                self.cidx = top_ofs
+            while self._cidx < top_ofs:
                 c = self._gc()
                 if c != 0:
                     self._bc()
@@ -899,6 +909,20 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         self.raw_len = self._cidx
         if self.dec_error_cnt > 0 and not ignore_dec_err:
             raise ValueError('invalid text buf: decode error')
+
+class c_ffta_sect_text_buf_ya(c_ffta_sect_text_buf):
+
+    _CTR_TRANS = [
+        0x4,  0x46, 0x4b, 0x45,
+        0x45, None, 0x53, 0x51,
+        0x4d, 0x52, 0x42, 0x57,
+        0x54, 0x40, 0x4f, 0x41,
+        0x56, 0x4a, None, 0x1b,
+        0x1d, 0x58, 0x0
+    ]
+    
+    def _get_tok(self):
+        pass
 
 # ===============
 #      font
