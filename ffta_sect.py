@@ -772,10 +772,10 @@ class c_ffta_sect_text_line(c_ffta_sect):
             subsect.parse_size(dst_len, min(self._sect_align, 2))
         else:
             subsect = self.sub(2, cls = c_ffta_sect_text_buf)
-            if self._sect_top is None:
+            if self.sect_top is None:
                 _st = None
             else:
-                _st = self._sect_top - 2
+                _st = self.sect_top - 2
             subsect.parse_size(_st, min(self._sect_align, 2))
         subsect.parse(not cmpr and self.sect_top_nondeterm)
         self.text = subsect
@@ -843,8 +843,8 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         return self._gc() | 0x3200
 
     def _getc(self):
-        if not self._sect_top is None and self._cidx >= self._sect_top:
-            self._cidx = self._sect_top
+        if not self.sect_top is None and self._cidx >= self.sect_top:
+            self._cidx = self.sect_top
             return 'EOS', 0
         c = self._gc()
         if c == 0:
