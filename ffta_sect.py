@@ -284,17 +284,25 @@ class c_ffta_sect(c_mark):
         return self._sect_top_nondeterm
 
     def set_real_top(self, real_top, align = None):
+        # Something wrong here, but it's not metter now.
+        # Alignment should be different between the last block and others.
+        # The last one should be align with upper table's align.
+        # No, it's work around with use the fixed align 4 to text line.
+        # I'll fix it sometimes, but not today.
         if align is None:
             align = self._sect_align
+        real_offset = self.real_offset
         if self._sect_top is None:
-            self._sect_top = alignup(real_top, align)
+            real_offset_top = alignup(real_offset + real_top, align)
+            self._sect_top = real_offset_top - real_offset
             self._sect_real_top = real_top
             return
         if 0 <= self._sect_top - real_top < align:
             self._sect_real_top = real_top
             return
         if self._sect_top_nondeterm:
-            self._sect_top = alignup(real_top, align)
+            real_offset_top = alignup(real_offset + real_top, align)
+            self._sect_top = real_offset_top - real_offset
             self._sect_real_top = real_top
             return
         else:
