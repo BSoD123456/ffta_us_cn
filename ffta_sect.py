@@ -281,7 +281,7 @@ class c_ffta_sect(c_mark):
 
     @property
     def sect_top_nondeterm(self):
-        return self._sect_top is None or self._sect_top_nondeterm
+        return self._sect_top_nondeterm
 
     def set_real_top(self, real_top, align = None):
         if align is None:
