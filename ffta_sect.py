@@ -104,6 +104,10 @@ class c_mark:
     def real_offset(self):
         return self.buf_real_offset + self.offset
 
+    @property
+    def accessable_top(self):
+        return len(self.raw) - self.offset
+
     def shift(self, offs):
         self._par_offset += offs
 
@@ -422,12 +426,17 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             self._init_ref(sub, idx, ofs)
         return sub
 
+    @property
+    def _tab_acs_top(self):
+        return self.accessable_top
+
     def _guess_size(self, top_ofs, upd_sz):
         assert(upd_sz or self.tsize < INF)
         cur_ent = 0
         ofs_min = INF
         ofs_ord = []
         ofs_sort = set()
+        acs_top = self._tab_acs_top
         while cur_ent < self.tsize:
             ofs = self.get_entry(cur_ent)
             if ofs < 0:
@@ -443,7 +452,8 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
                 else:
                     skip = True
             elif (cur_ent * self._TAB_WIDTH > ofs_min or
-                (not top_ofs is None and ofs > top_ofs)):
+                ofs >= acs_top or
+                (not top_ofs is None and ofs > top_ofs) ):
                 raise ValueError('invalid ref tab: tab entry not in range')
             cur_ent += 1
             if 0 < ofs < ofs_min:
@@ -487,31 +497,44 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
 class c_ffta_sect_tab_ref_sub(c_ffta_sect_tab_ref):
     def set_sub_offset(self, ofs):
         self._tab_ref_sub_offset = ofs
-    @tabitm()
-    def get_entry(self, ofs):
-        return ( self.readval(ofs, self._TAB_WIDTH, False)
-            - self._tab_ref_sub_offset )
+    def get_entry(self, idx):
+        return super().get_entry(idx) - self._tab_ref_sub_offset
 
 class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
+    
     _TAB_WIDTH = 4
+    
     def set_info(self, host, tlen, hole_idxs = None):
         self._tab_ref_host = host
         self.tsize = tlen
         if hole_idxs is None:
             hole_idxs = []
         self._tab_hole_idxs = hole_idxs
+        
     def _ref_top_nondeterm(self, idx):
         return True
-    def get_ref(self, idx):
-        host = self._tab_ref_host
-        addr = self.get_entry(idx)
+
+    @property
+    def _tab_acs_top(self):
+        return self._tab_ref_host.accessable_top
+    
+    def get_entry(self, idx):
+        addr = super().get_entry(idx)
         if addr:
-            ofs = host.aot(addr, 'ao')
-            ref = host.sub(ofs, cls = self._TAB_REF_CLS())
+            ofs = self._tab_ref_host.aot(addr, 'ao')
+        else:
+            ofs = 0
+        return ofs
+    
+    def get_ref(self, idx):
+        ofs = self.get_entry(idx)
+        if ofs:
+            ref = self._tab_ref_host.sub(ofs, cls = self._TAB_REF_CLS())
             self._init_ref(ref, idx, ofs)
         else:
             ref = None
         return ref
+    
     def parse_size(self, top_ofs, align_width):
         super(c_ffta_sect_tab, self).parse_size(top_ofs, align_width)
         tbsz = self._guess_size(top_ofs, False)

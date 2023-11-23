@@ -369,10 +369,17 @@ if __name__ == '__main__':
     def main(bs = 0):
         global fa, tc
         fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
-        tc = c_text_checker(rom)
-        for chkfunc in [tc.check_tab, tc.check_page, tc.check_line, tc.check_buf]:
+        for cls in [
+            c_ffta_sect_text, c_ffta_sect_text_page,
+            c_ffta_sect_text_line, c_ffta_sect_text_buf,]:
             for ofs in fa.scan():
-                sct = chkfunc(ofs)
-                if sct:
+                try:
+                    sct = rom.subsect(ofs, cls)
+                    if isinstance(sct, c_ffta_sect_tab_ref):
+                        for i in sct.iter_item():
+                            pass
+                except:
+                    continue
+                else:
                     fa.hold(ofs, sct.sect_top)
                     print('found', hex(ofs), type(sct).__name__)
