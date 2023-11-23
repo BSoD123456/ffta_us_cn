@@ -126,6 +126,7 @@ class c_ffta_ref_tab_finder:
     ST_SCAN_I = c_symb()
     ST_SCAN_O = c_symb()
     ST_CHECK = c_symb()
+    ST_CHECK_DROP = c_symb()
 
     def __init__(self, sect, st_ofs, top_ofs, ent_width, itm_align = 1):
         self.sect = sect
@@ -180,7 +181,7 @@ class c_ffta_ref_tab_finder:
         if bypass is True:
             return self.ST_BYPASS
         elif bypass is False:
-            return self.ST_DROPALL
+            return self.ST_CHECK_DROP
         else:
             pass
         if self._ent2ofs(ent) % self.itm_align:
@@ -254,11 +255,18 @@ class c_ffta_ref_tab_finder:
             elif st == self.ST_CHECK:
                 #print('chk', hex(self.win_ed))
                 st = self._chk_itm_bot()
+            elif st == self.ST_CHECK_DROP:
+                #print('chkdrp', hex(self.win_ed))
+                st = self._chk_itm_bot()
+                if st != self.ST_FOUND:
+                    st = self.ST_DROPALL
             elif st == self.ST_BYPASS:
                 #print('bp', hex(self.win_ed))
                 st = self.ST_SCAN_I
             elif st == self.ST_DROPALL:
                 #print('drp', hex(self.win_ed))
+                if brk_out:
+                    break
                 st = self._drop_all()
             elif st == self.ST_FOUND:
                 yield self.win_st, self.win_ed, self.win_len, self.win_max
@@ -297,8 +305,6 @@ class c_text_checker:
         if sz is None:
             assert(dst.tsize < 2)
             return False, dst, dst.tsize, None
-        if sz == 0:
-            breakpoint()
         return True, dst, dst.tsize, sz
 
     def _chk_item(self, ofs, cls):
@@ -325,7 +331,7 @@ class c_text_checker:
             else:
                 fnd = True
             if not fnd:
-                continue
+                pass#continue
             if dtyp & 0x3:
                 r = self._chk_tab(ofs, cls[i])
             else:
@@ -343,6 +349,11 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_us as rom
 
+    from ffta_charset import c_ffta_charset_us_dummy as c_charset
+    
+    chs = c_charset()
+    tc = c_text_checker(rom)
+    
     def main(bs = 0):
         global fa, tc
         fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
