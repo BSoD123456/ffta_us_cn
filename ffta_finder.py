@@ -35,10 +35,13 @@ class c_range_holder:
         mn, mx = rng
         rm_ridx_rng = [None, None]
         add_rng = [None, None]
+        adj_cnt = 0
         cv1, prv_ri, nxt_ri, rm_prv, rm_nxt = self._find_ridx(mn)
         if rm_prv:
             rm_ridx_rng[0] = prv_ri
             add_rng[0] = rngs[prv_ri][0]
+            if not cv1:
+                adj_cnt += 1
         else:
             rm_ridx_rng[0] = nxt_ri
             add_rng[0] = mn
@@ -46,6 +49,10 @@ class c_range_holder:
         if rm_nxt:
             rm_ridx_rng[1] = nxt_ri
             add_rng[1] = rngs[nxt_ri][1]
+            if not cv2:
+                # adj ridx can not be the same
+                # so just use 1 counter
+                adj_cnt += 1
         else:
             rm_ridx_rng[1] = prv_ri
             add_rng[1] = mx
@@ -60,14 +67,16 @@ class c_range_holder:
                 rngs.insert(rr_cmn, add_rng)
             return False, False # cover, include
         else:
+            if rr_cmn < 0:
+                rr_cmn = 0
+            inner_cnt = rr_cmx - rr_cmn + 1 - adj_cnt
+            assert(inner_cnt >= 0)
             if upd:
-                if rr_cmn < 0:
-                    rr_cmn = 0
                 nrngs = rngs[:rr_cmn]
                 nrngs.append(add_rng)
                 nrngs.extend(rngs[rr_cmx+1:])
                 self.rngs = nrngs
-            return True, False # cover, include
+            return inner_cnt > 0, False # cover, include
 
     def hold(self, rng):
         return self._hold(rng, True)
