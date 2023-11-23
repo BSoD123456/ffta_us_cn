@@ -331,7 +331,7 @@ class c_text_checker:
             else:
                 fnd = True
             if not fnd:
-                pass#continue
+                continue
             if dtyp & 0x3:
                 r = self._chk_tab(ofs, cls[i])
             else:
