@@ -104,7 +104,7 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
         self._scan_all()
 
     def _scan_all(self):
-        self.ofs_sort = sorted(ofs for ofs, adr, ent in super().scan())
+        self.ofs_sort = sorted(set(ofs for ofs, adr, ent in super().scan()))
         
     def scan(self):
         for ofs in self.ofs_sort:
@@ -280,82 +280,59 @@ class c_ffta_ref_tab_finder:
 
 class c_text_checker:
 
-    def __init__(self, sect, tab_thrs = (0.1, 0.2, 0.2)):
+    def __init__(self, sect, thrs = (2, 3, 5, 5)):
         self.sect = sect
         self.rtf2 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 2)
         self.rtf4 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 4)
-        self._bf_thr, self._pg_thr, self._tb_thr = tab_thrs
+        self._thrs = thrs
 
-    def _chk_thr(self, v1, v2, thr):
-        return v2 > 0 and v1 / v2 < thr
-
-    def _chk_line(self, dsect):
-        return self._chk_buf(dsect.text)
-
-    def _chk_buf(self, dsect):
-        return self._chk_thr(
-            dsect.dec_error_cnt, len(dsect.tokens), self._bf_thr)
-
-    def _chk_page(self, dsect):
-        err_cnt = 0
+    def _chk_tab(self, ofs, cls):
         try:
-            for tl in dsect:
-                if not self._chk_line(tl):
-                    err_cnt += 1
-        except ValueError as ex:
-            if ex.args[0].startswith('invalid text line:'):
-                return False
-            raise
-        return self._chk_thr(err_cnt, dsect.tsize, self._pg_thr)
+            dst = rom.subsect(ofs, cls)
+            for i in dst.iter_item():
+                pass
+        except:
+            return False, None, None, None
+        sz = dst.sect_top
+        if sz is None:
+            assert(dst.tsize < 2)
+            return False, dst, dst.tsize, None
+        if sz == 0:
+            breakpoint()
+        return True, dst, dst.tsize, sz
 
-    def _chk_tab(self, dsect):
-        err_cnt = 0
-        for tp in dsect:
-            if not self._chk_page(tp):
-                err_cnt += 1
-        return self._chk_thr(err_cnt, dsect.tsize, self._tb_thr)
-
-    def check_tab(self, ofs):
-        fnd, ln, mx = self.rtf4.check(ofs)
-        if fnd:
-            dst = self.sect.subsect(ofs, c_ffta_sect_text)
-            if self._chk_tab(dst):
-                return dst
-        return False
-
-    def check_page(self, ofs):
-        fnd, ln, mx = self.rtf2.check(ofs)
-        if fnd:
-            dst = self.sect.subsect(ofs, c_ffta_sect_text_page)
-            if self._chk_page(dst):
-                return dst
-        return False
-
-    def check_line(self, ofs):
+    def _chk_item(self, ofs, cls):
         try:
-            dst = self.sect.subsect(ofs, c_ffta_sect_text_line)
-        except ValueError as ex:
-            if ex.args[0].startswith('invalid text line:'):
-                return False
-            raise
-        if self._chk_line(dst):
-            return dst
+            dst = rom.subsect(ofs, cls)
+        except:
+            return False, None, None, None
+        sz = dst.sect_top
+        if sz is None:
+            return False, dst, None, None
+        return True, dst, sz, sz
 
-    def check_buf(self, ofs):
-        dst = self.sect.subsect(ofs, c_ffta_sect_text_buf)
-        if self._chk_buf(dst):
-            return dst
-
-    def check(self, ofs):
-        if self.check_tab(ofs):
-            return 'tab'
-        elif self.check_page(ofs):
-            return 'page'
-        elif self.check_line(ofs):
-            return 'line'
-        elif self.check_buf(ofs):
-            return 'buf'
-        return None
+    def check(self, ofs, typ):
+        cls = (
+            c_ffta_sect_text, c_ffta_sect_text_page,
+            c_ffta_sect_text_line, c_ffta_sect_text_buf)
+        for i, dtyp in enumerate((1, 2, 4, 8)):
+            if not (typ & dtyp):
+                continue
+            if dtyp & 0x1:
+                fnd, ln, mx = self.rtf4.check(ofs)
+            elif dtyp & 0x2:
+                fnd, ln, mx = self.rtf2.check(ofs)
+            else:
+                fnd = True
+            if not fnd:
+                continue
+            if dtyp & 0x3:
+                r = self._chk_tab(ofs, cls[i])
+            else:
+                r = self._chk_item(ofs, cls[i])
+            if r[0] and r[2] >= self._thrs[i]:
+                return r
+        return False, None, None, None
 
 if __name__ == '__main__':
     import pdb
@@ -369,17 +346,11 @@ if __name__ == '__main__':
     def main(bs = 0):
         global fa, tc
         fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
-        for cls in [
-            c_ffta_sect_text, c_ffta_sect_text_page,
-            c_ffta_sect_text_line, c_ffta_sect_text_buf,]:
+        tc = c_text_checker(rom)
+        for typ in [1, 2, 4, 8]:
+            print(f'scan for {typ}')
             for ofs in fa.scan():
-                try:
-                    sct = rom.subsect(ofs, cls)
-                    if isinstance(sct, c_ffta_sect_tab_ref):
-                        for i in sct.iter_item():
-                            pass
-                except:
-                    continue
-                else:
-                    fa.hold(ofs, sct.sect_top)
-                    print('found', hex(ofs), type(sct).__name__)
+                fnd, sct, ln, sz = tc.check(ofs, typ)
+                if fnd:
+                    fa.hold(ofs, sz)
+                    print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')

@@ -461,6 +461,8 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             ofs_ord.append(ofs)
             if not skip:
                 ofs_sort.add(ofs)
+        if not ofs_sort:
+            raise ValueError('invalid ref tab: empty entries')
         ofs_sort = sorted(ofs_sort)
         rslt = []
         for ofs in ofs_ord:
