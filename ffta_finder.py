@@ -30,7 +30,7 @@ class c_range_holder:
                 lst_mx = mx
         return False, lst_ridx, len(self.rngs), lst_mx == val, False
 
-    def hold(self, rng):
+    def _hold(self, rng, upd):
         rngs = self.rngs
         mn, mx = rng
         rm_ridx_rng = [None, None]
@@ -56,16 +56,27 @@ class c_range_holder:
             return True, True # cover, include
         elif rr_cmn > rr_cmx:
             assert(rr_cmn >= 0 and rr_cmn - rr_cmx == 1 and add_rng[0] == mn and add_rng[1] == mx)
-            rngs.insert(rr_cmn, add_rng)
+            if upd:
+                rngs.insert(rr_cmn, add_rng)
             return False, False # cover, include
         else:
-            if rr_cmn < 0:
-                rr_cmn = 0
-            nrngs = rngs[:rr_cmn]
-            nrngs.append(add_rng)
-            nrngs.extend(rngs[rr_cmx+1:])
-            self.rngs = nrngs
+            if upd:
+                if rr_cmn < 0:
+                    rr_cmn = 0
+                nrngs = rngs[:rr_cmn]
+                nrngs.append(add_rng)
+                nrngs.extend(rngs[rr_cmx+1:])
+                self.rngs = nrngs
             return True, False # cover, include
+
+    def hold(self, rng):
+        return self._hold(rng, True)
+
+    def peek(self, rng):
+        return self._hold(rng, False)
+
+    def peek1(self, ofs):
+        return self.peek((ofs, ofs+1))
 
 class c_ffta_ref_addr_finder:
 
@@ -84,7 +95,28 @@ class c_ffta_ref_addr_finder:
             if 0 <= ofs < self.top_ofs:
                 yield ofs, adr, cur_ofs
             cur_ofs += 4
-            
+
+class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
+
+    def __init__(self, *args, **kargs):
+        super().__init__(*args, **kargs)
+        self.holder = c_range_holder()
+        self._scan_all()
+
+    def _scan_all(self):
+        self.ofs_sort = sorted(ofs for ofs, adr, ent in super().scan())
+        
+    def scan(self):
+        for ofs in self.ofs_sort:
+            cv, incld = self.holder.peek1(ofs)
+            if cv:
+                continue
+            yield ofs
+
+    def hold(self, ofs, top):
+        if top is None:
+            top = 1
+        self.holder.hold((ofs, ofs + top))
 
 class c_ffta_ref_tab_finder:
 
@@ -287,14 +319,16 @@ class c_text_checker:
         fnd, ln, mx = self.rtf4.check(ofs)
         if fnd:
             dst = self.sect.subsect(ofs, c_ffta_sect_text)
-            return self._chk_tab(dst)
+            if self._chk_tab(dst):
+                return dst
         return False
 
     def check_page(self, ofs):
         fnd, ln, mx = self.rtf2.check(ofs)
         if fnd:
             dst = self.sect.subsect(ofs, c_ffta_sect_text_page)
-            return self._chk_page(dst)
+            if self._chk_page(dst):
+                return dst
         return False
 
     def check_line(self, ofs):
@@ -304,11 +338,13 @@ class c_text_checker:
             if ex.args[0].startswith('invalid text line:'):
                 return False
             raise
-        return self._chk_line(dst)
+        if self._chk_line(dst):
+            return dst
 
     def check_buf(self, ofs):
         dst = self.sect.subsect(ofs, c_ffta_sect_text_buf)
-        return self._chk_buf(dst)
+        if self._chk_buf(dst):
+            return dst
 
     def check(self, ofs):
         if self.check_tab(ofs):
@@ -331,17 +367,12 @@ if __name__ == '__main__':
     from ffta_sect import rom_us as rom
 
     def main(bs = 0):
-        global fa, f2, f4, tc
-        fa = c_ffta_ref_addr_finder(rom, bs, rom._sect_top)
-        f2 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 2)
-        f4 = c_ffta_ref_tab_finder(rom, bs, rom._sect_top, 4)
+        global fa, tc
+        fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
         tc = c_text_checker(rom)
-        wk = set()
-        for ofs, ptr, ent in fa.scan():
-            if ofs in wk:
-                continue
-            wk.add(ofs)
-            #if ofs == 0x9c1484: breakpoint()
-            r = tc.check(ofs)
-            if r and not r == 'line' and not r == 'buf':
-                print('found', hex(ent), hex(ptr), r)
+        for chkfunc in [tc.check_tab, tc.check_page, tc.check_line, tc.check_buf]:
+            for ofs in fa.scan():
+                sct = chkfunc(ofs)
+                if sct:
+                    fa.hold(ofs, sct.sect_top)
+                    print('found', hex(ofs), type(sct).__name__)
