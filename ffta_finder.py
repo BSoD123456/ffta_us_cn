@@ -110,13 +110,113 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
     def __init__(self, *args, **kargs):
         super().__init__(*args, **kargs)
         self.holder = c_range_holder()
-        self._scan_all()
+        self._pre_scan()
 
-    def _scan_all(self):
-        self.ofs_sort = sorted(set(ofs for ofs, adr, ent in super().scan()))
+    def _is_ptr(self, ent):
+        adr = self.sect.U32(ent)
+        ofs = self.sect._addr2offs(adr)
+        return 0 <= ofs < self.top_ofs, ofs, adr == 0
+
+    def _pre_scan(self, adrtab_min = 5):
+        cur_ofs = self.st_ofs
+        rvs_tab = {}
+        ptr_tab = {}
+        itm_tab = set()
+        while cur_ofs + 4 <= self.top_ofs:
+            cur_ent = cur_ofs
+            while not (cur_ent in ptr_tab or cur_ent in itm_tab):
+                is_ptr, nxt_ent, is_null = self._is_ptr(cur_ent)
+                if is_ptr:
+                    #self.holder.hold((cur_ent, cur_ent + 4)) # too slow
+                    ptr_tab[cur_ent] = nxt_ent
+                    if not nxt_ent in rvs_tab:
+                        rvs_tab[nxt_ent] = []
+                    rvs_tab[nxt_ent].append(cur_ent)
+                else:
+                    if is_null:
+                        ptr_tab[cur_ent] = None
+                    if cur_ent != cur_ofs:
+                        itm_tab.add(cur_ent)
+                    break
+                cur_ent = nxt_ent
+            cur_ofs += 4
+        adr_tab = []
+        ptr_sort = sorted(k for k in ptr_tab)
+        lst_mn = None
+        lst_ofs = 0
+        # insert another last ptr to handle the real last one
+        _af = (1 << 32) - 1
+        ptr_sort.append(_af)
+        for ofs in ptr_sort:
+            if not ofs < _af:
+                continue
+            ofs_p = ptr_tab[ofs]
+            if not ofs_p is None and not ofs_p in itm_tab:
+                continue
+            is_rng = False
+            if ofs == lst_ofs + 4:
+                if lst_mn is None:
+                    lst_mn = lst_ofs
+            elif not lst_mn is None:
+                mn = lst_mn
+                mx = lst_ofs + 4
+                lst_mn = None
+                is_rng = True
+            lst_ofs = ofs
+            if not is_rng:
+                continue
+            if mx - mn < adrtab_min * 4:
+                continue
+            lst_dofs = None
+            for dofs in range(mn, mx, 4):
+                if not dofs in rvs_tab:
+                    continue
+                if not lst_dofs is None:
+                    adr_tab.append((lst_dofs, dofs))
+                lst_dofs = dofs
+            if not lst_dofs is None:
+                adr_tab.append((lst_dofs, mx))
+        self.ptr_tab = ptr_tab
+        self.rvs_tab = rvs_tab
+        self.itm_tab = itm_tab
+        self.adr_tab = adr_tab
+
+    def scan_adrtab(self, adrtab_min = 5):
+        itm_tab = self.itm_tab
+        self._last_hold = None
+        itm_done = {}
+        for mn, mx in self.adr_tab:
+            not_empty = False
+            for ent in range(mn, mx, 4):
+                ofs = self.ptr_tab[ent]
+                if ofs is None:
+                    continue
+                if ofs in itm_done:
+                    if itm_done[ofs]:
+                        not_empty = True
+                        continue
+                    else:
+                        break
+                cv, incld = self.holder.peek1(ofs)
+                if cv:
+                    break
+                yield False, ofs
+                if ofs == self._last_hold:
+                    not_empty = True
+                    itm_done[ofs] = True
+                else:
+                    itm_done[ofs] = False
+                    break
+            else:
+                ent += 4
+            if not_empty and ent - mn >= adrtab_min * 4:
+                for ofs in range(mn, ent, 4):
+                    if ofs in self.itm_tab:
+                        self.itm_tab.remove(ofs)
+                yield True, (mn, ent)
         
     def scan(self):
-        for ofs in self.ofs_sort:
+        for ofs in sorted(self.itm_tab):
             cv, incld = self.holder.peek1(ofs)
             if cv:
                 continue
@@ -126,6 +226,7 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
         if top is None:
             top = 1
         self.holder.hold((ofs, ofs + top))
+        self._last_hold = ofs
 
 class c_ffta_ref_tab_finder:
 
@@ -367,6 +468,18 @@ if __name__ == '__main__':
         global fa, tc
         fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
         tc = c_text_checker(rom)
+        for typ in [2, 4, 8]:
+            print(f'scan adrtab for {typ}')
+            for is_rng, val in fa.scan_adrtab():
+                if is_rng:
+                    mn, mx = val
+                    print(f'found adrtab 0x{mn:x}-0x{mx:x}(0x{(mx-mn)//4:x}): *{typ}')
+                else:
+                    ofs = val
+                    fnd, sct, ln, sz = tc.check(ofs, typ)
+                    if fnd:
+                        fa.hold(ofs, sz)
+                        print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
         for typ in [1, 2, 4, 8]:
             print(f'scan for {typ}')
             for ofs in fa.scan():
