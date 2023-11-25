@@ -173,49 +173,15 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
             for dofs in range(mn, mx, 4):
                 if not dofs in rvs_tab:
                     continue
-                if not lst_dofs is None and lst_dofs - dofs < adrtab_min_sz:
+                if not lst_dofs is None and dofs - lst_dofs >= adrtab_min_sz:
                     adr_tab.append((lst_dofs, dofs))
                 lst_dofs = dofs
-            if not lst_dofs is None and mx - lst_dofs < adrtab_min_sz:
+            if not lst_dofs is None and mx - lst_dofs >= adrtab_min_sz:
                 adr_tab.append((lst_dofs, mx))
         self.ptr_tab = ptr_tab
         self.rvs_tab = rvs_tab
         self.itm_tab = itm_tab
         self.adr_tab = adr_tab
-
-    def scan_adrtab(self, adrtab_min = 5):
-        itm_tab = self.itm_tab
-        self._last_hold = None
-        itm_done = {}
-        for mn, mx in self.adr_tab:
-            not_empty = False
-            for ent in range(mn, mx, 4):
-                ofs = self.ptr_tab[ent]
-                if ofs is None:
-                    continue
-                if ofs in itm_done:
-                    if itm_done[ofs]:
-                        not_empty = True
-                        continue
-                    else:
-                        break
-                cv, incld = self.holder.peek1(ofs)
-                if cv:
-                    break
-                yield False, ofs
-                if ofs == self._last_hold:
-                    not_empty = True
-                    itm_done[ofs] = True
-                else:
-                    itm_done[ofs] = False
-                    break
-            else:
-                ent += 4
-            if not_empty and ent - mn >= adrtab_min * 4:
-                for ofs in range(mn, ent, 4):
-                    if ofs in self.itm_tab:
-                        self.itm_tab.remove(ofs)
-                yield True, (mn, ent)
 
     def scan_adrtab(self, adrtab_min = 5):
         self._last_hold = None
@@ -483,17 +449,22 @@ if __name__ == '__main__':
         global fa, tc
         fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
         tc = c_text_checker(rom)
-        for cls in [c_ffta_sect_words_text, c_ffta_sect_fixed_text]:
+        for cls in [c_ffta_sect_fixed_text, c_ffta_sect_words_text]:
             print(f'scan adrtab for {cls.__name__}')
             for mn, mx in fa.scan_adrtab():
+                #if mn == 0x36d678:breakpoint()
                 sz = mx - mn
                 ln = sz // 4
                 subrngs = []
                 try:
                     sct = rom.subsect(mn, cls, rom, ln)
                     for sub in sct:
+                        if sub is None:
+                            continue
                         subrngs.append((sub.real_offset, sub.sect_top))
                 except:
+                    continue
+                if len(subrngs) < 3:
                     continue
                 for rng in subrngs:
                     fa.hold(*rng)
@@ -506,7 +477,7 @@ if __name__ == '__main__':
                 if fnd:
                     fa.hold(ofs, sz)
                     print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
-                    #if typ & 0x4:
-                    #    print('txt:', chs.decode(sct.text.tokens))
-                    #elif typ & 0x8:
-                    #    print('txt:', chs.decode(sct.tokens))
+                    if typ & 0x4:
+                        print('txt:', chs.decode(sct.text.tokens))
+                    elif typ & 0x8:
+                        print('txt:', chs.decode(sct.tokens))
