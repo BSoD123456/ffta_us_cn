@@ -467,15 +467,21 @@ if __name__ == '__main__':
                 for rng in subrngs:
                     fa.hold(*rng)
                 fa.hold(mn, sz)
-                print(f'found 0x{mn:x}-0x{mx:x}(0x{ln:x}): {cls.__name__}')
+                rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[mn])
+                print(f'found 0x{mn:x}-0x{mx:x}(0x{ln:x}): {cls.__name__} [{rvs_rpr}]')
         for typ in [1, 2, 8, 4]:
             print(f'scan for {typ}')
             for ofs in fa.scan():
                 fnd, sct, ln, sz = tc.check(ofs, typ)
                 if fnd:
                     fa.hold(ofs, sz)
-                    print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
-                    #if typ & 0x4:
-                    #    print('txt:', chs.decode(sct.text.tokens))
-                    #elif typ & 0x8:
-                    #    print('txt:', chs.decode(sct.tokens))
+                    rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[ofs])
+                    print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ} [{rvs_rpr}]')
+                    if typ & 0x4:
+                        txt = chs.decode(sct.text.tokens)
+                    elif typ & 0x8:
+                        txt = chs.decode(sct.tokens)
+                    else:
+                        continue
+                    if txt and txt.count('.') / len(txt) < 0.3:
+                        print('  txt:', txt)
