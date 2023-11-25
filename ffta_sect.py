@@ -283,6 +283,9 @@ class c_ffta_sect(c_mark):
     def sect_top_nondeterm(self):
         return self._sect_top_nondeterm
 
+    def set_nondeterm(self):
+        self._sect_top_nondeterm = True
+
     def set_real_top(self, real_top, align = None):
         # Something wrong here, but it's not metter now.
         # Alignment should be different between the last block and others.
@@ -396,7 +399,7 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             sub.set_sub_offset(ofs)
         sub.parse_size(top_ofs, self._TAB_WIDTH)
         if self._ref_top_nondeterm(idx):
-            sub._sect_top_nondeterm = True
+            sub.set_nondeterm()
         sub.parse()
 
     @property
@@ -552,7 +555,7 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
             if i < len(tbsz):
                 tbsz[i] = None
         self._tab_ref_size = tbsz
-        self._sect_top_nondeterm = True
+        self.set_nondeterm()
 
 # ===============
 #     scene
@@ -1043,16 +1046,18 @@ class c_ffta_sect_rom(c_ffta_sect):
     def set_info(self, tabs_info):
         self._add_tabs(tabs_info)
 
-    def _subsect(self, offs, c_sect, pargs):
+    def _subsect(self, offs, c_sect, pargs, nondet = False):
         sect = self.sub(offs, cls = c_sect)
         if pargs:
             sect.set_info(*pargs)
+        if nondet:
+            sect.set_nondeterm()
         sect.parse_size(None, 1)
         sect.parse()
         return sect
 
-    def subsect(self, offs, c_sect, *pargs):
-        return self._subsect(offs, c_sect, pargs)
+    def subsect(self, offs, c_sect, *pargs, **kargs):
+        return self._subsect(offs, c_sect, pargs, **kargs)
 
     def _subsect_ptr(self, offs_ptr, c_sect, pargs):
         offs_base = self.rdptr(offs_ptr, 'oao')
