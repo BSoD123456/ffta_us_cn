@@ -299,11 +299,6 @@ class c_ffta_sect(c_mark):
         self._sect_top_nondeterm = True
 
     def set_real_top(self, real_top):
-        # Something wrong here, but it's not metter now.
-        # Alignment should be different between the last block and others.
-        # The last one should be align with upper table's align.
-        # No, it's work around with use the fixed align 4 to text line.
-        # I'll fix it sometimes, but not today.
         align = self._sect_top_align
         real_offset = self.real_offset
         if self._sect_top is None:
@@ -848,7 +843,7 @@ class c_ffta_sect_text_line(c_ffta_sect):
             subsect.parse_size(_st, self.sect_top_align)
             if self.sect_top_nondeterm:
                 subsect.set_nondeterm()
-        subsect.parse(not cmpr and self.sect_top_nondeterm)
+        subsect.parse()
         self.text = subsect
         if not cmpr and subsect:
             src_len = subsect.raw_len + 2
@@ -857,8 +852,6 @@ class c_ffta_sect_text_line(c_ffta_sect):
         self.warn_cnt = warn_cnt
 
 class c_ffta_sect_text_buf(c_ffta_sect):
-
-    _SECT_ALIGN = 2
 
     _CTR_TOKBASE = 0x21
     _CTR_TOKLEN = [
@@ -872,14 +865,14 @@ class c_ffta_sect_text_buf(c_ffta_sect):
     # read 3 but spec
     _CTR_TOKSPEC = [0x32, 0x04]
 
-    def parse(self, ignore_dec_err = False):
+    def parse(self):
         super().parse()
         self._cidx = 0
         self._half = False
         self._directly = 0
         self._make_ctr_tab()
         self.dec_error_cnt = 0
-        self._decode(ignore_dec_err)
+        self._decode()
 
     def _make_ctr_tab(self):
         ctr_tab = {}
@@ -952,7 +945,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             self.dec_error_cnt += 1
             return 'ERR_UNKNOWN', c
 
-    def _decode(self, ignore_dec_err):
+    def _decode(self):
         toks = []
         top_ofs = self.sect_top
         while top_ofs is None or self._cidx < top_ofs:
@@ -970,7 +963,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
                     break
         self.tokens = toks
         self.raw_len = self._cidx
-        if self.dec_error_cnt > 0 and not ignore_dec_err:
+        if self.dec_error_cnt > 0:# and not self.sect_top_nondeterm:
             raise ValueError('invalid text buf: decode error')
         self.set_real_top(self.raw_len)
 
