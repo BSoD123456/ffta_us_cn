@@ -187,7 +187,6 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
         self._last_hold = None
         rmati = []
         for ati, (mn, mx) in enumerate(self.adr_tab):
-            #if mn == 0x565f14: breakpoint()
             yield mn, mx
             if mn == self._last_hold:
                 rmati.append(ati)
@@ -452,7 +451,6 @@ if __name__ == '__main__':
         for cls in [c_ffta_sect_fixed_text, c_ffta_sect_words_text]:
             print(f'scan adrtab for {cls.__name__}')
             for mn, mx in fa.scan_adrtab():
-                #if mn == 0x36d678:breakpoint()
                 sz = mx - mn
                 ln = sz // 4
                 subrngs = []
@@ -477,7 +475,7 @@ if __name__ == '__main__':
                 if fnd:
                     fa.hold(ofs, sz)
                     print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
-                    if typ & 0x4:
-                        print('txt:', chs.decode(sct.text.tokens))
-                    elif typ & 0x8:
-                        print('txt:', chs.decode(sct.tokens))
+                    #if typ & 0x4:
+                    #    print('txt:', chs.decode(sct.text.tokens))
+                    #elif typ & 0x8:
+                    #    print('txt:', chs.decode(sct.tokens))
