@@ -216,11 +216,14 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
                 yield True, (mn, ent)
         
     def scan(self):
+        self._last_hold = None
         for ofs in sorted(self.itm_tab):
             cv, incld = self.holder.peek1(ofs)
             if cv:
                 continue
             yield ofs
+            if ofs == self._last_hold:
+                self.itm_tab.remove(ofs)
 
     def hold(self, ofs, top):
         if top is None:
@@ -398,7 +401,7 @@ class c_ffta_ref_tab_finder:
 
 class c_text_checker:
 
-    def __init__(self, sect, thrs = (2, 3, 5, 5)):
+    def __init__(self, sect, thrs = (2, 3, 9, 7)):
         self.sect = sect
         self.rtf2 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 2)
         self.rtf4 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 4)
@@ -462,7 +465,6 @@ if __name__ == '__main__':
     from ffta_charset import c_ffta_charset_us_dummy as c_charset
     
     chs = c_charset()
-    tc = c_text_checker(rom)
     
     def main(bs = 0):
         global fa, tc
@@ -474,12 +476,14 @@ if __name__ == '__main__':
                 if is_rng:
                     mn, mx = val
                     print(f'found adrtab 0x{mn:x}-0x{mx:x}(0x{(mx-mn)//4:x}): *{typ}')
+                    #for i in range(mn, mx, 4):
+                    #    print(f'    0x{rom.U32(i):x}')
                 else:
                     ofs = val
                     fnd, sct, ln, sz = tc.check(ofs, typ)
                     if fnd:
                         fa.hold(ofs, sz)
-                        print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
+                        #print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
         for typ in [1, 2, 4, 8]:
             print(f'scan for {typ}')
             for ofs in fa.scan():
@@ -487,3 +491,7 @@ if __name__ == '__main__':
                 if fnd:
                     fa.hold(ofs, sz)
                     print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
+                    if typ & 0x4:
+                        print('txt:', chs.decode(sct.text.tokens))
+                    elif typ & 0x8:
+                        print('txt:', chs.decode(sct.tokens))
