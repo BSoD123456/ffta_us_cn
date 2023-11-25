@@ -5,6 +5,7 @@ from ffta_sect import (
     c_ffta_sect_tab_ref, c_ffta_sect_tab_ref_addr,
     c_ffta_sect_text_line, c_ffta_sect_text_buf,
     c_ffta_sect_text, c_ffta_sect_text_page,
+    c_ffta_sect_fixed_text, c_ffta_sect_words_text,
 )
 
 INF = float('inf')
@@ -118,6 +119,7 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
         return 0 <= ofs < self.top_ofs, ofs, adr == 0
 
     def _pre_scan(self, adrtab_min = 5):
+        adrtab_min_sz = adrtab_min * 4
         cur_ofs = self.st_ofs
         rvs_tab = {}
         ptr_tab = {}
@@ -165,16 +167,16 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
             lst_ofs = ofs
             if not is_rng:
                 continue
-            if mx - mn < adrtab_min * 4:
+            if mx - mn < adrtab_min_sz:
                 continue
             lst_dofs = None
             for dofs in range(mn, mx, 4):
                 if not dofs in rvs_tab:
                     continue
-                if not lst_dofs is None:
+                if not lst_dofs is None and lst_dofs - dofs < adrtab_min_sz:
                     adr_tab.append((lst_dofs, dofs))
                 lst_dofs = dofs
-            if not lst_dofs is None:
+            if not lst_dofs is None and mx - lst_dofs < adrtab_min_sz:
                 adr_tab.append((lst_dofs, mx))
         self.ptr_tab = ptr_tab
         self.rvs_tab = rvs_tab
@@ -214,6 +216,17 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
                     if ofs in self.itm_tab:
                         self.itm_tab.remove(ofs)
                 yield True, (mn, ent)
+
+    def scan_adrtab(self, adrtab_min = 5):
+        self._last_hold = None
+        rmati = []
+        for ati, (mn, mx) in enumerate(self.adr_tab):
+            #if mn == 0x565f14: breakpoint()
+            yield mn, mx
+            if mn == self._last_hold:
+                rmati.append(ati)
+        for ati in reversed(rmati):
+            self.adr_tab.pop(ati)
         
     def scan(self):
         self._last_hold = None
@@ -470,28 +483,30 @@ if __name__ == '__main__':
         global fa, tc
         fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
         tc = c_text_checker(rom)
-        for typ in [2, 4, 8]:
-            print(f'scan adrtab for {typ}')
-            for is_rng, val in fa.scan_adrtab():
-                if is_rng:
-                    mn, mx = val
-                    print(f'found adrtab 0x{mn:x}-0x{mx:x}(0x{(mx-mn)//4:x}): *{typ}')
-                    #for i in range(mn, mx, 4):
-                    #    print(f'    0x{rom.U32(i):x}')
-                else:
-                    ofs = val
-                    fnd, sct, ln, sz = tc.check(ofs, typ)
-                    if fnd:
-                        fa.hold(ofs, sz)
-                        #print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
-        for typ in [1, 2, 4, 8]:
+        for cls in [c_ffta_sect_words_text, c_ffta_sect_fixed_text]:
+            print(f'scan adrtab for {cls.__name__}')
+            for mn, mx in fa.scan_adrtab():
+                sz = mx - mn
+                ln = sz // 4
+                subrngs = []
+                try:
+                    sct = rom.subsect(mn, cls, rom, ln)
+                    for sub in sct:
+                        subrngs.append((sub.real_offset, sub.sect_top))
+                except:
+                    continue
+                for rng in subrngs:
+                    fa.hold(*rng)
+                fa.hold(mn, sz)
+                print(f'found 0x{mn:x}-0x{mx:x}(0x{ln:x}): {cls.__name__}')
+        for typ in [1, 2, 8, 4]:
             print(f'scan for {typ}')
             for ofs in fa.scan():
                 fnd, sct, ln, sz = tc.check(ofs, typ)
                 if fnd:
                     fa.hold(ofs, sz)
                     print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ}')
-                    if typ & 0x4:
-                        print('txt:', chs.decode(sct.text.tokens))
-                    elif typ & 0x8:
-                        print('txt:', chs.decode(sct.tokens))
+                    #if typ & 0x4:
+                    #    print('txt:', chs.decode(sct.text.tokens))
+                    #elif typ & 0x8:
+                    #    print('txt:', chs.decode(sct.tokens))
