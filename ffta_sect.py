@@ -266,14 +266,26 @@ class c_ffta_sect(c_mark):
 
     ADDR_BASE = 0x8000000
 
+    _SECT_ALIGN = 1
+    _SECT_TOP_ALIGN = 1
+
     def parse(self):
         pass
 
-    def parse_size(self, top_ofs, align_width):
+    def parse_size(self, top_ofs, top_align_width):
+        assert(self.real_offset % self.sect_align == 0)
         self._sect_top = top_ofs
         self._sect_real_top = None
         self._sect_top_nondeterm = False
-        self._sect_align = align_width
+        self._sect_top_align = top_align_width
+
+    @property
+    def sect_align(self):
+        return self._SECT_ALIGN
+
+    @property
+    def sect_top_align(self):
+        return max(self._sect_top_align, self._SECT_TOP_ALIGN)
 
     @property
     def sect_top(self):
@@ -286,14 +298,13 @@ class c_ffta_sect(c_mark):
     def set_nondeterm(self):
         self._sect_top_nondeterm = True
 
-    def set_real_top(self, real_top, align = None):
+    def set_real_top(self, real_top):
         # Something wrong here, but it's not metter now.
         # Alignment should be different between the last block and others.
         # The last one should be align with upper table's align.
         # No, it's work around with use the fixed align 4 to text line.
         # I'll fix it sometimes, but not today.
-        if align is None:
-            align = self._sect_align
+        align = self._sect_top_align
         real_offset = self.real_offset
         if self._sect_top is None:
             real_offset_top = alignup(real_offset + real_top, align)
@@ -337,9 +348,20 @@ class c_ffta_sect(c_mark):
 # ===============
 
 class c_ffta_sect_tab(c_ffta_sect):
-    _TAB_WIDTH = 0
-    def parse_size(self, top_ofs, align_width):
-        super().parse_size(top_ofs, align_width)
+    _TAB_WIDTH = 1
+    _TAB_ALIGN = INF
+    @property
+    def sect_align(self):
+        wd = self._TAB_WIDTH
+        if wd % 4 == 0:
+            a = 4
+        elif wd % 2 == 0:
+            a = 2
+        else:
+            a = 1
+        return max(self._SECT_ALIGN, a)
+    def parse_size(self, top_ofs, top_align_width):
+        super().parse_size(top_ofs, top_align_width)
         if top_ofs is None:
             self.tsize = INF
         else:
@@ -387,8 +409,11 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
     def get_entry(self, ofs):
         return self.readval(ofs, self._TAB_WIDTH, False)
 
+    def _is_last(self, idx):
+        return idx == idx == self.tsize - 1
+
     def _ref_top_nondeterm(self, idx):
-        return self._sect_top_nondeterm and idx == self.tsize - 1
+        return self._sect_top_nondeterm and self._is_last(idx)
 
     def _init_ref(self, sub, idx, ofs):
         try:
@@ -397,7 +422,11 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             top_ofs = None
         if isinstance(sub, c_ffta_sect_tab_ref_sub):
             sub.set_sub_offset(ofs)
-        sub.parse_size(top_ofs, self._TAB_WIDTH)
+        if self._is_last(idx):
+            top_align = self.sect_top_align
+        else:
+            top_align = sub.sect_align
+        sub.parse_size(top_ofs, top_align)
         if self._ref_top_nondeterm(idx):
             sub.set_nondeterm()
         sub.parse()
@@ -492,8 +521,8 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             rslt.append(sz)
         return rslt
 
-    def parse_size(self, top_ofs, align_width):
-        super().parse_size(top_ofs, align_width)
+    def parse_size(self, top_ofs, top_align_width):
+        super().parse_size(top_ofs, top_align_width)
         self._tab_ref_size = self._guess_size(top_ofs, True)
 
     def _iter_item(self, path):
@@ -548,8 +577,8 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
             ref = None
         return ref
     
-    def parse_size(self, top_ofs, align_width):
-        super(c_ffta_sect_tab, self).parse_size(top_ofs, align_width)
+    def parse_size(self, top_ofs, top_align_width):
+        super(c_ffta_sect_tab, self).parse_size(top_ofs, top_align_width)
         tbsz = self._guess_size(top_ofs, False)
         for i in self._tab_hole_idxs:
             if i < len(tbsz):
@@ -720,11 +749,14 @@ class c_ffta_sect_words_text(c_ffta_sect_tab_ref_addr):
 
 class c_ffta_sect_text_page(c_ffta_sect_tab_ref):
     _TAB_WIDTH = 2
+    _SECT_TOP_ALIGN = 4
     @staticmethod
     def _TAB_REF_CLS():
         return c_ffta_sect_text_line
 
 class c_ffta_sect_text_line(c_ffta_sect):
+    
+    _SECT_ALIGN = 2
     
     def _gc(self, si):
         c = self.U8(si)
@@ -806,25 +838,27 @@ class c_ffta_sect_text_line(c_ffta_sect):
                 src_len = self._decompress(subsect.mod, 6, dst_len)
             except:
                 raise ValueError('invalid text line: decompress error')
-            subsect.parse_size(dst_len, min(self._sect_align, 2))
+            subsect.parse_size(dst_len, self.sect_top_align)
         else:
             subsect = self.sub(2, cls = cls_buf)
             if self.sect_top is None:
                 _st = None
             else:
                 _st = self.sect_top - 2
-            subsect.parse_size(_st, min(self._sect_align, 2))
+            subsect.parse_size(_st, self.sect_top_align)
             if self.sect_top_nondeterm:
                 subsect.set_nondeterm()
         subsect.parse(not cmpr and self.sect_top_nondeterm)
         self.text = subsect
         if not cmpr and subsect:
             src_len = subsect.raw_len + 2
-        self.set_real_top(src_len, 4)
+        self.set_real_top(src_len)
         self.raw_len = src_len
         self.warn_cnt = warn_cnt
 
 class c_ffta_sect_text_buf(c_ffta_sect):
+
+    _SECT_ALIGN = 2
 
     _CTR_TOKBASE = 0x21
     _CTR_TOKLEN = [
@@ -938,7 +972,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         self.raw_len = self._cidx
         if self.dec_error_cnt > 0 and not ignore_dec_err:
             raise ValueError('invalid text buf: decode error')
-        self.set_real_top(self.raw_len, 4)
+        self.set_real_top(self.raw_len)
 
 class c_ffta_sect_text_buf_ya(c_ffta_sect_text_buf):
 
