@@ -814,6 +814,8 @@ class c_ffta_sect_text_line(c_ffta_sect):
             else:
                 _st = self.sect_top - 2
             subsect.parse_size(_st, min(self._sect_align, 2))
+            if self.sect_top_nondeterm:
+                subsect.set_nondeterm()
         subsect.parse(not cmpr and self.sect_top_nondeterm)
         self.text = subsect
         if not cmpr and subsect:
@@ -936,6 +938,7 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         self.raw_len = self._cidx
         if self.dec_error_cnt > 0 and not ignore_dec_err:
             raise ValueError('invalid text buf: decode error')
+        self.set_real_top(self.raw_len, 4)
 
 class c_ffta_sect_text_buf_ya(c_ffta_sect_text_buf):
 
@@ -1050,9 +1053,9 @@ class c_ffta_sect_rom(c_ffta_sect):
         sect = self.sub(offs, cls = c_sect)
         if pargs:
             sect.set_info(*pargs)
+        sect.parse_size(None, 1)
         if nondet:
             sect.set_nondeterm()
-        sect.parse_size(None, 1)
         sect.parse()
         return sect
 
