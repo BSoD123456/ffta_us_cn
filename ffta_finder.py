@@ -531,7 +531,8 @@ if __name__ == '__main__':
                         print('  txt:', txt)
         return fa
 
-    def check_diff(ah, rom, rom_d):
+    def check_diff(fa, rom, rom_d):
+        ah = fa.holder
         rtab = [[], [], []]
         for rng, is_txt in ah.iter_rngs((0, rom.sect_top)):
             is_diff = False
@@ -561,7 +562,8 @@ if __name__ == '__main__':
             print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
         print('text and diff:')
         for rng in rtab[2]:
-            print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
+            rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[rng[0]])
+            print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x} / {rvs_rpr}')
 
     def main():
         global ah
@@ -573,4 +575,4 @@ if __name__ == '__main__':
         tab = rom_jp.tabs['font']
         ah.hold((tab.real_offset, tab.real_offset + 0xc66 * tab._TAB_WIDTH))
         fa = find_txt(rom_jp, 0, ah = ah)
-        check_diff(ah, rom_jp, rom_cn)
+        check_diff(fa, rom_jp, rom_cn)
