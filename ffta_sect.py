@@ -404,8 +404,24 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
     def get_entry(self, ofs):
         return self.readval(ofs, self._TAB_WIDTH, False)
 
+    @property
+    def last_idx(self):
+        try:
+            return self._last_idx
+        except:
+            pass
+        _last_idx = 0
+        _last_ofs = 0
+        for i in range(self.tsize):
+            sofs = self.get_entry(i)
+            if sofs >= _last_ofs:
+                _last_ofs = sofs
+                _last_idx = i
+        self._last_idx = _last_idx
+        return _last_idx
+
     def _is_last(self, idx):
-        return idx == idx == self.tsize - 1
+        return idx == self.last_idx
 
     def _ref_top_nondeterm(self, idx):
         return self._sect_top_nondeterm and self._is_last(idx)
@@ -432,7 +448,7 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             return self._sect_top
         if not self.tsize:
             return None
-        lst_sub = self[self.tsize - 1]
+        lst_sub = self[self.last_idx]
         lst_top = lst_sub.sect_top
         if lst_top is None:
             return None
@@ -635,7 +651,7 @@ class c_ffta_sect_battle_script(c_ffta_sect_tab_ref):
     _TAB_WIDTH = 2
     @staticmethod
     def _TAB_REF_CLS():
-        return c_ffta_sect_scene_script_group
+        return c_ffta_sect_battle_script_group
 
 class c_ffta_sect_battle_script_group(c_ffta_sect_tab_ref):
     _TAB_WIDTH = 2
