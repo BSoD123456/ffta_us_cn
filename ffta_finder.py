@@ -88,6 +88,31 @@ class c_range_holder:
     def peek1(self, ofs):
         return self.peek((ofs, ofs+1))
 
+    def iter_rngs(self, arng = None):
+        if not arng:
+            arng = (0, None)
+        st, ed = arng
+        def chk_in_arng(mn, mx):
+            if (ed and mn >= ed) or mx <= st:
+                return None
+            rmn, rmx = max(st, mn), min(ed, mx) if ed else mx
+            if rmn >= rmx:
+                return None
+            return rmn, rmx
+        lst_mx = 0
+        for mn, mx in self.rngs:
+            drng = chk_in_arng(lst_mx, mn)
+            lst_mx = mx
+            if drng:
+                yield drng, False
+            drng = chk_in_arng(mn, mx)
+            if drng:
+                yield drng, True
+        if ed and ed > lst_mx:
+            drng = chk_in_arng(lst_mx, ed)
+            if drng:
+                yield drng, False
+
 class c_ffta_ref_addr_finder:
 
     def __init__(self, sect, st_ofs, top_ofs, itm_align = 1):
@@ -387,7 +412,7 @@ class c_text_checker:
 
     def _chk_tab(self, ofs, cls):
         try:
-            dst = rom.subsect(ofs, cls)
+            dst = self.sect.subsect(ofs, cls)
             for i in dst.iter_item():
                 pass
         except:
@@ -400,7 +425,7 @@ class c_text_checker:
 
     def _chk_item(self, ofs, cls):
         try:
-            dst = rom.subsect(ofs, cls)
+            dst = self.sect.subsect(ofs, cls)
         except:
             return False, None, None, None
         sz = dst.sect_top
@@ -436,7 +461,7 @@ class c_text_checker:
         ln = sz // 4
         subrngs = []
         try:
-            sct = rom.subsect(mn, cls, rom, ln)
+            sct = self.sect.subsect(mn, cls, self.sect, ln)
             for sub in sct:
                 if sub is None:
                     continue
@@ -463,13 +488,13 @@ if __name__ == '__main__':
 
     from ffta_sect import main as sect_main
     sect_main()
-    from ffta_sect import rom_us as rom
+    from ffta_sect import rom_cn, rom_jp, rom_us
 
     from ffta_charset import c_ffta_charset_us_dummy as c_charset
     
     chs = c_charset()
     
-    def main(bs = 0):
+    def find_txt(rom, bs = 0):
         global fa, tc
         fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
         tc = c_text_checker(rom)
@@ -500,3 +525,29 @@ if __name__ == '__main__':
                         continue
                     if txt and txt.count('.') / len(txt) < 0.3:
                         print('  txt:', txt)
+        return fa.holder
+
+    def check_diff(ah, rom, rom_d):
+        rtab = [[], []]
+        for rng, is_txt in ah.iter_rngs():
+            is_diff = False
+            for i in range(*rng):
+                if rom.U8(i) != rom_d.U8(i):
+                    is_diff = True
+                    break
+            if is_txt != is_diff:
+                if is_txt:
+                    rtab[1].append(rng)
+                else:
+                    rtab[0].append(rng)
+        print('diff but not text:')
+        for rng in rtab[0]:    
+            print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
+        print('text but not diff:')
+        for rng in rtab[1]:    
+            print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
+
+    def main():
+        global ah
+        ah = find_txt(rom_jp, 0)
+        check_diff(ah, rom_jp, rom_cn)
