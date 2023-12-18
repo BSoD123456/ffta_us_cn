@@ -133,9 +133,10 @@ class c_ffta_ref_addr_finder:
 
 class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
 
-    def __init__(self, *args, **kargs):
+    def __init__(self, *args, ignore_item = False, **kargs):
         super().__init__(*args, **kargs)
         self.holder = c_range_holder()
+        self.ignore_item = ignore_item
         self._pre_scan()
 
     def _is_ptr(self, ent):
@@ -178,7 +179,7 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
             if not ofs < _af:
                 continue
             ofs_p = ptr_tab[ofs]
-            if not ofs_p is None and not ofs_p in itm_tab:
+            if not ofs_p is None and not ofs_p in itm_tab and not self.ignore_item:
                 continue
             is_rng = False
             if ofs == lst_ofs + 4:
@@ -496,7 +497,7 @@ if __name__ == '__main__':
     
     def find_txt(rom, bs = 0):
         global fa, tc
-        fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
+        fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top, ignore_item = True)
         tc = c_text_checker(rom)
         for typ in [1, 2]:
             print(f'scan adrtab for atb{typ}')
