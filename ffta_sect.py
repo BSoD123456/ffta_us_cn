@@ -292,6 +292,14 @@ class c_ffta_sect(c_mark):
         return self._sect_top
 
     @property
+    def sect_top_least(self):
+        sect_top = self.sect_top
+        if sect_top is None:
+            return self.real_offset
+        else:
+            return sect_top
+
+    @property
     def sect_top_nondeterm(self):
         return self._sect_top_nondeterm
 
@@ -455,6 +463,16 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         real_top = lst_sub.real_offset - self.real_offset + lst_top
         self.set_real_top(real_top)
         return self._sect_top
+
+    @property
+    def sect_top_least(self):
+        sect_top = self.sect_top
+        if not sect_top is None:
+            return sect_top
+        if not self.tsize:
+            return None
+        lst_sub = self[self.last_idx]
+        return lst_sub.sect_top_least
     
     def get_ref(self, idx):
         ofs = self.get_entry(idx)
