@@ -146,7 +146,7 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
         ofs = self.sect._addr2offs(adr)
         return 0 <= ofs < self.top_ofs, ofs, adr == 0
 
-    def _pre_scan(self, adrtab_min = 5):
+    def _pre_scan(self, adrtab_min = 5-1):
         adrtab_min_sz = adrtab_min * 4
         cur_ofs = self.st_ofs
         rvs_tab = {}
@@ -407,7 +407,7 @@ class c_ffta_ref_tab_finder:
 
 class c_text_checker:
 
-    def __init__(self, sect, thrs = (2, 3, 9, 7, 3, 3)):
+    def __init__(self, sect, thrs = (2, 3, 9-3, 7-3, 3, 3)):
         self.sect = sect
         self.rtf2 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 2)
         self.rtf4 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 4)
@@ -529,7 +529,7 @@ if __name__ == '__main__':
                         continue
                     if txt and txt.count('.') / len(txt) < 0.3:
                         print('  txt:', txt)
-        return fa.holder
+        return fa
 
     def check_diff(ah, rom, rom_d):
         rtab = [[], []]
@@ -567,5 +567,5 @@ if __name__ == '__main__':
         ah.hold((tab.real_offset, tab.real_offset + tab.sect_top_least))
         tab = rom_jp.tabs['font']
         ah.hold((tab.real_offset, tab.real_offset + 0xc66 * tab._TAB_WIDTH))
-        find_txt(rom_jp, 0, ah = ah)
+        fa = find_txt(rom_jp, 0, ah = ah)
         check_diff(ah, rom_jp, rom_cn)
