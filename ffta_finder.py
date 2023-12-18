@@ -532,7 +532,7 @@ if __name__ == '__main__':
         return fa
 
     def check_diff(ah, rom, rom_d):
-        rtab = [[], []]
+        rtab = [[], [], []]
         for rng, is_txt in ah.iter_rngs((0, rom.sect_top)):
             is_diff = False
             for i in range(*rng):
@@ -544,6 +544,8 @@ if __name__ == '__main__':
                     rtab[1].append(rng)
                 else:
                     rtab[0].append(rng)
+            elif is_txt and is_diff:
+                rtab[2].append(rng)
         print('diff but not text:')
         for rng in rtab[0]:
             print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
@@ -556,6 +558,9 @@ if __name__ == '__main__':
             print(f'    real: 0x{srmn:0>7x}-0x{srmx:0>7x}: 0x{srmx - srmn:x}')
         print('text but not diff:')
         for rng in rtab[1]:
+            print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
+        print('text and diff:')
+        for rng in rtab[2]:
             print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
 
     def main():
