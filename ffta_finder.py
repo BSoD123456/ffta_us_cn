@@ -533,7 +533,7 @@ if __name__ == '__main__':
 
     def check_diff(ah, rom, rom_d):
         rtab = [[], []]
-        for rng, is_txt in ah.iter_rngs():
+        for rng, is_txt in ah.iter_rngs((0, rom.sect_top)):
             is_diff = False
             for i in range(*rng):
                 if rom.U8(i) != rom_d.U8(i):
@@ -545,14 +545,27 @@ if __name__ == '__main__':
                 else:
                     rtab[0].append(rng)
         print('diff but not text:')
-        for rng in rtab[0]:    
+        for rng in rtab[0]:
             print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
+            sah = c_range_holder()
+            for i in range(*rng):
+                if rom.U8(i) != rom_d.U8(i):
+                    sah.hold((i, i+1))
+            srmn = sah.rngs[0][0]
+            srmx = sah.rngs[-1][1]
+            print(f'    real: 0x{srmn:0>7x}-0x{srmx:0>7x}: 0x{srmx - srmn:x}')
         print('text but not diff:')
-        for rng in rtab[1]:    
+        for rng in rtab[1]:
             print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
 
     def main():
         global ah
         ah = c_range_holder()
+        tab = rom_jp.tabs['s_scrpt']
+        ah.hold((tab.real_offset, tab.real_offset + tab.sect_top_least))
+        tab = rom_jp.tabs['b_scrpt']
+        ah.hold((tab.real_offset, tab.real_offset + tab.sect_top_least))
+        tab = rom_jp.tabs['font']
+        ah.hold((tab.real_offset, tab.real_offset + 0xc66 * tab._TAB_WIDTH))
         find_txt(rom_jp, 0, ah = ah)
         check_diff(ah, rom_jp, rom_cn)

@@ -295,7 +295,7 @@ class c_ffta_sect(c_mark):
     def sect_top_least(self):
         sect_top = self.sect_top
         if sect_top is None:
-            return self.real_offset
+            return 0
         else:
             return sect_top
 
@@ -472,7 +472,7 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         if not self.tsize:
             return None
         lst_sub = self[self.last_idx]
-        return lst_sub.sect_top_least
+        return lst_sub.real_offset - self.real_offset + lst_sub.sect_top_least
     
     def get_ref(self, idx):
         ofs = self.get_entry(idx)
