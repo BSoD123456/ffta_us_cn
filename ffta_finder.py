@@ -379,7 +379,7 @@ class c_ffta_ref_tab_finder:
 
 class c_text_checker:
 
-    def __init__(self, sect, thrs = (2, 3, 9, 7)):
+    def __init__(self, sect, thrs = (2, 3, 9, 7, 3, 3)):
         self.sect = sect
         self.rtf2 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 2)
         self.rtf4 = c_ffta_ref_tab_finder(sect, 0, sect._sect_top, 4)
@@ -431,6 +431,31 @@ class c_text_checker:
                 return r
         return False, None, None, None
 
+    def _chk_atab(self, mn, mx, cls):
+        sz = mx - mn
+        ln = sz // 4
+        subrngs = []
+        try:
+            sct = rom.subsect(mn, cls, rom, ln)
+            for sub in sct:
+                if sub is None:
+                    continue
+                subrngs.append((sub.real_offset, sub.sect_top))
+        except:
+            return False, None, None, None
+        return True, subrngs, ln, sz
+
+    def check_atab(self, mn, mx, typ):
+        cls = (
+            c_ffta_sect_fixed_text, c_ffta_sect_words_text)
+        for i, dtyp in enumerate((1, 2)):
+            if not (typ & dtyp):
+                continue
+            r = self._chk_atab(mn, mx, cls[i])
+            if r[0] and len(r[1]) >= self._thrs[i+4]:
+                return r
+        return False, None, None, None
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
@@ -448,27 +473,17 @@ if __name__ == '__main__':
         global fa, tc
         fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top)
         tc = c_text_checker(rom)
-        for cls in [c_ffta_sect_fixed_text, c_ffta_sect_words_text]:
-            print(f'scan adrtab for {cls.__name__}')
+        for typ in [1, 2]:
+            print(f'scan adrtab for atb{typ}')
             for mn, mx in fa.scan_adrtab():
-                sz = mx - mn
-                ln = sz // 4
-                subrngs = []
-                try:
-                    sct = rom.subsect(mn, cls, rom, ln)
-                    for sub in sct:
-                        if sub is None:
-                            continue
-                        subrngs.append((sub.real_offset, sub.sect_top))
-                except:
-                    continue
-                if len(subrngs) < 3:
+                fnd, subrngs, ln, sz = tc.check_atab(mn, mx, typ)
+                if not fnd:
                     continue
                 for rng in subrngs:
                     fa.hold(*rng)
                 fa.hold(mn, sz)
                 rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[mn])
-                print(f'found 0x{mn:x}-0x{mx:x}(0x{ln:x}): {cls.__name__} [{rvs_rpr}]')
+                print(f'found 0x{mn:x}-0x{mx:x}(0x{ln:x}): atb{typ} [{rvs_rpr}]')
         for typ in [1, 2, 8, 4]:
             print(f'scan for {typ}')
             for ofs in fa.scan():
