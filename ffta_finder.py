@@ -484,6 +484,84 @@ class c_text_checker:
                 return r
         return False, None, None, None
 
+def find_txt(rom, bs = 0, ah = None):
+    global fa, tc
+    fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top,
+         addr_holder = ah, ignore_item = True)
+    tc = c_text_checker(rom)
+    yield 0, 0, fa, tc
+    for typ in [1, 2]:
+        print(f'scan adrtab for atb{typ}')
+        for mn, mx in fa.scan_adrtab():
+            fnd, subrngs, ln, sz = tc.check_atab(mn, mx, typ)
+            if not fnd:
+                continue
+            yield typ * 16, len(subrngs), mn, sz
+            for rng in subrngs:
+                yield typ * 16, None, *rng
+                fa.hold(*rng)
+            fa.hold(mn, sz)
+            rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[mn])
+            print(f'found 0x{mn:x}-0x{mx:x}(0x{ln:x}): atb{typ} [{rvs_rpr}]')
+    for typ in [1, 2, 8, 4]:
+        print(f'scan for {typ}')
+        for ofs in fa.scan():
+            fnd, sct, ln, sz = tc.check(ofs, typ)
+            if fnd:
+                yield typ, ln, ofs, sz
+                fa.hold(ofs, sz)
+                rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[ofs])
+                print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ} [{rvs_rpr}]')
+                if typ & 0x4:
+                    txt = chs.decode(sct.text.tokens)
+                elif typ & 0x8:
+                    txt = chs.decode(sct.tokens)
+                else:
+                    continue
+                if txt and txt.count('.') / len(txt) < 0.3:
+                    print('  txt:', txt)
+
+def chk_diff(rom, rom_d, ofs, sz):
+    for i in range(ofs, ofs+sz):
+        if rom.U8(i) != rom_d.U8(i):
+            return True
+    return False
+
+def check_diffs(fa, rom, rom_d):
+    ah = fa.holder
+    rtab = [[], [], []]
+    for rng, is_txt in ah.iter_rngs((0, rom.sect_top)):
+        is_diff = False
+        for i in range(*rng):
+            if rom.U8(i) != rom_d.U8(i):
+                is_diff = True
+                break
+        if is_txt != is_diff:
+            if is_txt:
+                rtab[1].append(rng)
+            else:
+                rtab[0].append(rng)
+        elif is_txt and is_diff:
+            rtab[2].append(rng)
+    print('diff but not text:')
+    for rng in rtab[0]:
+        print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
+        sah = c_range_holder()
+        for i in range(*rng):
+            if rom.U8(i) != rom_d.U8(i):
+                sah.hold((i, i+1))
+        srmn = sah.rngs[0][0]
+        srmx = sah.rngs[-1][1]
+        print(f'    real: 0x{srmn:0>7x}-0x{srmx:0>7x}: 0x{srmx - srmn:x}')
+    print('text but not diff:')
+    for rng in rtab[1]:
+        print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
+    print('text and diff:')
+    for rng in rtab[2]:
+        rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[rng[0]])
+        print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x} / {rvs_rpr}')
+
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
@@ -497,82 +575,44 @@ if __name__ == '__main__':
     
     chs = c_charset()
     
-    def find_txt(rom, bs = 0, ah = None):
-        global fa, tc
-        fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top,
-             addr_holder = ah, ignore_item = True)
-        tc = c_text_checker(rom)
-        for typ in [1, 2]:
-            print(f'scan adrtab for atb{typ}')
-            for mn, mx in fa.scan_adrtab():
-                fnd, subrngs, ln, sz = tc.check_atab(mn, mx, typ)
-                if not fnd:
-                    continue
-                for rng in subrngs:
-                    fa.hold(*rng)
-                fa.hold(mn, sz)
-                rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[mn])
-                print(f'found 0x{mn:x}-0x{mx:x}(0x{ln:x}): atb{typ} [{rvs_rpr}]')
-        for typ in [1, 2, 8, 4]:
-            print(f'scan for {typ}')
-            for ofs in fa.scan():
-                fnd, sct, ln, sz = tc.check(ofs, typ)
-                if fnd:
-                    fa.hold(ofs, sz)
-                    rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[ofs])
-                    print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ} [{rvs_rpr}]')
-                    if typ & 0x4:
-                        txt = chs.decode(sct.text.tokens)
-                    elif typ & 0x8:
-                        txt = chs.decode(sct.tokens)
-                    else:
-                        continue
-                    if txt and txt.count('.') / len(txt) < 0.3:
-                        print('  txt:', txt)
-        return fa
-
-    def check_diff(fa, rom, rom_d):
-        ah = fa.holder
-        rtab = [[], [], []]
-        for rng, is_txt in ah.iter_rngs((0, rom.sect_top)):
-            is_diff = False
-            for i in range(*rng):
-                if rom.U8(i) != rom_d.U8(i):
-                    is_diff = True
-                    break
-            if is_txt != is_diff:
-                if is_txt:
-                    rtab[1].append(rng)
-                else:
-                    rtab[0].append(rng)
-            elif is_txt and is_diff:
-                rtab[2].append(rng)
-        print('diff but not text:')
-        for rng in rtab[0]:
-            print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
-            sah = c_range_holder()
-            for i in range(*rng):
-                if rom.U8(i) != rom_d.U8(i):
-                    sah.hold((i, i+1))
-            srmn = sah.rngs[0][0]
-            srmx = sah.rngs[-1][1]
-            print(f'    real: 0x{srmn:0>7x}-0x{srmx:0>7x}: 0x{srmx - srmn:x}')
-        print('text but not diff:')
-        for rng in rtab[1]:
-            print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x}')
-        print('text and diff:')
-        for rng in rtab[2]:
-            rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[rng[0]])
-            print(f'0x{rng[0]:0>7x}-0x{rng[1]:0>7x}: 0x{rng[1] - rng[0]:x} / {rvs_rpr}')
-
-    def main():
+    def main(rom = rom_jp, rom_d = rom_cn):
         global ah
         ah = c_range_holder()
-        tab = rom_jp.tabs['s_scrpt']
+        tab = rom.tabs['s_scrpt']
         ah.hold((tab.real_offset, tab.real_offset + tab.sect_top_least))
-        tab = rom_jp.tabs['b_scrpt']
+        tab = rom.tabs['b_scrpt']
         ah.hold((tab.real_offset, tab.real_offset + tab.sect_top_least))
-        tab = rom_jp.tabs['font']
+        tab = rom.tabs['font']
         ah.hold((tab.real_offset, tab.real_offset + 0xc66 * tab._TAB_WIDTH))
-        fa = find_txt(rom_jp, 0, ah = ah)
-        check_diff(fa, rom_jp, rom_cn)
+        rs = []
+        lst_ent = None
+        for typ, sublen, ofs, sz in find_txt(rom, 0, ah = ah):
+            if typ == 0:
+                fa = ofs
+                tc = sz
+                continue
+            if not sublen is None:
+                lst_ent = (typ, ofs, sz, sublen, [])
+            if not chk_diff(rom, rom_d, ofs, sz):
+                continue
+            if lst_ent:
+                rs.append(lst_ent)
+                lst_ent = None
+            if sublen is None:
+                assert(typ == rs[-1][0])
+                rs[-1][-1].append((ofs, sz))
+        print('diff texts:')
+        for typ, ofs, sz, ln, subs in rs:
+            rvs_vals = [hex(i) for i in fa.rvs_tab[ofs]]
+            if len(rvs_vals) > 3:
+                rvs_vals = rvs_vals[:2] + [f'...{len(rvs_vals)}']
+            rvs_rpr = ', '.join(rvs_vals)
+            if typ > 8:
+                print(f'typ{typ} 0x{ofs:0>7x}-0x{ofs+sz:0>7x}: 0x{sz:x} [0x{len(subs):x}/0x{ln:x}] <= {rvs_rpr}')
+            else:
+                assert(len(subs) == 0)
+                print(f'typ{typ} 0x{ofs:0>7x}-0x{ofs+sz:0>7x}: 0x{sz:x} [0x{ln:x}] <= {rvs_rpr}')
+            #for ofs, sz in subs:
+            #    print(f'    0x{ofs:0>7x}-0x{ofs+sz:0>7x}: 0x{sz:x}')
+        #check_diffs(fa, rom, rom_d)
+        return rs
