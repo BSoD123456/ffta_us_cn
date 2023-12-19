@@ -598,6 +598,14 @@ if __name__ == '__main__':
                 continue
             if not sct:
                 continue
+            if typ == 0x20:
+                _invalid = False
+                for x in sct:
+                    if x and not x.tokens:
+                        _invalid = True
+                        break
+                if _invalid:
+                    continue
             if not typ in tabs:
                 tabs[typ] = []
             tabs[typ].append(sct)
