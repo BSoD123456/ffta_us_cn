@@ -594,6 +594,8 @@ if __name__ == '__main__':
                 fa = ofs
                 tc = sz
                 continue
+            if not rom_d:
+                continue
             if not sublen is None:
                 lst_ent = (typ, ofs, sz, sublen, [])
             if not chk_diff(rom, rom_d, ofs, sz):
@@ -604,6 +606,8 @@ if __name__ == '__main__':
             if sublen is None:
                 assert(typ == rs[-1][0])
                 rs[-1][-1].append((ofs, sz))
+        if not rom_d:
+            return
         print('diff texts:')
         for typ, ofs, sz, ln, subs in rs:
             rvs_vals = [hex(i) for i in fa.rvs_tab[ofs]]
