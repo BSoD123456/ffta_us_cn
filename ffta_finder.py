@@ -473,8 +473,8 @@ class c_text_checker:
                     continue
                 subrngs.append((sub.real_offset, sub.sect_top))
         except:
-            return False, None, None, None
-        return True, subrngs, ln, sz
+            return False, None, None, None, None
+        return True, subrngs, sct, ln, sz
 
     def check_atab(self, mn, mx, typ):
         cls = (
@@ -485,33 +485,37 @@ class c_text_checker:
             r = self._chk_atab(mn, mx, cls[i])
             if r[0] and len(r[1]) >= self._thrs[i+4]:
                 return r
-        return False, None, None, None
+        return False, None, None, None, None
 
-def find_txt(rom, bs = 0, ah = None):
+def find_txt(rom, bs = 0, ah = None, dtyp = 0xff):
     global fa, tc
     fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top,
          addr_holder = ah, ignore_item = True, merge_cn = True)
     tc = c_text_checker(rom)
-    yield 0, 0, fa, tc
+    yield 0, 0, fa, tc, None
     for typ in [1, 2]:
+        if not (dtyp & (typ * 16)):
+            continue
         print(f'scan adrtab for atb{typ}')
         for mn, mx in fa.scan_adrtab():
-            fnd, subrngs, ln, sz = tc.check_atab(mn, mx, typ)
+            fnd, subrngs, sct, ln, sz = tc.check_atab(mn, mx, typ)
             if not fnd:
                 continue
-            yield typ * 16, len(subrngs), mn, sz
+            yield typ * 16, len(subrngs), mn, sz, sct
             for rng in subrngs:
-                yield typ * 16, None, *rng
+                yield typ * 16, None, *rng, None
                 fa.hold(*rng)
             fa.hold(mn, sz)
             rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[mn])
             print(f'found 0x{mn:x}-0x{mx:x}(0x{ln:x}): atb{typ} [{rvs_rpr}]')
     for typ in [1, 2, 8, 4]:
+        if not (dtyp & typ):
+            continue
         print(f'scan for {typ}')
         for ofs in fa.scan():
             fnd, sct, ln, sz = tc.check(ofs, typ)
             if fnd:
-                yield typ, ln, ofs, sz
+                yield typ, ln, ofs, sz, sct
                 fa.hold(ofs, sz)
                 rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[ofs])
                 print(f'found 0x{ofs:x}-0x{ofs+sz:x}(0x{ln:x}): {typ} [{rvs_rpr}]')
@@ -577,6 +581,38 @@ if __name__ == '__main__':
     from ffta_charset import c_ffta_charset_us_dummy as c_charset
     
     chs = c_charset()
+
+    def sct_tabs(rom):
+        ah = c_range_holder()
+        tab = rom.tabs['s_scrpt']
+        ah.hold((tab.real_offset, tab.real_offset + tab.sect_top_least))
+        tab = rom.tabs['b_scrpt']
+        ah.hold((tab.real_offset, tab.real_offset + tab.sect_top_least))
+        tab = rom.tabs['font']
+        ah.hold((tab.real_offset, tab.real_offset + 0xc66 * tab._TAB_WIDTH))
+        tabs = {}
+        for typ, sublen, ofs, sz, sct in find_txt(rom, 0, ah = ah, dtyp = 0x33):
+            if typ == 0:
+                fa = ofs
+                tc = sz
+                continue
+            if not sct:
+                continue
+            if not typ in tabs:
+                tabs[typ] = []
+            tabs[typ].append(sct)
+        return tabs
+
+    def show_tabs(tabs, typ):
+        for ti, t in enumerate(tabs[typ]):
+            print(f'tab {ti}: 0x{t.real_offset:x}(0x{t.tsize:x}))')
+            for xi, x in enumerate(t):
+                if not x:
+                    continue
+                if typ & 0x20:
+                    print(f'{ti}/{xi} {chs.decode(x.tokens)}')
+                else:
+                    raise NotImplementedError
     
     def main(rom = rom_jp, rom_d = rom_cn):
         global ah
@@ -590,7 +626,7 @@ if __name__ == '__main__':
         rs = []
         nrs = []
         lst_ent = None
-        for typ, sublen, ofs, sz in find_txt(rom, 0, ah = ah):
+        for typ, sublen, ofs, sz, sct in find_txt(rom, 0, ah = ah):
             if typ == 0:
                 fa = ofs
                 tc = sz
