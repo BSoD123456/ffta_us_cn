@@ -588,6 +588,7 @@ if __name__ == '__main__':
         tab = rom.tabs['font']
         ah.hold((tab.real_offset, tab.real_offset + 0xc66 * tab._TAB_WIDTH))
         rs = []
+        nrs = []
         lst_ent = None
         for typ, sublen, ofs, sz in find_txt(rom, 0, ah = ah):
             if typ == 0:
@@ -597,6 +598,8 @@ if __name__ == '__main__':
             if not rom_d:
                 continue
             if not sublen is None:
+                if lst_ent:
+                    nrs.append(lst_ent)
                 lst_ent = (typ, ofs, sz, sublen, [])
             if not chk_diff(rom, rom_d, ofs, sz):
                 continue
@@ -608,6 +611,8 @@ if __name__ == '__main__':
                 rs[-1][-1].append((ofs, sz))
         if not rom_d:
             return
+        if lst_ent:
+            nrs.append(lst_ent)
         print('diff texts:')
         for typ, ofs, sz, ln, subs in rs:
             rvs_vals = [hex(i) for i in fa.rvs_tab[ofs]]
@@ -621,5 +626,14 @@ if __name__ == '__main__':
                 print(f'typ{typ} 0x{ofs:0>7x}-0x{ofs+sz:0>7x}: 0x{sz:x} [0x{ln:x}] <= {rvs_rpr}')
             #for ofs, sz in subs:
             #    print(f'    0x{ofs:0>7x}-0x{ofs+sz:0>7x}: 0x{sz:x}')
+        print('same texts:')
+        for typ, ofs, sz, ln, subs in nrs:
+            if  typ & 0xc:
+                continue
+            rvs_vals = [hex(i) for i in fa.rvs_tab[ofs]]
+            if len(rvs_vals) > 3:
+                rvs_vals = rvs_vals[:2] + [f'...{len(rvs_vals)}']
+            rvs_rpr = ', '.join(rvs_vals)
+            print(f'typ{typ} 0x{ofs:0>7x}-0x{ofs+sz:0>7x}: 0x{sz:x} [0x{ln:x}] <= {rvs_rpr}')
         #check_diffs(fa, rom, rom_d)
         return rs
