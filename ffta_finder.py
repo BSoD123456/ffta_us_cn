@@ -133,18 +133,19 @@ class c_ffta_ref_addr_finder:
 
 class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
 
-    def __init__(self, *args, addr_holder = None, ignore_item = False, **kargs):
+    def __init__(self, *args, addr_holder = None, ignore_item = False, merge_cn = False, **kargs):
         super().__init__(*args, **kargs)
         if not addr_holder:
             addr_holder = c_range_holder()
         self.holder = addr_holder
         self.ignore_item = ignore_item
+        self.merge_cn = merge_cn
         self._pre_scan()
 
     def _is_ptr(self, ent):
         adr = self.sect.U32(ent)
         ofs = self.sect._addr2offs(adr)
-        return 0 <= ofs < self.top_ofs, ofs, adr == 0
+        return 0 < ofs < self.top_ofs, ofs, adr == 0
 
     def _pre_scan(self, adrtab_min = 5-1):
         adrtab_min_sz = adrtab_min * 4
@@ -204,6 +205,8 @@ class c_ffta_ref_addr_hold_finder(c_ffta_ref_addr_finder):
                 if not lst_dofs is None and dofs - lst_dofs >= adrtab_min_sz:
                     adr_tab.append((lst_dofs, dofs))
                 lst_dofs = dofs
+                if self.merge_cn:
+                    break
             if not lst_dofs is None and mx - lst_dofs >= adrtab_min_sz:
                 adr_tab.append((lst_dofs, mx))
         self.ptr_tab = ptr_tab
@@ -487,7 +490,7 @@ class c_text_checker:
 def find_txt(rom, bs = 0, ah = None):
     global fa, tc
     fa = c_ffta_ref_addr_hold_finder(rom, bs, rom._sect_top,
-         addr_holder = ah, ignore_item = True)
+         addr_holder = ah, ignore_item = True, merge_cn = True)
     tc = c_text_checker(rom)
     yield 0, 0, fa, tc
     for typ in [1, 2]:
