@@ -583,7 +583,7 @@ if __name__ == '__main__':
     
     chs = c_charset()
 
-    def sct_tabs(rom):
+    def sct_tabs(rom, chk = None):
         ah = c_range_holder()
         tab = rom.tabs['s_scrpt']
         ah.hold((tab.real_offset, tab.real_offset + tab.sect_top_least))
@@ -592,13 +592,20 @@ if __name__ == '__main__':
         tab = rom.tabs['font']
         ah.hold((tab.real_offset, tab.real_offset + 0xc66 * tab._TAB_WIDTH))
         tabs = {}
+        lst_ent = None
         for typ, sublen, ofs, sz, sct in find_txt(rom, 0, ah = ah, dtyp = 0x33):
             if typ == 0:
                 fa = ofs
                 tc = sz
                 continue
-            if not sct:
+            if not sublen is None:
+                lst_ent = sct
+            if not lst_ent:
                 continue
+            if callable(chk) and not chk(rom, ofs, sz):
+                continue
+            sct = lst_ent
+            lst_ent = None
             if typ == 0x20:
                 _invalid = False
                 for x in sct:
@@ -610,6 +617,7 @@ if __name__ == '__main__':
             if not typ in tabs:
                 tabs[typ] = []
             tabs[typ].append(sct)
+        tabs['fa'] = fa
         return tabs
 
     def show_tabs(tabs, typ):
@@ -703,3 +711,24 @@ if __name__ == '__main__':
             print(f'typ{typ} 0x{ofs:0>7x}-0x{ofs+sz:0>7x}: 0x{sz:x} [0x{ln:x}] <= {rvs_rpr}')
         #check_diffs(fa, rom, rom_d)
         return rs
+
+    def main_get_words(rom):
+        if rom is rom_jp:
+            tabs = sct_tabs(rom, lambda rom, ofs, sz: chk_diff(rom, rom_cn, ofs, sz))
+        else:
+            tabs = sct_tabs(rom)
+        fa = tabs['fa']
+        print('words tabs')
+        for tab in tabs[32]:
+            ofs = tab.real_offset
+            sz = tab.tsize
+            rvs_rpr = ', '.join(hex(i) for i in fa.rvs_tab[ofs])
+            print(f'0x{ofs:x}: 0x{sz:x}, [{rvs_rpr}]')
+        print('words tabs info: {')
+        for i, tab in enumerate(tabs[32]):
+            ofs = tab.real_offset
+            sz = tab.tsize
+            ptr = fa.rvs_tab[ofs][0]
+            print(f"'u{i}': (0x{ptr:x}, 0x{sz:x}),")
+        print('}')
+        return tabs
