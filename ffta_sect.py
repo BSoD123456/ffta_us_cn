@@ -688,7 +688,8 @@ class c_ffta_sect_script_page(c_ffta_sect):
         self._line_ofs = [0]
 
     def _get_prms(self, cofs, clen):
-        return self.BYTES(cofs + 1, clen - 1)
+        r = self.BYTES(cofs + 1, clen - 1)
+        return r
 
     def _get_cmd(self, idx):
         ent = self._line_ofs[idx]
@@ -1107,6 +1108,11 @@ class c_ffta_sect_rom(c_ffta_sect):
         self.parse()
         return self
 
+    def patch(self, patchs):
+        for ofs, val in patchs.items():
+            self.W8(val, ofs)
+        return self
+
     def set_info(self, tabs_info):
         self._add_tabs(tabs_info)
 
@@ -1193,7 +1199,9 @@ def main():
             }),
         }, 0xa39920)
     with open('fftacns.gba', 'rb') as fd:
-        rom_cn = c_ffta_sect_rom(fd.read(), 0).setup({
+        rom_cn = c_ffta_sect_rom(fd.read(), 0).patch({
+            0x48cd3f: 0x25,
+        }).setup({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
             's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
             's_cmds': (0x117f10, c_ffta_sect_script_cmds),

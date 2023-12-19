@@ -65,7 +65,7 @@ class c_ffta_cmd:
 
     def __repr__(self):
         #prms_rpr = bytearray.hex(self.prms)
-        prms_rpr = bytes.hex(self.prms)
+        prms_rpr = bytearray.hex(self.prms)
         prms_rpr = ' '.join(prms_rpr[i:i+2] for i in range(0, len(prms_rpr), 2))
         return f'<{self.op:X}: {prms_rpr.upper()}>'
 
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 
     from ffta_sect import main as sect_main
     sect_main()
-    from ffta_sect import rom_us as rom
+    from ffta_sect import rom_cn as rom
 
     from ffta_charset import c_ffta_charset_us_dummy as c_charset
 
