@@ -578,6 +578,7 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_cn, rom_jp, rom_us
 
+    from ffta_font import c_ffta_font_drawer
     from ffta_charset import c_ffta_charset_us_dummy as c_charset
     
     chs = c_charset()
@@ -612,6 +613,8 @@ if __name__ == '__main__':
         return tabs
 
     def show_tabs(tabs, typ):
+        if not (typ & 0x20):
+            raise NotImplementedError
         for ti, t in enumerate(tabs[typ]):
             print(f'tab {ti}: 0x{t.real_offset:x}(0x{t.tsize:x}))')
             for xi, x in enumerate(t):
@@ -619,8 +622,27 @@ if __name__ == '__main__':
                     continue
                 if typ & 0x20:
                     print(f'{ti}/{xi} {chs.decode(x.tokens)}')
-                else:
-                    raise NotImplementedError
+
+    def draw_tabs(rom, tabs, typ, rng):
+        dr = c_ffta_font_drawer(rom.tabs['font'])
+        if not (typ & 0x20):
+            raise NotImplementedError
+        dtabs = tabs[typ]
+        blks = []
+        for ti in range(max(rng[0], 0), min(rng[1], len(dtabs))):
+            t = dtabs[ti]
+            blks.append(dr.draw_comment(
+                f'tab{typ}[{ti}]: 0x{t.real_offset:x}(0x{t.tsize:x}))'))
+            for xi, x in enumerate(t):
+                if not x:
+                    continue
+                if typ & 0x20:
+                    blks.append(dr.draw_vert(
+                        dr.draw_comment(
+                            f'{ti}/{xi} ofs 0x{x.real_offset:x}'),
+                        dr.draw_tokens(x.tokens),
+                    ))
+        return dr.make_img(dr.draw_vert(*blks))
     
     def main(rom = rom_jp, rom_d = rom_cn):
         global ah
