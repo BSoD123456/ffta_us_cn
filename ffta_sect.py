@@ -1110,7 +1110,24 @@ class c_ffta_sect_rom(c_ffta_sect):
 
     def patch(self, patchs):
         for ofs, val in patchs.items():
-            self.W8(val, ofs)
+            if type(val) is str:
+                cmd, *cvals = val.split(':')
+                if cmd == 'shft':
+                    clen = int(cvals[0], 16)
+                    cval = int(cvals[1], 16)
+                    while cval > 0:
+                        for i in range(ofs + clen - 1, ofs - 1, -1):
+                            self.W8(self.U8(i), i+1)
+                        self.W8(0, ofs)
+                        cval -= 1
+                    while cval < 0:
+                        for i in range(ofs, ofs + clen):
+                            self.W8(self.U8(i+1), i)
+                        cval += 1
+                else:
+                    raise NotImplementedError
+            else:
+                self.W8(val, ofs)
         return self
 
     def set_info(self, tabs_info):
@@ -1200,7 +1217,10 @@ def main():
         }, 0xa39920)
     with open('fftacns.gba', 'rb') as fd:
         rom_cn = c_ffta_sect_rom(fd.read(), 0).patch({
+            # wrong ctrl-tok
             0x48cd3f: 0x25,
+            # missing 0
+            0x9761eb: 'shft:50:1',
         }).setup({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
             's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
