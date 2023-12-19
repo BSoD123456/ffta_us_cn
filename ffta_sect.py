@@ -1136,12 +1136,28 @@ class c_ffta_sect_rom(c_ffta_sect):
             else:
                 pargs = None
             subsect = self._subsect_ptr(tab_ptr, tab_cls, pargs)
-            tabs[tab_name] = subsect
+            tab_gidx = tab_name.split(':')
+            if len(tab_gidx) > 1:
+                if tab_gidx[0] in tabs:
+                    t_grp = tabs[tab_gidx[0]]
+                else:
+                    t_grp = {}
+                    tabs[tab_gidx[0]] = t_grp
+                t_grp[tab_gidx[1]] = subsect
+            else:
+                tabs[tab_name] = subsect
         self.tabs = tabs
 
 # ===============
 #      main
 # ===============
+
+def _words_sect_info(info):
+    return {
+        'words:'+k: (ofs, c_ffta_sect_words_text,
+            c_ffta_sect_rom.ARG_SELF, sz,
+        )
+        for k, (ofs, sz) in info.items()}
 
 def main():
     global rom_us, rom_cn, rom_jp
@@ -1153,6 +1169,8 @@ def main():
             's_text': (0x009a88, c_ffta_sect_text),
             'b_scrpt': (0x00a148, c_ffta_sect_battle_script),
             'b_cmds': (0x00a19c, c_ffta_sect_script_cmds),
+            'b_text': (0x237f4, c_ffta_sect_text_page),
+            #'ico_text': (0x13c84, c_ffta_sect_text_page),
             'font': (0x013474, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
@@ -1160,9 +1178,19 @@ def main():
             'fx_text': (0x018050, c_ffta_sect_fixed_text,
                 c_ffta_sect_rom.ARG_SELF, 27,
             ),
-            'nm_word': (0x016264, c_ffta_sect_words_text,
-                c_ffta_sect_rom.ARG_SELF, 0x6b,
-            ),
+            **_words_sect_info({
+                'u0': (0x198d0, 0xa),
+                'u1': (0x538b8, 0x4),
+                'u2': (0x18da4, 0x2f2),
+                'name': (0x9a08, 0x6b),
+                'u4': (0x9028, 0x301),
+                'u5': (0x5fd9c, 0x5c),
+                'u6': (0x191f0, 0x20f),
+                'u7': (0x9a10, 0x80),
+                'u8': (0x39f54, 0x54),
+                'u9': (0xc9ed0, 0x2d5),
+                'u10': (0x192bc, 0x34),
+            }),
         }, 0xa39920)
     with open('fftacns.gba', 'rb') as fd:
         rom_cn = c_ffta_sect_rom(fd.read(), 0).setup({
@@ -1172,6 +1200,8 @@ def main():
             's_text': (0x009ad8, c_ffta_sect_text),
             'b_scrpt': (0x00a0dc, c_ffta_sect_battle_script),
             'b_cmds': (0x00a130, c_ffta_sect_script_cmds),
+            'b_text': (0x23698, c_ffta_sect_text_page),
+            #'ico_text': (0x13bfc, c_ffta_sect_text_page),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
@@ -1179,9 +1209,19 @@ def main():
             'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
                 c_ffta_sect_rom.ARG_SELF, 26,
             ),
-            'nm_word': (0x0161a8, c_ffta_sect_words_text,
-                c_ffta_sect_rom.ARG_SELF, 0x68,
-            ),
+            **_words_sect_info({
+                'u0': (0x5113c, 0x4),
+                'u1': (0x558f8, 0x5),
+                'u2': (0x18cb4, 0x2f2),
+                'name': (0x9a58, 0x68),
+                'u4': (0x9070, 0x2f5),
+                'u5': (0x5c954, 0x5c),
+                'u6': (0x19100, 0x20f),
+                'u7': (0x9a60, 0x80),
+                'u8': (0x3a560, 0x49),
+                'u9': (0xc10c0, 0x80),
+                'u10': (0x191cc, 0x34),
+            }),
         }, 0x9e1aa0)
     with open('fftajp.gba', 'rb') as fd:
         rom_jp = c_ffta_sect_rom(fd.read(), 0).setup({
@@ -1191,6 +1231,8 @@ def main():
             's_text': (0x009ad8, c_ffta_sect_text),
             'b_scrpt': (0x00a0dc, c_ffta_sect_battle_script),
             'b_cmds': (0x00a130, c_ffta_sect_script_cmds),
+            'b_text': (0x23698, c_ffta_sect_text_page),
+            #'ico_text': (0x13bfc, c_ffta_sect_text_page),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'rvsbyt': False,
@@ -1198,9 +1240,19 @@ def main():
             'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
                 c_ffta_sect_rom.ARG_SELF, 26,
             ),
-            'nm_word': (0x0161a8, c_ffta_sect_words_text,
-                c_ffta_sect_rom.ARG_SELF, 0x68,
-            ),
+            **_words_sect_info({
+                'u0': (0x5113c, 0x4),
+                'u1': (0x558f8, 0x5),
+                'u2': (0x18cb4, 0x2f2),
+                'name': (0x9a58, 0x68),
+                'u4': (0x9070, 0x2f5),
+                'u5': (0x5c954, 0x5c),
+                'u6': (0x19100, 0x20f),
+                'u7': (0x9a60, 0x80),
+                'u8': (0x3a560, 0x49),
+                'u9': (0xc10c0, 0x80),
+                'u10': (0x191cc, 0x34),
+            }),
         }, 0x9bb3d0)
 
 if __name__ == '__main__':
