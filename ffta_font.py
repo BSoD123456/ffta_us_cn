@@ -229,6 +229,20 @@ class c_font_drawer:
 
 class c_ffta_font_drawer(c_font_drawer):
 
+    def draw_chars(self, chars, pad = 2, trim = -1, **kargs):
+        if trim < 0:
+            trim = 0
+            autotrim = True
+        else:
+            autotrim = False
+        blks = []
+        for char in chars:
+            blk = self.draw_char(char, **kargs)
+            if autotrim:
+                blk = self.draw_trim(blk)
+            blks.append(blk)
+        return self.draw_horiz(*blks, pad = pad, trim = trim)
+
     def draw_tokens(self, toks, pad = 2, trim = -1, **kargs):
         if trim < 0:
             trim = 0
