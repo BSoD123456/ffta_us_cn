@@ -375,7 +375,7 @@ class c_map_guesser:
         for t in trim_r:
             if t in self.det_r:
                 trim1.add(self.det_r[t])
-                trim2.add(t)
+            trim2.add(t)
         s1 = self._norm_text(s1, {}, trim1)
         s2 = self._norm_text(s2, norm_r, trim2)
         #print('feed', cmt, f'({len(s2)})', ''.join(s2))
