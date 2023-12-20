@@ -277,6 +277,9 @@ class c_map_guesser:
                 self._feed_blk_trim(sblk, detp)
 
     def _ensure_match_nondet(self, c1, i1, c2, i2, cmt):
+        #print('ensure nondet', c1, i1, c2, i2, cmt)
+        if not c1 in self.nondet:
+            return
         c1r_info = self.nondet[c1]
         del self.nondet[c1]
         for cc2, (ccmt, ci1, ci2) in c1r_info.items():
@@ -528,7 +531,7 @@ class c_ffta_ocr_parser:
             '！': '!',
         }
         self.gsr_trim = [' ']
-        self.txt_trim_rng = [(0x99, 0x13b)]
+        self.txt_trim_rng = [(0, 0xa3)]
 
     @staticmethod
     def _chartab(base, seq, enc):
@@ -657,13 +660,21 @@ class c_ffta_ocr_parser:
         return r
 
     def draw_conflict(self):
-        r = []
+        blks = []
         for c, v in self.get_conflict().items():
             if isinstance(c, int):
-                r.append(c)
+                blks.append(self.font.draw_horiz(
+                    self.font.draw_chars([c]),
+                    self.font.draw_comment(f'(0x{c:x}):{v}'),
+                ))
             else:
-                r.extend(v)
-        return self.draw_chars(r)
+                blks.append(self.font.draw_horiz(
+                    self.font.draw_comment(f'{c}:({",".join(hex(i) for i in v)})'),
+                    self.font.draw_chars(v),
+                ))
+        if not blks:
+            return None
+        return self.font.make_img(ocr.font.draw_vert(*blks))
 
     def export_charset(self):
         cdet = self.gsr.det.copy()

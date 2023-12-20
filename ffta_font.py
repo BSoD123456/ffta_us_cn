@@ -46,7 +46,8 @@ class c_font_drawer:
     @staticmethod
     def draw_comment(txt, pal_sel = 2):
         pal = c_font_drawer.PAL
-        ifnt = ImageFont.load_default()
+        #ifnt = ImageFont.load_default()
+        ifnt = ImageFont.truetype('msyh.ttf', 12, encoding='utf-8')
         bbox = ifnt.getbbox(txt)
         im = Image.new('RGB', bbox[2:4], pal[0])
         dr = ImageDraw.Draw(im)
