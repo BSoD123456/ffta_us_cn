@@ -561,6 +561,21 @@ class c_ffta_ocr_parser:
             0xbdf: '领',
             0x479: '嫌',
             0x23a: '隐',
+            0xafc: '魔',
+            0x302: '确',
+            0x893: '痛',
+            0x578: '索',
+            0x2b0: '河',
+            0x1e9: '阿',
+            0x7e0: '多',
+            0xa2a: '缪',
+            0x9cd: '滚',
+            0x86c: '宠',
+            0x42d: '窟',
+            0x603: '释',
+            0x475: '剑',
+            0x970: '醺',
+            0xc0a: '联',
         })
         self.gsr_norm = {
             '，': ',',
@@ -719,11 +734,14 @@ class c_ffta_ocr_parser:
                     self.font.draw_chars([c]),
                     self.font.draw_comment(f'(0x{c:x}):{v}'),
                 ))
+                print(f"0x{c:x}: '{v}',")
             else:
                 blks.append(self.font.draw_horiz(
                     self.font.draw_comment(f'{c}:({",".join(hex(i) for i in v)})'),
                     self.font.draw_chars(v),
                 ))
+                for i in v:
+                    print(f"0x{i:x}: '{c}',")
         if not blks:
             return None
         return self.font.make_img(ocr.font.draw_vert(*blks))
