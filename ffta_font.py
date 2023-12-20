@@ -24,7 +24,7 @@ class c_font_drawer:
     def __init__(self, font):
         self.sect = font
 
-    def draw_char(self, cidx, *args, **kargs):
+    def draw_char(self, cidx, *args, noshadow = False, **kargs):
         pal = self.PAL
         sect = self.sect
         cw = None
@@ -33,6 +33,8 @@ class c_font_drawer:
             for v in line:
                 if v > 3:
                     v = 4
+                if noshadow and v < 3:
+                    v = 0
                 rline.append(pal[v])
             if cw is None:
                 cw = len(rline)

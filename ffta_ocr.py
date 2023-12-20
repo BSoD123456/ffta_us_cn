@@ -17,7 +17,7 @@ python -m pip install cnocr
     raise
 
 def report(*args):
-    r = ' '.join(args)
+    r = ' '.join(a for a in args if a)
     print(r)
     return r
 
@@ -576,6 +576,57 @@ class c_ffta_ocr_parser:
             0x475: '剑',
             0x970: '醺',
             0xc0a: '联',
+            0x3c7: '给',
+            0x9c7: '找',
+            0x8ff: '麝',
+            0xc33: '嘛',
+            0xb23: '脉',
+            0xa6b: '服',
+            0x4c2: '擒',
+            0xafb: '磨',
+            0x8af: '庭',
+            0x704: '睡',
+            0x535: '彻',
+            0x501: '衡',
+            0xc26: '啫',
+            0x15a: '味',
+            0x6c0: '嗦',
+            0xaa6: '亏',
+            0x3a1: '议',
+            0x594: '算',
+            0x8f4: '倒',
+            0x9d7: '搞',
+            0x731: '精',
+            0xc0c: '炼',
+            0x428: '咯',
+            0x9e8: '繁',
+            0x7d4: '续',
+            0x9aa: '卖',
+            0x7c4: '蔑',
+            0x7ed: '体',
+            0x17e: '驹',
+            0x16f: '教',
+            0x711: '数',
+            0x55f: '栽',
+            0x932: '匿',
+            0x189: '移',
+            0xaa8: '穆',
+            0x1fe: '糟',
+            0x858: '着',
+            0x67a: '汝',
+            0x1d3: '待',
+            0x943: '蹭',
+            0x786: '曾',
+            0x2b5: '豫',
+            0x9cb: '玫',
+            0xaac: '呜',
+            0x3ed: '盯',
+            0x6d3: '侵',
+            0x57c: '哟',
+            0x432: '惧',
+            0x21a: '畏',
+            0x42f: '眩',
+            0x3f8: '晓',
         })
         self.gsr_norm = {
             '，': ',',
@@ -621,7 +672,7 @@ class c_ffta_ocr_parser:
             # supplement height to 10px, make OCR work.
             # OCR do not work on image whose height is less than 10px
             self.font.draw_point(2),
-            self.font.draw_chars(chars, pad = pad)
+            self.font.draw_chars(chars, pad = pad, noshadow = False)
         ]
         return self.font.make_img(self.font.draw_horiz(*blks, pad = 1))
 
@@ -734,14 +785,14 @@ class c_ffta_ocr_parser:
                     self.font.draw_chars([c]),
                     self.font.draw_comment(f'(0x{c:x}):{v}'),
                 ))
-                print(f"0x{c:x}: '{v}',")
+                report(None, f"0x{c:x}: '{v}',")
             else:
                 blks.append(self.font.draw_horiz(
                     self.font.draw_comment(f'{c}:({",".join(hex(i) for i in v)})'),
                     self.font.draw_chars(v),
                 ))
                 for i in v:
-                    print(f"0x{i:x}: '{c}',")
+                    report(None, f"0x{i:x}: '{c}',")
         if not blks:
             return None
         return self.font.make_img(ocr.font.draw_vert(*blks))
