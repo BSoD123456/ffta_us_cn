@@ -1215,7 +1215,7 @@ def main():
                 'u10': (0x192bc, 0x34),
             }),
         }, 0xa39920)
-    with open('fftacns.gba', 'rb') as fd:
+    with open('fftacnb.gba', 'rb') as fd:
         rom_cn = c_ffta_sect_rom(fd.read(), 0).patch({
             # wrong ctrl-tok
             0x48cd3f: 0x25,
