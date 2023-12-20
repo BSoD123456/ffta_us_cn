@@ -502,26 +502,19 @@ class c_ffta_ocr_parser:
         self.ocr = CnOcr(det_model_name='naive_det')
         self.gsr = c_map_guesser()
         self.gsr.innate({
-            
-            
-            0x87b: '.',
-            0x25: '%',
-            
-            
-            
-            0x92: ' ',
-            
-
             **self._chartab(0xa3, ['、', '。', 'ー'], 'gbk'),
             **self._chartab(0xa6, [('0', '9')], 'gbk'),
             **self._chartab(0xb0, [('A', 'Z')], 'gbk'),
             **self._chartab(0xca, [('a', 'z')], 'gbk'),
             **self._chartab(0xe4, [
-                *'.「」『』…'.split(''),
-                *'?!·:_々/~'.split(''),
-                *'‘’“”(){}[]'.split(''),
-                *'+-±×=<>∞♂♀%&*※—|'.split(''),
+                *'.「」『』…',
+                *'?!·:_々/~',
+                *'‘’“”(){}[]',
+                *'+-±×=<>∞♂♀%&*※—|',
+                *'↑↓←→',
+                *'○△□■^;◎',
             ], 'gbk'),
+            **self._chartab(0x118, [('０', '９')], 'gbk'),
             # Ambiguous
             # unused, only for charset
             **self._chartab(0, [
