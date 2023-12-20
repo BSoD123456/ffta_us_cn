@@ -803,6 +803,26 @@ class c_ffta_ocr_parser:
                     uc.add(c)
         return sorted(uc)
 
+def iter_toks(rom):
+    def iter_sect(sect):
+        for path, line in sect.iter_item():
+            if line is None:
+                continue
+            try:
+                line = line.text
+            except:
+                pass
+            yield line.tokens
+    report('info', 'iter s_text')
+    yield from iter_sect(rom.tabs['s_text'])
+    report('info', 'iter b_text')
+    yield from iter_sect(rom.tabs['b_text'])
+    report('info', 'iter fx_text')
+    yield from iter_sect(rom.tabs['fx_text'])
+    for nm, tab in rom.tabs['words'].items():
+        report('info', f'iter words:{nm}')
+        yield from iter_sect(tab)
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
@@ -814,26 +834,6 @@ if __name__ == '__main__':
     from ffta_sect import rom_cn
 
     from ffta_font import c_ffta_font_drawer
-
-    def iter_toks(rom):
-        def iter_sect(sect):
-            for path, line in sect.iter_item():
-                if line is None:
-                    continue
-                try:
-                    line = line.text
-                except:
-                    pass
-                yield line.tokens
-        print('iter s_text')
-        yield from iter_sect(rom.tabs['s_text'])
-        print('iter b_text')
-        yield from iter_sect(rom.tabs['b_text'])
-        print('iter fx_text')
-        yield from iter_sect(rom.tabs['fx_text'])
-        for nm, tab in rom.tabs['words'].items():
-            print(f'iter words:{nm}')
-            yield from iter_sect(tab)
 
     def main(rom):
         dr = c_ffta_font_drawer(rom.tabs['font'])
