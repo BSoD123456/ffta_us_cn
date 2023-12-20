@@ -423,7 +423,7 @@ class c_map_guesser:
                     else:
                         if _i2dlt >= self.MAX_LA_WARN:
                             report('warning',
-                                f's2 lookahead too mush {i2}+{_i2dlt}/{self.MAX_LA_WARN}~{self.MAX_LA_SKIP} at {cmt}')
+                                f's2 lookahead too much {i2}+{_i2dlt}/{self.MAX_LA_WARN}~{self.MAX_LA_SKIP} at {cmt}')
                         i1 += 1
                         i2 += _i2dlt + 1
                         #print('sk2+1', ''.join(_sk2))
@@ -461,7 +461,7 @@ class c_map_guesser:
                     else:
                         if _i1dlt >= self.MAX_LA_WARN:
                             report('warning',
-                                f's2 lookahead too mush {i1}+{_i1dlt}/{self.MAX_LA_WARN}~{self.MAX_LA_SKIP}')
+                                f's2 lookahead too much {i1}+{_i1dlt}/{self.MAX_LA_WARN}~{self.MAX_LA_SKIP}')
                         i2 += 1
                         i1 += _i1dlt + 1
                         #print('sk1+1')
@@ -495,6 +495,7 @@ class c_ffta_ocr_parser:
         self.txts = txts
         self.font = font
         self.chrs = []
+        self.chrs_idx = 0
         self.toks_done = False
 
     def parse(self):
@@ -524,7 +525,7 @@ class c_ffta_ocr_parser:
             '！': '!',
         }
         self.gsr_trim = [' ']
-        self.txt_trim_rng = [(0x99, 0x13b), (0x91, 0x92)]
+        self.txt_trim_rng = [(0x99, 0x13b)]
 
     def _chartab(self, base, seq, enc):
         r = {}
@@ -574,51 +575,63 @@ class c_ffta_ocr_parser:
                 trimed = True
                 break
         if trimed:
-            return tchr
-        else:
             return None
+        else:
+            return tchr
+
+    def _next_chrs(self):
+        if self.chrs_idx < 0:
+            return None
+        if self.chrs_idx < len(self.chrs):
+            t = self.chrs[self.chrs_idx]
+            self.chrs_idx += 1
+            return t
+        toks = self._next_toks()
+        if toks is None:
+            self.chrs_idx = -1
+            return None
+        line = []
+        for tok in toks:
+            c = self._hndl_tok(tok)
+            if c is None:
+                continue
+            line.append(c)
+        self.chrs.append(line)
+        self.chrs_idx = len(self.chrs)
+        return line
 
     def pick_next(self, tlen_min, txt = None):
         if txt is None:
             txt = []
         tlen = 0
         while tlen < tlen_min:
-            toks = self._next_toks()
-            if toks is None:
+            line = self._next_chrs()
+            if line is None:
                 return txt
-            line = []
-            for tok in toks:
-                c = self._hndl_tok(tok)
-                if c is None:
-                    continue
-                line.append(c)
-                tlen += 1
-            self.chrs.append(line)
             txt.extend(line)
+            tlen += len(line)
         return txt
 
-    @property
-    def toks_idx(self):
-        return -1 if self.toks_done else len(self.chrs)
+    def draw_next(self, tlen_min):
+        stxt = self.pick_next(tlen_min)
+        return self.draw_chars(stxt)
 
     def feed_next(self, tlen_min, detail = False):
-        tidx = self.toks_idx
+        tidx = self.chrs_idx
         stxt = self.pick_next(tlen_min)
-        ntidx = self.toks_idx
+        ntidx = self.chrs_idx
         if detail:
             rtxt, im = self.ocr_chars(stxt, True)
         else:
             rtxt = self.ocr_chars(stxt)
         self.gsr.feed(stxt, rtxt, (tidx, ntidx), self.gsr_norm, self.gsr_trim)
         if detail:
-            return ntidx, rtxt, im
-        else:
-            return ntidx
+            return rtxt, im
 
     def feed_all(self, tlen_min = 200):
-        while self.toks_idx >= 0:
-            report('info', f'feed {self.toks_idx}')
-            tidx = self.feed_next(tlen_min)
+        while self.chrs_idx >= 0:
+            report('info', f'feed {self.chrs_idx}')
+            self.feed_next(tlen_min)
 
     def get_conflict(self):
         r = {}
@@ -698,10 +711,10 @@ class c_ffta_ocr_parser:
 
     def unknown_chars(self):
         cs, csr = self.export_charset()
-        tidx = 0
         uc = set()
-        while tidx >= 0:
-            txt, tidx = self.pick_text(tidx, 200)
+        self.chrs_idx = 0
+        while self.chrs_idx >= 0:
+            txt = self.pick_next(200)
             for c in txt:
                 if not (c in cs[0] or c in cs[1]):
                     uc.add(c)
