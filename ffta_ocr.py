@@ -378,8 +378,8 @@ class c_map_guesser:
                 trim2.add(t)
         s1 = self._norm_text(s1, {}, trim1)
         s2 = self._norm_text(s2, norm_r, trim2)
-        #print('feed', cmt, ''.join(s2))
-        #print(' '.join(hex(c)[2:] for c in s1))
+        #print('feed', cmt, len(s2), ''.join(s2))
+        #print(len(s1), ' '.join(hex(c)[2:] for c in s1))
         l1 = len(s1)
         l2 = len(s2)
         i1 = 0
@@ -505,13 +505,19 @@ class c_ffta_ocr_parser:
         self.ocr = CnOcr(det_model_name='naive_det')
         self.gsr = c_map_guesser()
         self.gsr.innate({
+            # unused, only for charset
+            **self._chartab(0, [
+                (0xa4a1, 0xa4ef), (0xa4f2, 0xa4f3),
+                (0xa5a1, 0xa5ef), (0xa5f2, 0xa5f4),
+            ], 'gbk'),
+            # symbols
             **self._chartab(0xa3, ['、', '。', 'ー'], 'gbk'),
             **self._chartab(0xa6, [('0', '9')], 'gbk'),
             **self._chartab(0xb0, [('A', 'Z')], 'gbk'),
             **self._chartab(0xca, [('a', 'z')], 'gbk'),
             **self._chartab(0xe4, [
                 *'.「」『』…',
-                *'?!·:_々/~',
+                *'?!,·:_々/~',
                 *'‘’“”(){}[]',
                 *'+-±×=<>∞♂♀%&*※—|',
                 *'↑↓←→',
@@ -543,19 +549,24 @@ class c_ffta_ocr_parser:
             0x9c6: '肇',
             0x71a: '咦',
             0x878: '羡',
-            # unused, only for charset
-            **self._chartab(0, [
-                (0xa4a1, 0xa4ef), (0xa4f2, 0xa4f3),
-                (0xa5a1, 0xa5ef), (0xa5f2, 0xa5f4),
-            ], 'gbk')
         })
         self.gsr_norm = {
             '，': ',',
             '？': '?',
             '！': '!',
+            '０': '0',
+            '１': '1',
+            '２': '2',
+            '３': '3',
+            '４': '4',
+            '５': '5',
+            '６': '6',
+            '７': '7',
+            '８': '8',
+            '９': '9',
         }
         self.gsr_trim = [' ']
-        self.txt_trim_rng = [(0, 0xa3)]
+        self.txt_trim_rng = [(0, 0xa4), (0xe4, 0xea), (0xed, 0x118)]
 
     @staticmethod
     def _chartab(base, seq, enc):
@@ -579,8 +590,13 @@ class c_ffta_ocr_parser:
         return r
 
     def draw_chars(self, chars, pad = 3):
-        blk = self.font.draw_chars(chars, pad = pad)
-        return self.font.make_img(blk)
+        blks = [
+            # supplement height to 10px, make OCR work.
+            # OCR do not work on image whose height is less than 10px
+            self.font.draw_point(2),
+            self.font.draw_chars(chars, pad = pad)
+        ]
+        return self.font.make_img(self.font.draw_horiz(*blks, pad = 1))
 
     def ocr_chars(self, chars, ret_img = False):
         im = self.draw_chars(chars)

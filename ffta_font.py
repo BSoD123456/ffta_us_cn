@@ -83,6 +83,16 @@ class c_font_drawer:
             yield rline, False
 
     @staticmethod
+    def draw_point(pos):
+        clr_blank = c_font_drawer.PAL[0]
+        clr_black = c_font_drawer.PAL[3]
+        for y in range(pos):
+            yield [clr_blank], True
+        yield [clr_black], True
+        while True:
+            yield [clr_blank], False
+
+    @staticmethod
     def draw_trim(blk, pad_left = 0, pad_right = 0,
                   trim_empty = False, trim_val = 0):
         clr_blank = c_font_drawer.PAL[0]
