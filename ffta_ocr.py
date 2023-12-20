@@ -504,6 +504,7 @@ class c_ffta_ocr_parser:
     def parse(self):
         self.ocr = CnOcr(det_model_name='naive_det')
         self.gsr = c_map_guesser()
+        from ffta_ocr_ambi import ocr_ambiguous
         self.gsr.innate({
             # unused, only for charset
             **self._chartab(0, [
@@ -525,130 +526,7 @@ class c_ffta_ocr_parser:
             ], 'gbk'),
             **self._chartab(0x118, [('０', '９')], 'gbk'),
             # Ambiguous
-            0x409: '紧',
-            0x455: '啵',
-            0xb27: '务',
-            0x3db: '竞',
-            0x311: '竟',
-            0x628: '终',
-            0x5a9: '志',
-            0x4fd: '忐',
-            0x343: '忑',
-            0x7f3: '态',
-            0x9c6: '肇',
-            0x71a: '咦',
-            0x878: '羡',
-            0x17b: '样',
-            0xade: '哦',
-            0x32c: '蜴',
-            0xab4: '报',
-            0x907: '盗',
-            0xb39: '盔',
-            0x49f: '乎',
-            0x4d0: '效',
-            0x3cb: '拒',
-            0x1d2: '速',
-            0x180: '赖',
-            0x8b9: '颗',
-            0x7bd: '搜',
-            0x380: '弃',
-            0x63f: '叔',
-            0x734: '馈',
-            0x9d8: '寞',
-            0x16c: '案',
-            0x3a2: '喊',
-            0xb7a: '雄',
-            0xbdf: '领',
-            0x479: '嫌',
-            0x23a: '隐',
-            0xafc: '魔',
-            0x302: '确',
-            0x893: '痛',
-            0x578: '索',
-            0x2b0: '河',
-            0x1e9: '阿',
-            0x7e0: '多',
-            0xa2a: '缪',
-            0x9cd: '滚',
-            0x86c: '宠',
-            0x42d: '窟',
-            0x603: '释',
-            0x475: '剑',
-            0x970: '醺',
-            0xc0a: '联',
-            0x3c7: '给',
-            0x9c7: '找',
-            0x8ff: '麝',
-            0xc33: '嘛',
-            0xb23: '脉',
-            0xa6b: '服',
-            0x4c2: '擒',
-            0xafb: '磨',
-            0x8af: '庭',
-            0x704: '睡',
-            0x535: '彻',
-            0x501: '衡',
-            0xc26: '啫',
-            0x15a: '味',
-            0x6c0: '嗦',
-            0xaa6: '亏',
-            0x3a1: '议',
-            0x594: '算',
-            0x8f4: '倒',
-            0x9d7: '搞',
-            0x731: '精',
-            0xc0c: '炼',
-            0x428: '咯',
-            0x9e8: '繁',
-            0x7d4: '续',
-            0x9aa: '卖',
-            0x7c4: '蔑',
-            0x7ed: '体',
-            0x17e: '驹',
-            0x16f: '教',
-            0x711: '数',
-            0x55f: '栽',
-            0x932: '匿',
-            0x189: '移',
-            0xaa8: '穆',
-            0x1fe: '糟',
-            0x858: '着',
-            0x67a: '汝',
-            0x1d3: '待',
-            0x943: '蹭',
-            0x786: '曾',
-            0x2b5: '豫',
-            0x9cb: '玫',
-            0xaac: '呜',
-            0x3ed: '盯',
-            0x6d3: '侵',
-            0x57c: '哟',
-            0x432: '惧',
-            0x21a: '畏',
-            0x42f: '眩',
-            0x3f8: '晓',
-            0x256: '婴',
-            0xb05: '幕',
-            0x942: '妒',
-            0x4ad: '糊',
-            0x255: '营',
-            0x7ec: '锏',
-            0x787: '肆',
-            0xab9: '崩',
-            0x55b: '霆',
-            0x3ee: '胸',
-            0x52f: '昏',
-            0x59a: '餐',
-            0x9c0: '缚',
-            0x6cc: '触',
-            0x35d: '陷',
-            0x921: '腾',
-            0x4b9: '互',
-            0x81c: '脱',
-            0x911: '答',
-            0x56c: '莉',
-            0xc36: '腕',
-            0x7b7: '歹',
+            **ocr_ambiguous,
         })
         self.gsr_norm = {
             '，': ',',
@@ -793,8 +671,10 @@ class c_ffta_ocr_parser:
                 r[c1] = ''.join(s)
             else:
                 for c2 in rinfo:
-                    assert c2 in self.gsr.det_r
+                    #assert c2 in self.gsr.det_r
                     if not c2 in r:
+                        if not c2 in self.gsr.det_r:
+                            continue
                         r[c2] = [self.gsr.det_r[c2]]
                     r[c2].append(c1)
         return r
@@ -817,7 +697,7 @@ class c_ffta_ocr_parser:
                     report(None, f"0x{i:x}: '{c}',")
         if not blks:
             return None
-        return self.font.make_img(ocr.font.draw_vert(*blks))
+        return self.font.make_img(self.font.draw_vert(*blks))
 
     def draw_nondet(self):
         blks = []
@@ -834,7 +714,7 @@ class c_ffta_ocr_parser:
             report(None, f"0x{c:x}: '{v}',")
         if not blks:
             return None
-        return self.font.make_img(ocr.font.draw_vert(*blks))
+        return self.font.make_img(self.font.draw_vert(*blks))
 
     def draw_det(self):
         blks = []
@@ -847,7 +727,17 @@ class c_ffta_ocr_parser:
             report(None, f"0x{c:x}: '{v}',")
         if not blks:
             return None
-        return self.font.make_img(ocr.font.draw_vert(*blks))
+        return self.font.make_img(self.font.draw_vert(*blks))
+
+    def draw_found_chrs(self, char):
+        blks = []
+        for i, ch in enumerate(self.chrs):
+            if char in ch:
+                blks.append(self.font.draw_horiz(
+                    self.font.draw_comment(f'{i}:'),
+                    self.font.draw_chars(ch),
+                ))
+        return self.font.make_img(self.font.draw_vert(*blks))
 
     def export_charset(self):
         cdet = self.gsr.det.copy()
@@ -935,7 +825,15 @@ if __name__ == '__main__':
                 except:
                     pass
                 yield line.tokens
+        print('iter s_text')
         yield from iter_sect(rom.tabs['s_text'])
+        print('iter b_text')
+        yield from iter_sect(rom.tabs['b_text'])
+        print('iter fx_text')
+        yield from iter_sect(rom.tabs['fx_text'])
+        for nm, tab in rom.tabs['words'].items():
+            print(f'iter words:{nm}')
+            yield from iter_sect(tab)
 
     def main(rom):
         dr = c_ffta_font_drawer(rom.tabs['font'])
