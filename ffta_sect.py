@@ -1221,6 +1221,8 @@ def main():
             0x48cd3f: 0x25,
             # missing 0
             0x9761eb: 'shft:50:1',
+            # surplus 0
+            0x987bdf: 'shft:8:-2',
         }).setup({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
             's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
