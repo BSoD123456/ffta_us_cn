@@ -502,22 +502,32 @@ class c_ffta_ocr_parser:
         self.ocr = CnOcr(det_model_name='naive_det')
         self.gsr = c_map_guesser()
         self.gsr.innate({
-            0x2c: ',',
-            0x2e: '。',
+            
+            
             0x87b: '.',
             0x25: '%',
-            0x21: '!',
-            0x3f: '?',
-            0x95: '「',
-            0x96: '」',
-            0x91: '…',
+            
+            
+            
             0x92: ' ',
-            0x93: '、',
-            **{i: chr(i) for i in range(ord('0'), ord('9')+1)},
-            **{i: chr(i) for i in range(ord('a'), ord('z')+1)},
-            **{i: chr(i) for i in range(ord('A'), ord('Z')+1)},
+            
+
+            **self._chartab(0xa3, ['、', '。', 'ー'], 'gbk'),
+            **self._chartab(0xa6, [('0', '9')], 'gbk'),
+            **self._chartab(0xb0, [('A', 'Z')], 'gbk'),
+            **self._chartab(0xca, [('a', 'z')], 'gbk'),
+            **self._chartab(0xe4, [
+                *'.「」『』…'.split(''),
+                *'?!·:_々/~'.split(''),
+                *'‘’“”(){}[]'.split(''),
+                *'+-±×=<>∞♂♀%&*※—|'.split(''),
+            ], 'gbk'),
             # Ambiguous
             # unused, only for charset
+            **self._chartab(0, [
+                (0xa4a1, 0xa4ef), (0xa4f2, 0xa4f3),
+                (0xa5a1, 0xa5ef), (0xa5f2, 0xa5f4),
+            ], 'gbk')
         })
         self.gsr_norm = {
             '，': ',',
@@ -527,8 +537,14 @@ class c_ffta_ocr_parser:
         self.gsr_trim = [' ']
         self.txt_trim_rng = [(0x99, 0x13b)]
 
-    def _chartab(self, base, seq, enc):
+    @staticmethod
+    def _chartab(base, seq, enc):
         r = {}
+        def dec(c):
+            if isinstance(c, str):
+                return int(c.encode(enc).hex(), 16)
+            else:
+                return c
         def rec(c):
             s = hex(c)[2:]
             if len(s) % 2:
@@ -536,10 +552,10 @@ class c_ffta_ocr_parser:
             r[len(r) + base] = bytes.fromhex(s).decode(enc)
         for v in seq:
             if isinstance(v, tuple):
-                for c in range(*v):
+                for c in range(dec(v[0]), dec(v[1]) + 1):
                     rec(c)
             else:
-                rec(v)
+                rec(dec(v))
         return r
 
     def draw_chars(self, chars, pad = 3):
