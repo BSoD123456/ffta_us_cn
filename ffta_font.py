@@ -83,9 +83,9 @@ class c_font_drawer:
             yield rline, False
 
     @staticmethod
-    def draw_point(pos):
+    def draw_point(pos, cl=3):
         clr_blank = c_font_drawer.PAL[0]
-        clr_black = c_font_drawer.PAL[3]
+        clr_black = c_font_drawer.PAL[cl]
         for y in range(pos):
             yield [clr_blank], True
         yield [clr_black], True

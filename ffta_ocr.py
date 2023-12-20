@@ -378,8 +378,8 @@ class c_map_guesser:
                 trim2.add(t)
         s1 = self._norm_text(s1, {}, trim1)
         s2 = self._norm_text(s2, norm_r, trim2)
-        #print('feed', cmt, len(s2), ''.join(s2))
-        #print(len(s1), ' '.join(hex(c)[2:] for c in s1))
+        #print('feed', cmt, f'({len(s2)})', ''.join(s2))
+        #print(f'({len(s1)})', ' '.join(hex(c)[2:] for c in s1))
         l1 = len(s1)
         l2 = len(s2)
         i1 = 0
