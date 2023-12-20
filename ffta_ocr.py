@@ -627,6 +627,28 @@ class c_ffta_ocr_parser:
             0x21a: '畏',
             0x42f: '眩',
             0x3f8: '晓',
+            0x256: '婴',
+            0xb05: '幕',
+            0x942: '妒',
+            0x4ad: '糊',
+            0x255: '营',
+            0x7ec: '锏',
+            0x787: '肆',
+            0xab9: '崩',
+            0x55b: '霆',
+            0x3ee: '胸',
+            0x52f: '昏',
+            0x59a: '餐',
+            0x9c0: '缚',
+            0x6cc: '触',
+            0x35d: '陷',
+            0x921: '腾',
+            0x4b9: '互',
+            0x81c: '脱',
+            0x911: '答',
+            0x56c: '莉',
+            0xc36: '腕',
+            0x7b7: '歹',
         })
         self.gsr_norm = {
             '，': ',',
@@ -793,6 +815,36 @@ class c_ffta_ocr_parser:
                 ))
                 for i in v:
                     report(None, f"0x{i:x}: '{c}',")
+        if not blks:
+            return None
+        return self.font.make_img(ocr.font.draw_vert(*blks))
+
+    def draw_nondet(self):
+        blks = []
+        (_, nd, ndm), _ = self.export_charset()
+        nd = nd.copy()
+        nd.update(ndm)
+        for c, v in nd.items():
+            if isinstance(v, list):
+                v = ''.join(v)
+            blks.append(self.font.draw_horiz(
+                self.font.draw_chars([c]),
+                self.font.draw_comment(f'(0x{c:x}):{v}'),
+            ))
+            report(None, f"0x{c:x}: '{v}',")
+        if not blks:
+            return None
+        return self.font.make_img(ocr.font.draw_vert(*blks))
+
+    def draw_det(self):
+        blks = []
+        (dt, _, _), _ = self.export_charset()
+        for c, v in dt.items():
+            blks.append(self.font.draw_horiz(
+                self.font.draw_chars([c]),
+                self.font.draw_comment(f'(0x{c:x}):{v}'),
+            ))
+            report(None, f"0x{c:x}: '{v}',")
         if not blks:
             return None
         return self.font.make_img(ocr.font.draw_vert(*blks))
