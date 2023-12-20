@@ -1110,7 +1110,7 @@ class c_ffta_sect_rom(c_ffta_sect):
 
     def patch(self, patchs):
         for ofs, val in patchs.items():
-            if type(val) is str:
+            if isinstance(val, str):
                 cmd, *cvals = val.split(':')
                 if cmd == 'shft':
                     clen = int(cvals[0], 16)
