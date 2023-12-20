@@ -742,11 +742,16 @@ if __name__ == '__main__':
     from ffta_font import c_ffta_font_drawer
 
     def iter_toks(rom):
-        for tp in rom.tabs['fx_text']:
-            if not tp:
-                continue
-            for t in tp:
-                yield t.text.tokens
+        def iter_sect(sect):
+            for path, line in sect.iter_item():
+                if line is None:
+                    continue
+                try:
+                    line = line.text
+                except:
+                    pass
+                yield line.tokens
+        yield from iter_sect(rom.tabs['s_text'])
 
     def main(rom):
         dr = c_ffta_font_drawer(rom.tabs['font'])
