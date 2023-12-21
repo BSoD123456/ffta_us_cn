@@ -90,6 +90,23 @@ class c_ffta_charset_ocr:
         self.chst, self.chst_r = cs_rs
         self.save()
 
+    def _decode_unknown(self, typ, code):
+        if typ == 'CTR_FUNC':
+            return self._decode_ctr(typ, code)
+        elif typ == 'CTR_EOS':
+            return '@[ ]'
+        else:
+            return '@[E:{typ}:{code:X}]'
+
+    def _decode_ctr(self, typ, code):
+        return f'@[{code:X}]'
+
+    def _decode_char(self, typ, code):
+        if code in self.chst:
+            return self.chst[code]
+        else:
+            return '@[U:{code:X}]'
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd

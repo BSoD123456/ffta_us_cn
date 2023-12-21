@@ -1182,10 +1182,17 @@ def _words_sect_info(info):
         )
         for k, (ofs, sz) in info.items()}
 
-def main():
-    global rom_us, rom_cn, rom_jp
-    with open('fftaus.gba', 'rb') as fd:
-        rom_us = c_ffta_sect_rom(fd.read(), 0).setup({
+def _trim_raw_len(raw, st):
+    for i in range(min(st, len(raw) - 1), -1, -1):
+        b = raw[i]
+        if b != 0xff:
+            break
+    return alignup(i, 0x10)
+
+def load_rom_us(fn):
+    with open(fn, 'rb') as fd:
+        raw = fd.read()
+        return c_ffta_sect_rom(raw, 0).setup({
             's_fat': (0x009a20, c_ffta_sect_scene_fat),
             's_scrpt': (0x1223c0, c_ffta_sect_scene_script),
             's_cmds': (0x122b10, c_ffta_sect_script_cmds),
@@ -1214,16 +1221,12 @@ def main():
                 'u9': (0xc9ed0, 0x2d5),
                 'u10': (0x192bc, 0x34),
             }),
-        }, 0xa39920)
-    with open('fftacnb.gba', 'rb') as fd:
-        rom_cn = c_ffta_sect_rom(fd.read(), 0).patch({
-            # wrong ctrl-tok
-            0x48cd3f: 0x25,
-            # missing 0
-            0x9761eb: 'shft:50:1',
-            # surplus 0
-            0x987bdf: 'shft:8:-2',
-        }).setup({
+        }, _trim_raw_len(raw, 0xf00000))
+
+def load_rom_jp(fn):
+    with open(fn, 'rb') as fd:
+        raw = fd.read()
+        return c_ffta_sect_rom(raw, 0).setup({
             's_fat': (0x009a70, c_ffta_sect_scene_fat),
             's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
             's_cmds': (0x117f10, c_ffta_sect_script_cmds),
@@ -1252,38 +1255,25 @@ def main():
                 'u9': (0xc10c0, 0x80),
                 'u10': (0x191cc, 0x34),
             }),
-        }, 0x9e1aa0)
-    with open('fftajp.gba', 'rb') as fd:
-        rom_jp = c_ffta_sect_rom(fd.read(), 0).setup({
-            's_fat': (0x009a70, c_ffta_sect_scene_fat),
-            's_scrpt': (0x1178a8, c_ffta_sect_scene_script),
-            's_cmds': (0x117f10, c_ffta_sect_script_cmds),
-            's_text': (0x009ad8, c_ffta_sect_text),
-            'b_scrpt': (0x00a0dc, c_ffta_sect_battle_script),
-            'b_cmds': (0x00a130, c_ffta_sect_script_cmds),
-            'b_text': (0x23698, c_ffta_sect_text_page),
-            #'ico_text': (0x13bfc, c_ffta_sect_text_page),
-            'font': (0x0133f4, c_ffta_sect_font, {
-                'shape': (4, 8, 16, 2),
-                'rvsbyt': False,
-            }),
-            'fx_text': (0x017f6c, c_ffta_sect_fixed_text,
-                c_ffta_sect_rom.ARG_SELF, 26,
-            ),
-            **_words_sect_info({
-                'u0': (0x5113c, 0x4),
-                'u1': (0x558f8, 0x5),
-                'u2': (0x18cb4, 0x2f2),
-                'name': (0x9a58, 0x68),
-                'u4': (0x9070, 0x2f5),
-                'u5': (0x5c954, 0x5c),
-                'u6': (0x19100, 0x20f),
-                'u7': (0x9a60, 0x80),
-                'u8': (0x3a560, 0x49),
-                'u9': (0xc10c0, 0x80),
-                'u10': (0x191cc, 0x34),
-            }),
-        }, 0x9bb3d0)
+        }, _trim_raw_len(raw, 0xf00000))
+
+def load_rom_cn(fn):
+    rom = load_rom_jp(fn)
+    rom.patch({
+        # wrong ctrl-tok
+        0x48cd3f: 0x25,
+        # missing 0
+        0x9761eb: 'shft:50:1',
+        # surplus 0
+        0x987bdf: 'shft:8:-2',
+    })
+    return rom
+
+def main():
+    global rom_us, rom_cn, rom_jp
+    rom_us = load_rom_us('fftaus.gba')
+    rom_cn = load_rom_cn('fftacnb.gba')
+    rom_jp = load_rom_jp('fftajp.gba')
 
 if __name__ == '__main__':
     import pdb
