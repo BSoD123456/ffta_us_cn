@@ -31,6 +31,70 @@ import json
 from ffta_sect import load_rom
 from ffta_charset import c_ffta_charset_ocr
 
+INF = float('inf')
+
+class c_tab_align_iter:
+
+    def __init__(self, *tabs):
+        self.tabs = tabs
+
+    def _iter_tab(self, idx):
+        yield from self.tabs[idx].items()
+
+    def reset(self):
+        self.stats = []
+        for i in range(len(self.tabs)):
+            itr = self._iter_tab(i)
+            val = next(itr)
+            self.stats.append([itr, val])
+
+    @staticmethod
+    def _getidxv(idxpath, i):
+        if i < len(idxpath):
+            return idxpath[i]
+        else:
+            return 0
+
+    def _cmp_idx(self, idxp1, idxp2):
+        for i in range(max(len(idxp1), len(idxp2))):
+            v1 = self._getidxv(idxp1, i)
+            v2 = self._getidxv(idxp2, i)
+            if v1 > v2:
+                return 1
+            elif v1 < v2:
+                return -1
+        return 0
+
+    def _next(self):
+        mnidxp = None
+        for itr, (idxp, val) in self.stats:
+            if mnidxp is None or self._cmp_idx(idxp, mnidxp) < 0:
+                mnidxp = idxp
+        if mnidxp and mnidxp[0] == INF:
+            return mnidxp, None
+        rs = []
+        for sinfo in self.stats:
+            itr, (idxp, val) = sinfo
+            if self._cmp_idx(idxp, mnidxp) == 0:
+                rs.append(val)
+                try:
+                    idxp, val = next(itr)
+                except StopIteration:
+                    idxp = (INF,)
+                    val = None
+                sinfo[1] = (idxp, val)
+            else:
+                rs.append(None)
+        return mnidxp, rs
+
+    def iter(self):
+        self.reset()
+        while True:
+            idxp, rs = self._next()
+            if rs is None:
+                return
+            yield idxp, rs
+
 class c_ffta_modifier:
 
     def __init__(self, conf):
@@ -75,7 +139,7 @@ class c_ffta_modifier:
                 for stname, stab in tab.items():
                     yield ':'.join((tname, stname)), stab
 
-    def parse_text(self, romkey):
+    def _parse_text(self, romkey):
         rom = self.srom[romkey]
         chst = self.chst[romkey]
         txts = {}
@@ -88,11 +152,29 @@ class c_ffta_modifier:
                     line = line.text
                 except:
                     pass
-                pkey = '/'.join(str(i) for i in path)
+                #pkey = '/'.join(str(i) for i in path)
+                pkey = tuple(path)
                 dec = chst.decode(line.tokens)
                 ttxts[pkey] = dec
             txts[tname] = ttxts
         return txts
+
+    def _merge_texts(self, tbas, ttxt, minfo):
+        trslt = {}
+        for tname, btab in tbas.items():
+            ttab = ttxt[tname]
+            rtab = {}
+            trslt[tname] = rtab
+            ta = c_tab_align_iter(btab, ttab)
+            for idxp, vals in ta.iter():
+                pkey = '/'.join(str(i) for i in idxp)
+                rtab[pkey] = [v if v else '' for v in vals]
+        return trslt
+
+    def parse_texts(self):
+        bt = self._parse_text('base')
+        tt = self._parse_text('text')
+        return self._merge_texts(bt, tt, None)
 
 if __name__ == '__main__':
     import pdb
@@ -104,8 +186,6 @@ if __name__ == '__main__':
         global md
         md = c_ffta_modifier(CONF)
         md.load()
-        txts = md.parse_text('text')
+        txts = md.parse_texts()
         md.save_json('out_wk.json', txts)
-        txts = md.parse_text('base')
-        md.save_json('out_us_wk.json', txts)
     main()
