@@ -52,22 +52,26 @@ class c_tab_align_iter:
         self.amap = self._hndl_amap(align_map)
 
     def _hndl_amap(self, align_map):
-        ramap = []
-        for idxps in align_map:
-            ri = []
-            mi = None
+        add_lsts = []
+        for amap_itm in align_map:
             mxidxp = None
-            for i, idxp in enumerate(idxps):
-                if mxidxp is None or self._cmp_idx(idxp, mxidxp) > 0:
-                    mxidxp = idxp
-                    mi = [i]
-                elif self._cmp_idx(idxp, mxidxp) == 0:
-                    mi.append(i)
-                ri.append(idxp)
-            for i in mi
-                ri[i] = None
-            ramap.append((mxidxp, ri))
-        return ramap
+            cidxps = []
+            for i, idxp in enumerate(amap_itm):
+                while i >= len(add_lsts):
+                    add_lsts.append([])
+                add_lst = add_lsts[i]
+                cidxp = idxp
+                for abas, adst in add_lst:
+                    cidxp, _ = self._add_idx(cidxp, abas, adst)
+                cidxps.append(cidxp)
+                if mxidxp is None or self._cmp_idx(cidxp, mxidxp) > 0:
+                    mxidxp = cidxp
+            for i, cidxp in enumerate(cidxps):
+                add_lst = add_lsts[i]
+                if self._cmp_idx(cidxp, mxidxp) == 0:
+                    continue
+                add_lst.append((cidxp, mxidxp))
+        return add_lsts
 
     def _iter_tab(self, idx):
         yield from self.tabs[idx].items()
@@ -105,6 +109,8 @@ class c_tab_align_iter:
         return tuple(idxp[:i+1])
 
     def _add_idx(self, src, abas, adst):
+        if self._cmp_idx(src, abas) < 0:
+            return src, False
         r = []
         do_add = True
         for i in range(max(len(src), len(abas), len(adst))):
@@ -117,17 +123,16 @@ class c_tab_align_iter:
             if vs != vb:
                 do_add = False
             r.append(vr)
-        return self._trim_idx(r)
+        return self._trim_idx(r), True
 
     def _calc_cidx(self, idxp, si):
+        if si >= len(self.amap):
+            return idxp
         cidxp = idxp
-        for almnidxp, alidxps in self.amap:
-            if self._cmp_idx(cidxp, almnidxp) < 0:
+        for abas, adst in self.amap[si]:
+            cidxp, is_done = self._add_idx(cidxp, abas, adst)
+            if not is_done:
                 break
-            alidxp = alidxps[si]
-            if alidxp is None:
-                continue
-            cidxp = self._add_idx(cidxp, almnidxp, alidxp)
         return cidxp
 
     def _next(self):
@@ -269,10 +274,10 @@ if __name__ == '__main__':
         global md
         md = c_ffta_modifier(CONF)
         md.load()
-        #txts = md._parse_text('text')
-        #md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
-        #txts = md._parse_text('base')
-        #md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+        txts = md._parse_text('text')
+        md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+        txts = md._parse_text('base')
+        md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
         txts = md.parse_texts()
         md.save_json('out_wk.json', txts)
     main()
