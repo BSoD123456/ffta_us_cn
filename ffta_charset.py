@@ -1,6 +1,8 @@
 #! python3
 # coding: utf-8
 
+import json
+
 class c_ffta_charset:
 
     def _decode_char(self, typ, code):
@@ -43,3 +45,62 @@ class c_ffta_charset_us_dummy(c_ffta_charset):
         else:
             d = '.'
         return d
+
+class c_ffta_charset_ocr:
+
+    def __init__(self, path, rom):
+        self.rom = rom
+        self.path = path
+
+    def load(self):
+        try:
+            with open(self.path, 'r', encoding = 'utf-8') as fd:
+                cs, csr = json.load(fd)
+            self.chst = {int(k): v for k, v in cs.items()}
+            self.chst_r = csr
+        except:
+            self.ocr()
+
+    def save(self):
+        try:
+            with open(self.path, 'w', encoding = 'utf-8') as fd:
+                json.dump((self.chst, self.chst_r), fd,
+                    ensure_ascii=False, indent=4, sort_keys=False)
+        except:
+            raise
+
+    def ocr(self):
+        from ffta_font import c_ffta_font_drawer
+        from ffta_ocr import c_ffta_ocr_parser, iter_toks
+        if self.rom:
+            dr = c_ffta_font_drawer(self.rom.tabs['font'])
+            ocr = c_ffta_ocr_parser(iter_toks(self.rom), dr)
+            ocr.parse()
+            ocr.feed_all()
+        else:
+            ocr = c_ffta_ocr_parser(None, None)
+            ocr.parse(noambi = True)
+        cs_ex = ocr.export_charset()
+        cs_rs = []
+        for c_ex in cs_ex:
+            cs = {}
+            for c in c_ex[:2]:
+                cs.update(c)
+            cs_rs.append(cs)
+        self.chst, self.chst_r = cs_rs
+        self.save()
+
+if __name__ == '__main__':
+    import pdb
+    from hexdump import hexdump as hd
+    from pprint import pprint
+    ppr = lambda *a, **ka: pprint(*a, **ka, sort_dicts = False)
+
+    from ffta_sect import main as sect_main
+    sect_main()
+    from ffta_sect import rom_cn
+
+    chs_us = c_ffta_charset_ocr('charset_us.json', None)
+    chs_us.load()
+    chs_cn = c_ffta_charset_ocr('charset_cn.json', rom_cn)
+    chs_cn.load()

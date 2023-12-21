@@ -501,10 +501,13 @@ class c_ffta_ocr_parser:
         self.chrs_idx = 0
         self.toks_done = False
 
-    def parse(self):
+    def parse(self, noambi = False):
         self.ocr = CnOcr(det_model_name='naive_det')
         self.gsr = c_map_guesser()
-        from ffta_ocr_ambi import ocr_ambiguous
+        if noambi:
+            ocr_ambiguous = {}
+        else:
+            from ffta_ocr_ambi import ocr_ambiguous
         self.gsr.innate({
             # unused, only for charset
             **self._chartab(0, [
