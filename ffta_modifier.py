@@ -33,6 +33,8 @@ CONF = {
             's_text': [
                 ((36,), (35,)),
                 ((60,), (60,)),
+                ((61,2,168), (61,2,105)),
+                ((61,2,191), (61,2,119)),
             ],
         },
     }
@@ -274,10 +276,10 @@ if __name__ == '__main__':
         global md
         md = c_ffta_modifier(CONF)
         md.load()
-        txts = md._parse_text('text')
-        md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
-        txts = md._parse_text('base')
-        md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+        #txts = md._parse_text('text')
+        #md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+        #txts = md._parse_text('base')
+        #md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
         txts = md.parse_texts()
         md.save_json('out_wk.json', txts)
     main()
