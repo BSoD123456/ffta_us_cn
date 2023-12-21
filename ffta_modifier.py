@@ -39,8 +39,24 @@ INF = float('inf')
 
 class c_tab_align_iter:
 
-    def __init__(self, *tabs):
+    def __init__(self, *tabs, align_map = []):
         self.tabs = tabs
+        self.amap = self._hndl_amap(align_map)
+
+    def _hndl_amap(self, align_map):
+        ramap = []
+        for idxps in align_map:
+            ri = []
+            mi = None
+            mnidxp = None
+            for i, idxp in enumerate(idxps):
+                if mnidxp is None or self._cmp_idx(idxp, mnidxp) < 0:
+                    mnidxp = idxp
+                    mi = i
+                ri.append(idxp)
+            ri[mi] = None
+            ramap.append((mnidxp, ri))
+        return ramap
 
     def _iter_tab(self, idx):
         yield from self.tabs[idx].items()
@@ -69,18 +85,55 @@ class c_tab_align_iter:
                 return -1
         return 0
 
+    def _trim_idx(self, idxp):
+        for i in range(len(idxp) - 1, -1, -1):
+            if idxp[i] != 0:
+                break
+        else:
+            return tuple()
+        return tuple(idxp[:i+1])
+
+    def _add_idx(self, src, abas, adst):
+        r = []
+        do_add = True
+        for i in range(max(len(src), len(abas), len(adst))):
+            vs = self._getidxv(src, i)
+            vb = self._getidxv(abas, i)
+            vd = self._getidxv(adst, i)
+            vr = vs
+            if do_add:
+                vr += vd - vb
+            if vs != vb:
+                do_add = False
+            r.append(vr)
+        return _trim_idx(r)
+
+    def _calc_cidx(self, idxp, si):
+        cidxp = idxp
+        for almnidxp, alidxps in self.amap:
+            if self._cmp_idx(cidxp, almnidxp) < 0:
+                break
+            alidxp = alidxps[si]
+            if alidxp is None:
+                continue
+            cidxp = self._add_idx(cidxp, almnidxp, alidxp)
+        return cidxp
+
     def _next(self):
         mnidxp = None
-        for itr, (idxp, val) in self.stats:
-            if mnidxp is None or self._cmp_idx(idxp, mnidxp) < 0:
-                mnidxp = idxp
+        cidxps = []
+        for si, (itr, (idxp, val)) in enumerate(self.stats):
+            cidxp = self._calc_cidx(idxp, si)
+            cidxps.append(cidxp)
+            if mnidxp is None or self._cmp_idx(cidxp, mnidxp) < 0:
+                mnidxp = cidxp
         if mnidxp and mnidxp[0] == INF:
-            return mnidxp, None
+            return None, True
         rs = []
-        for sinfo in self.stats:
+        for sinfo, cidxp in zip(self.stats, cidxps):
             itr, (idxp, val) = sinfo
-            if self._cmp_idx(idxp, mnidxp) == 0:
-                rs.append(val)
+            if self._cmp_idx(cidxp, mnidxp) == 0:
+                rs.append((idxp, val))
                 try:
                     idxp, val = next(itr)
                 except StopIteration:
@@ -88,16 +141,16 @@ class c_tab_align_iter:
                     val = None
                 sinfo[1] = (idxp, val)
             else:
-                rs.append(None)
-        return mnidxp, rs
+                rs.append((idxp, None))
+        return rs, False
 
     def iter(self):
         self.reset()
         while True:
-            idxp, rs = self._next()
-            if rs is None:
+            rs, is_done = self._next()
+            if is_done:
                 return
-            yield idxp, rs
+            yield tuple(rs)
 
 class c_ffta_modifier:
 
@@ -176,9 +229,12 @@ class c_ffta_modifier:
             rtab = {}
             trslt[tname] = rtab
             ta = c_tab_align_iter(btab, ttab)
-            for idxp, vals in ta.iter():
-                pkey = '/'.join(str(i) for i in idxp)
-                rtab[pkey] = [v if v else '' for v in vals]
+            for (bidxp, bval), (tidxp, tval) in ta.iter():
+                if bval is None:
+                    pkey = '#' + '/'.join(str(i) for i in tidxp)
+                else:
+                    pkey = '/'.join(str(i) for i in bidxp)
+                rtab[pkey] = [i if i else '' for i in [bval, tval]]
         return trslt
 
     def parse_texts(self):
@@ -196,10 +252,10 @@ if __name__ == '__main__':
         global md
         md = c_ffta_modifier(CONF)
         md.load()
-        txts = md._parse_text('text')
-        md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
-        txts = md._parse_text('base')
-        md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+        #txts = md._parse_text('text')
+        #md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+        #txts = md._parse_text('base')
+        #md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
         txts = md.parse_texts()
         md.save_json('out_wk.json', txts)
     main()
