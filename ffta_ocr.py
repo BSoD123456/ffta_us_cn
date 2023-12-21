@@ -742,6 +742,22 @@ class c_ffta_ocr_parser:
                 ))
         return self.font.make_img(self.font.draw_vert(*blks))
 
+    def uncovered_chrs_idx(self):
+        cs = {}
+        cs_ex, _ = self.export_charset()
+        cs.update(cs_ex[1])
+        cs.update(cs_ex[0])
+        rs = []
+        rc = set()
+        for i, ch in enumerate(self.chrs):
+            fnd = False
+            for c in ch:
+                if not c in cs:
+                    fnd = True
+                    rc.add(c)
+            rs.append(i)
+        return list(rc), rs
+
     def export_charset(self):
         cdet = self.gsr.det.copy()
         cdet_r = self.gsr.det_r.copy()
@@ -808,8 +824,8 @@ class c_ffta_ocr_parser:
 
 def iter_toks(rom):
     def iter_sect(sect):
-        for path, line in sect.iter_item():
-            if line is None:
+        for path, line in sect.iter_item(skiprep = True):
+            if line is None or isinstance(line, list):
                 continue
             try:
                 line = line.text
