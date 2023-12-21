@@ -34,11 +34,15 @@ CONF = {
             's_text': [
                 ((36,), (35,)),
                 ((60,), (60,)),
-                ((61,2,168), (61,2,105)),
-                ((61,2,191), (61,2,119)),
-                ((61,2,216), (61,2,135)),
             ],
         },
+        'trim': {
+            's_text': [{
+                (61,),
+            }, {
+                (61,),
+            }],
+        }
     }
 }
 
@@ -51,9 +55,10 @@ INF = float('inf')
 
 class c_tab_align_iter:
 
-    def __init__(self, *tabs, align_map = []):
+    def __init__(self, *tabs, align_map = [], trim_page = []):
         self.tabs = tabs
         self.amap = self._hndl_amap(align_map)
+        self.trmpg = trim_page
 
     def _hndl_amap(self, align_map):
         add_lsts = []
@@ -84,8 +89,10 @@ class c_tab_align_iter:
         self.stats = []
         for i in range(len(self.tabs)):
             itr = self._iter_tab(i)
-            val = next(itr)
-            self.stats.append([itr, val])
+            zidx = tuple()
+            sinfo = [itr, zidx, (zidx, None)]
+            self._next_sinfo(i, sinfo)
+            self.stats.append(sinfo)
 
     @staticmethod
     def _getidxv(idxpath, i):
@@ -139,10 +146,57 @@ class c_tab_align_iter:
                 break
         return cidxp
 
+    def _sublen_idx(self, dst, src):
+        sl = 0
+        for i in range(max(len(dst), len(src))):
+            vd = self._getidxv(dst, i)
+            vs = self._getidxv(src, i)
+            if vd != vs:
+                assert vd > vs
+                return sl
+            sl += 1
+
+    def _next_sinfo(self, si, sinfo):
+        itr, idxp, (vidxp, val) = sinfo
+        try:
+            nvidxp, nval = next(itr)
+        except StopIteration:
+            infi = (INF,)
+            sinfo[1] = infi
+            sinfo[2] = (infi, None)
+            return
+        sinfo[2] = (nvidxp, nval)
+        if si >= len(self.trmpg):
+            sinfo[1] = nvidxp
+            return
+        tpgs = self.trmpg[si]
+        cpg = None
+        for i in range(len(nvidxp), -1, -1):
+            pg = nvidxp[:i]
+            if pg in tpgs:
+                cpg = pg
+                break
+        if cpg is None:
+            sinfo[1] = nvidxp
+            return
+        sl = self._sublen_idx(nvidxp, vidxp)
+        if sl < len(cpg):
+            sinfo[1] = cpg
+            return
+        ridxp = []
+        for i in range(len(nvidxp)):
+            v = self._getidxv(idxp, i)
+            if i > sl:
+                v = 0
+            elif i == sl:
+                v += 1
+            ridxp.append(v)
+        sinfo[1] = tuple(ridxp)
+
     def _next(self):
         mnidxp = None
         cidxps = []
-        for si, (itr, (idxp, val)) in enumerate(self.stats):
+        for si, (itr, idxp, _) in enumerate(self.stats):
             cidxp = self._calc_cidx(idxp, si)
             cidxps.append(cidxp)
             if mnidxp is None or self._cmp_idx(cidxp, mnidxp) < 0:
@@ -150,18 +204,13 @@ class c_tab_align_iter:
         if mnidxp and mnidxp[0] == INF:
             return None, True
         rs = []
-        for sinfo, cidxp in zip(self.stats, cidxps):
-            itr, (idxp, val) = sinfo
+        for si, (sinfo, cidxp) in enumerate(zip(self.stats, cidxps)):
+            itr, idxp, (vidxp, val) = sinfo
             if self._cmp_idx(cidxp, mnidxp) == 0:
-                rs.append((idxp, val))
-                try:
-                    idxp, val = next(itr)
-                except StopIteration:
-                    idxp = (INF,)
-                    val = None
-                sinfo[1] = (idxp, val)
+                rs.append((vidxp, val))
+                self._next_sinfo(si, sinfo)
             else:
-                rs.append((idxp, None))
+                rs.append((vidxp, None))
         return rs, False
 
     def iter(self):
@@ -250,6 +299,7 @@ class c_ffta_modifier:
     def _merge_texts(self, tbas, ttxt, minfo):
         trslt = {}
         amaps = self.conf['text']['align']
+        trmpgs = self.conf['text']['trim']
         for tname, btab in tbas.items():
             ttab = ttxt[tname]
             rtab = {}
@@ -258,7 +308,12 @@ class c_ffta_modifier:
                 amap = amaps[tname]
             else:
                 amap = []
-            ta = c_tab_align_iter(btab, ttab, align_map = amap)
+            if tname in trmpgs:
+                trmpg = trmpgs[tname]
+            else:
+                trmpg = []
+            ta = c_tab_align_iter(btab, ttab,
+                align_map = amap, trim_page = trmpg)
             for (bidxp, bval), (tidxp, tval) in ta.iter():
                 if bval is None:
                     pkey = '#' + '/'.join(str(i) for i in tidxp)
