@@ -666,6 +666,10 @@ class c_ffta_ocr_parser:
             report('info', f'feed {self.chrs_idx}')
             self.feed_next(tlen_min)
 
+    def refeed_all(self, tlen_min = 200):
+        self.chrs_idx = 0
+        self.feed_all(tlen_min)
+
     def get_conflict(self):
         r = {}
         for c1, rinfo in self.gsr.cnflct.items():
@@ -742,7 +746,7 @@ class c_ffta_ocr_parser:
                 ))
         return self.font.make_img(self.font.draw_vert(*blks))
 
-    def uncovered_chrs_idx(self):
+    def uncovered_chrs(self):
         cs = {}
         cs_ex, _ = self.export_charset()
         cs.update(cs_ex[1])
@@ -755,8 +759,22 @@ class c_ffta_ocr_parser:
                 if not c in cs:
                     fnd = True
                     rc.add(c)
-            rs.append(i)
+            if fnd:
+                rs.append(i)
         return list(rc), rs
+
+    def draw_uncovered(self):
+        ch, _ = self.uncovered_chrs()
+        blks = []
+        for c in ch:
+            blks.append(self.font.draw_horiz(
+                self.font.draw_chars([c]),
+                self.font.draw_comment(f'(0x{c:x})'),
+            ))
+            report(None, f"0x{c:x}: '',")
+        if not blks:
+            return None
+        return self.font.make_img(self.font.draw_vert(*blks))
 
     def export_charset(self):
         cdet = self.gsr.det.copy()

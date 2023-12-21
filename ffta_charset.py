@@ -82,6 +82,7 @@ class c_ffta_charset_ocr(c_ffta_charset):
         assert len(cs_ex[0][2]) == 0
         assert len(cs_ex[1][2]) == 0
         assert len(ocr.get_conflict()) == 0
+        assert len(ocr.uncovered_chrs()[0]) == 0
         cs_rs = []
         for c_ex in cs_ex:
             cs = {}
