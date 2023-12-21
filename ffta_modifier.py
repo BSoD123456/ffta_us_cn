@@ -24,9 +24,17 @@ CONF = {
             'type': 'us',
         },
     },
-    'text_skip': {
-        '@[40]@[42]',
-        '@[42]',
+    'text': {
+        'skip': {
+            '@[40]@[42]',
+            '@[42]',
+        },
+        'align': {
+            's_text': [
+                ((36,), (35,)),
+                ((60,), (60,)),
+            ],
+        },
     }
 }
 
@@ -106,7 +114,7 @@ class c_tab_align_iter:
             if vs != vb:
                 do_add = False
             r.append(vr)
-        return _trim_idx(r)
+        return self._trim_idx(r)
 
     def _calc_cidx(self, idxp, si):
         cidxp = idxp
@@ -199,6 +207,7 @@ class c_ffta_modifier:
     def _parse_text(self, romkey):
         rom = self.srom[romkey]
         chst = self.chst[romkey]
+        txt_skip = self.conf['text']['skip']
         txts = {}
         for tname, tab in self._iter_txttab(rom):
             ttxts = {}
@@ -216,7 +225,7 @@ class c_ffta_modifier:
                 except:
                     pass
                 dec = chst.decode(line.tokens)
-                if dec in self.conf['text_skip']:
+                if dec in txt_skip:
                     continue
                 ttxts[pkey] = dec
             txts[tname] = ttxts
@@ -224,11 +233,16 @@ class c_ffta_modifier:
 
     def _merge_texts(self, tbas, ttxt, minfo):
         trslt = {}
+        amaps = self.conf['text']['align']
         for tname, btab in tbas.items():
             ttab = ttxt[tname]
             rtab = {}
             trslt[tname] = rtab
-            ta = c_tab_align_iter(btab, ttab)
+            if tname in amaps:
+                amap = amaps[tname]
+            else:
+                amap = []
+            ta = c_tab_align_iter(btab, ttab, align_map = amap)
             for (bidxp, bval), (tidxp, tval) in ta.iter():
                 if bval is None:
                     pkey = '#' + '/'.join(str(i) for i in tidxp)
