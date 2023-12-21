@@ -46,9 +46,10 @@ class c_ffta_charset_us_dummy(c_ffta_charset):
             d = '.'
         return d
 
-class c_ffta_charset_ocr:
+class c_ffta_charset_ocr(c_ffta_charset):
 
     def __init__(self, path, rom):
+        super().__init__()
         self.rom = rom
         self.path = path
 
@@ -62,12 +63,9 @@ class c_ffta_charset_ocr:
             self.ocr()
 
     def save(self):
-        try:
-            with open(self.path, 'w', encoding = 'utf-8') as fd:
-                json.dump((self.chst, self.chst_r), fd,
-                    ensure_ascii=False, indent=4, sort_keys=False)
-        except:
-            raise
+        with open(self.path, 'w', encoding = 'utf-8') as fd:
+            json.dump((self.chst, self.chst_r), fd,
+                ensure_ascii=False, indent=4, sort_keys=False)
 
     def ocr(self):
         from ffta_font import c_ffta_font_drawer

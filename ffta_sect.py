@@ -1269,6 +1269,12 @@ def load_rom_cn(fn):
     })
     return rom
 
+load_rom = {
+    'us': load_rom_us,
+    'jp': load_rom_jp,
+    'cn': load_rom_cn,
+}
+
 def main():
     global rom_us, rom_cn, rom_jp
     rom_us = load_rom_us('fftaus.gba')
