@@ -105,5 +105,7 @@ if __name__ == '__main__':
         md = c_ffta_modifier(CONF)
         md.load()
         txts = md.parse_text('text')
-        md.save_json('out.json', txts)
+        md.save_json('out_wk.json', txts)
+        txts = md.parse_text('base')
+        md.save_json('out_us_wk.json', txts)
     main()

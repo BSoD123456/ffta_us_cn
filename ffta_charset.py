@@ -97,7 +97,10 @@ class c_ffta_charset_ocr(c_ffta_charset):
             return '@[E:{typ}:{code:X}]'
 
     def _decode_ctr(self, typ, code):
-        return f'@[{code:X}]'
+        if code == 0x52:
+            return ' '
+        else:
+            return f'@[{code:X}]'
 
     def _decode_char(self, typ, code):
         if code in self.chst:

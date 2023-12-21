@@ -1,3 +1,4 @@
 *.gba
 *.sav
 __pycache__/*
+*_wk.json
