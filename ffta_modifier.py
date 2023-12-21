@@ -24,6 +24,9 @@ CONF = {
             'type': 'us',
         },
     },
+    'text_skip': {
+        '@[40]@[42]',
+    }
 }
 
 import json
@@ -159,6 +162,8 @@ class c_ffta_modifier:
                 except:
                     pass
                 dec = chst.decode(line.tokens)
+                if dec in self.conf['text_skip']:
+                    continue
                 ttxts[pkey] = dec
             txts[tname] = ttxts
         return txts
