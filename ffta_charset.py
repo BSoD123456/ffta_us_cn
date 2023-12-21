@@ -65,7 +65,7 @@ class c_ffta_charset_ocr(c_ffta_charset):
     def save(self):
         with open(self.path, 'w', encoding = 'utf-8') as fd:
             json.dump((self.chst, self.chst_r), fd,
-                ensure_ascii=False, indent=4, sort_keys=False)
+                ensure_ascii=False, indent=4, sort_keys=True)
 
     def ocr(self):
         from ffta_font import c_ffta_font_drawer
@@ -79,6 +79,9 @@ class c_ffta_charset_ocr(c_ffta_charset):
             ocr = c_ffta_ocr_parser(None, None)
             ocr.parse(noambi = True)
         cs_ex = ocr.export_charset()
+        assert len(cs_ex[0][2]) == 0
+        assert len(cs_ex[1][2]) == 0
+        assert len(ocr.get_conflict()) == 0
         cs_rs = []
         for c_ex in cs_ex:
             cs = {}

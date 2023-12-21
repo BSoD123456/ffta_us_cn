@@ -13,6 +13,7 @@ CONF = {
                 'path': 'fftacnb.gba',
                 'type': 'cn',
                 'charset': 'charset_cn.json',
+                'charset_ocr': True,
             },
             'font': {
                 'path': 'fftacns.gba',
@@ -35,6 +36,7 @@ CONF = {
                 ((60,), (60,)),
                 ((61,2,168), (61,2,105)),
                 ((61,2,191), (61,2,119)),
+                ((61,2,216), (61,2,135)),
             ],
         },
     }
@@ -187,7 +189,11 @@ class c_ffta_modifier:
         lfunc = load_rom[rom_conf['type']]
         rom = lfunc(rom_conf['path'])
         if 'charset' in rom_conf:
-            chst = c_ffta_charset_ocr(rom_conf['charset'], rom)
+            if 'charset_ocr' in rom_conf and rom_conf['charset_ocr']:
+                chstrom = rom
+            else:
+                chstrom = None
+            chst = c_ffta_charset_ocr(rom_conf['charset'], chstrom)
             chst.load()
         else:
             chst = None
