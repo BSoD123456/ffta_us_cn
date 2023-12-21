@@ -56,14 +56,17 @@ class c_tab_align_iter:
         for idxps in align_map:
             ri = []
             mi = None
-            mnidxp = None
+            mxidxp = None
             for i, idxp in enumerate(idxps):
-                if mnidxp is None or self._cmp_idx(idxp, mnidxp) < 0:
-                    mnidxp = idxp
-                    mi = i
+                if mxidxp is None or self._cmp_idx(idxp, mxidxp) > 0:
+                    mxidxp = idxp
+                    mi = [i]
+                elif self._cmp_idx(idxp, mxidxp) == 0:
+                    mi.append(i)
                 ri.append(idxp)
-            ri[mi] = None
-            ramap.append((mnidxp, ri))
+            for i in mi
+                ri[i] = None
+            ramap.append((mxidxp, ri))
         return ramap
 
     def _iter_tab(self, idx):
