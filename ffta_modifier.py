@@ -145,15 +145,19 @@ class c_ffta_modifier:
         txts = {}
         for tname, tab in self._iter_txttab(rom):
             ttxts = {}
-            for path, line in tab.iter_item():
+            for path, line in tab.iter_item(skiprep = True):
                 if line is None:
+                    continue
+                #pkey = '/'.join(str(i) for i in path)
+                pkey = tuple(path)
+                if isinstance(line, list):
+                    rep_rpr = '/'.join(str(i) for i in line)
+                    ttxts[pkey] = f'#repeat from {rep_rpr}'
                     continue
                 try:
                     line = line.text
                 except:
                     pass
-                #pkey = '/'.join(str(i) for i in path)
-                pkey = tuple(path)
                 dec = chst.decode(line.tokens)
                 ttxts[pkey] = dec
             txts[tname] = ttxts

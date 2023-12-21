@@ -554,16 +554,23 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         super().parse_size(top_ofs, top_align_width)
         self._tab_ref_size = self._guess_size(top_ofs, True)
 
-    def _iter_item(self, path):
+    def _iter_item(self, path, skiprep):
+        wkofs = {}
         for i, sub in enumerate(self):
             npath = path + [i]
+            if skiprep and sub:
+                sofs = sub.real_offset
+                if sofs in wkofs:
+                    yield npath, wkofs[sofs]
+                    continue
+                wkofs[sofs] = npath
             if isinstance(sub, c_ffta_sect_tab_ref):
-                yield from sub._iter_item(npath)
+                yield from sub._iter_item(npath, skiprep)
             else:
                 yield npath, sub
 
-    def iter_item(self):
-        yield from self._iter_item([])
+    def iter_item(self, skiprep = False):
+        yield from self._iter_item([], skiprep)
 
 class c_ffta_sect_tab_ref_sub(c_ffta_sect_tab_ref):
     def set_sub_offset(self, ofs):
