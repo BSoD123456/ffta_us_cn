@@ -87,7 +87,7 @@ class c_ffta_charset_ocr(c_ffta_charset):
         elif typ == 'CTR_EOS':
             return '@[ ]'
         else:
-            return '@[E:{typ}:{code:X}]'
+            return f'@[E:{typ}:{code:X}]'
 
     def _decode_ctr(self, typ, code):
         if code == 0x52:
@@ -99,7 +99,7 @@ class c_ffta_charset_ocr(c_ffta_charset):
         if code in self.chst:
             return self.chst[code]
         else:
-            return '@[U:{code:X}]'
+            return f'@[U:{code:X}]'
 
 if __name__ == '__main__':
     import pdb
