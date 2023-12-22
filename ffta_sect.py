@@ -1082,6 +1082,9 @@ class c_ffta_sect_text_buf(c_ffta_sect):
                 return 'CTR_FUNC', c
             elif c in self._ctr_tab:
                 cmlen = self._ctr_tab[c]
+                if c == 0:
+                    # for record. 0 can not be recorded
+                    c = 1
                 for _ in range(cmlen):
                     c <<= 8
                     c |= self._gc()
@@ -1134,6 +1137,9 @@ class c_ffta_sect_text_buf(c_ffta_sect):
                 tseq.append(cchr & 0xff)
                 cchr >>= 8
             cmd = tseq.pop()
+            if cmd == 1:
+                # recorded 1 is actually 0
+                cmd = 0
             assert cmd in self._ctr_tab and self._ctr_tab[cmd] == len(tseq)
             buf.append(0x40)
             buf.append(cmd + self._CTR_TOKBASE)
