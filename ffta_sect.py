@@ -903,6 +903,14 @@ class c_ffta_sect_text_line(c_ffta_sect):
         self.raw_len = src_len
         self.warn_cnt = warn_cnt
 
+    def repack_with(self, toks):
+        rmk = self.sub(0, 0, cls = type(self))
+        flags = (self.U16(0) & 0xfc)
+        rmk.W16(flags, 0)
+        rmk.concat(self.text.repack_with(toks))
+        self.repack_end(rmk)
+        return rmk
+
 class c_ffta_sect_text_buf(c_ffta_sect):
 
     _CTR_TOKBASE = 0x21
