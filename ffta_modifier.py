@@ -406,10 +406,12 @@ class c_ffta_modifier:
         for tname, tab in mtxt.items():
             if tname.startswith('#'):
                 continue
+            report('info', f'encode tab:{tname}')
             rtab = {}
             for idxr, (src, dst) in tab.items():
                 if not dst or idxr.startswith('#'):
                     continue
+                #report('info', f'encode line {idxr}')
                 dst = self.chst['text'].encode(dst)
                 if not dst:
                     continue

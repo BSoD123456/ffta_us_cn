@@ -1347,6 +1347,7 @@ class c_ffta_sect_rom(c_ffta_sect):
             if not tname in self.tabs:
                 continue
             subsect = self.tabs[tname]
+            report('info', f'repack tab:{tname}')
             if isinstance(subsect, c_ffta_sect_tab_ref_addr):
                 srmk, sdirty = subsect.repack_with(tab, tail)
             else:
@@ -1362,6 +1363,7 @@ class c_ffta_sect_rom(c_ffta_sect):
             return self, False
         rmk = self.sub(0, self.sect_top, cls = type(self))
         rmk._replace_ptrs(rplc_ptrs)
+        report('info', f'repack concat all {len(ntabs)} tabs')
         for tofs, srmk in ntabs:
             assert tofs == rmk.accessable_top
             rmk.concat(srmk)

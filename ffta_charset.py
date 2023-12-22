@@ -39,8 +39,9 @@ class c_ffta_charset:
         def gc():
             for c in txt:
                 yield c
+        gci = gc()
         while True:
-            ttyp, tchr = self._encode_tok(gc())
+            ttyp, tchr = self._encode_tok(gci)
             if ttyp is None:
                 continue
             elif ttyp == 'EOS':
