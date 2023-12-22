@@ -587,7 +587,7 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
     def iter_item(self, skiprep = False):
         yield from self._iter_item([], skiprep)
 
-    def repack_with(self, tab):
+    def _repack_content(self, tab):
         mtab = {}
         for idxp, val in tab.items():
             si = idxp[0]
@@ -622,11 +622,8 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
                     ss_cch[sk] = si
             srmks.append(srmk)
         if not dirty:
-            return self, False
-        rmk = self.sub(0, 0, cls = type(self))
+            return None, None
         cmk = c_mark(bytearray(), 0)
-        ewd = self._TAB_WIDTH
-        cbase = alignup(ewd * len(srmks), self.sect_align)
         ents = []
         for si, srmk in enumerate(srmks):
             if srmk is None:
@@ -634,10 +631,20 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             elif isinstance(srmk, int):
                 ent = ents[srmk]
             else:
-                ent = cbase + cmk.accessable_top
+                ent = cmk.accessable_top
                 cmk.concat(srmk)
             ents.append(ent)
-            rmk.writeval(ent, si * ewd, ewd)
+        return cmk, ents
+
+    def repack_with(self, tab):
+        cmk, ents = self._repack_content(tab)
+        if cmk is None:
+            return self, False
+        rmk = self.sub(0, 0, cls = type(self))
+        ewd = self._TAB_WIDTH
+        cbase = alignup(ewd * len(ents), self.sect_align)
+        for si, ent in enumerate(ents):
+            rmk.writeval(cbase + ent, si * ewd, ewd)
         assert rmk.accessable_top == cbase
         rmk.concat(cmk)
         self.repack_end(rmk)
