@@ -3,6 +3,11 @@
 
 import json
 
+def report(*args):
+    r = ' '.join(a for a in args if a)
+    print(r)
+    return r
+
 class c_ffta_charset:
 
     def _decode_char(self, typ, code):
@@ -26,6 +31,24 @@ class c_ffta_charset:
 
     def decode(self, toks):
         return ''.join(self.decode_tokens(toks))
+
+    def _encode_tok(self, gc):
+        return NotImplemented
+
+    def _encode_tokens(self, txt):
+        def gc():
+            for c in txt:
+                yield c
+        while True:
+            ttyp, tchr = self._encode_tok(gc())
+            if ttyp is None:
+                continue
+            elif ttyp == 'EOS':
+                break
+            yield ttyp, tchr
+
+    def encode(self, txt):
+        return list(self._encode_tokens(txt))
 
 class c_ffta_charset_us_dummy(c_ffta_charset):
 
@@ -101,6 +124,48 @@ class c_ffta_charset_ocr(c_ffta_charset):
         else:
             return f'@[U:{code:X}]'
 
+    def _encode_tok(self, gc):
+        try:
+            c = next(gc)
+        except StopIteration:
+            return 'EOS', 0
+        if c == '#':
+            return 'EOS', 0
+        elif c == '@':
+            c = next(gc)
+            assert(c == '[')
+            cs = []
+            while True:
+                c = next(gc)
+                if c == ']':
+                    break
+                else:
+                    cs.append(c)
+            cs = ''.join(cs)
+            if cs == ' ':
+                return 'CTR_EOS', 0
+            cs = cs.split(':')
+            if cs[0] == 'U':
+                return 'CHR_FULL', int(cs[1], 16)
+            elif cs[0] == 'E':
+                return cs[1], int(cs[2], 16)
+            elif not len(cs) == 1:
+                report('warning', f'unknown ctrl: {cs}')
+                return None, None
+            try:
+                cv = int(cs[0], 16)
+            except:
+                report('warning', f'unknown ctrl: {cs[0]}')
+                return None, None
+            return 'CTR_FUNC', cv
+        elif c == ' ':
+            return 'CTR_FUNC', 0x52
+        elif c in self.chst_r:
+            return 'CHR_FULL', self.chst_r[c]
+        else:
+            report('warning', f'unknown char: {c}')
+            return None, None
+            
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd

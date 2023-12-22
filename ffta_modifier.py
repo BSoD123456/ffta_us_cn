@@ -408,7 +408,10 @@ class c_ffta_modifier:
                 continue
             rtab = {}
             for idxr, (src, dst) in tab.items():
-                if not dst or dst.startswith('#') or idxr.startswith('#'):
+                if not dst or idxr.startswith('#'):
+                    continue
+                dst = self.chst['text'].encode(dst)
+                if not dst:
                     continue
                 idxp = tuple(int(i) for i in idxr.split('/'))
                 rtab[idxp] = dst
