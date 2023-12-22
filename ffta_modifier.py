@@ -34,6 +34,9 @@ CONF = {
             'dummy',
             'Dummy',
         },
+        'var': {
+            'prefix': ['CRN_'],
+        },
         'align': {
             's_text': [
                 ((36,), (35,)),
@@ -347,6 +350,7 @@ class c_ffta_modifier:
     def _merge_texts(self, tbas, ttxt, minfo):
         trslt = {}
         utrslt = {}
+        var_prefix = self.conf['text']['var']['prefix']
         amaps = self.conf['text']['align']
         trmpgs = self.conf['text']['trim']
         tnames = self._merge_keys(tbas, ttxt)
@@ -368,8 +372,12 @@ class c_ffta_modifier:
                     pkey = '#' + '/'.join(str(i) for i in tidxp)
                 else:
                     pkey = '/'.join(str(i) for i in bidxp)
-                    if tval and re.match(r'^[0-9A-Z_]+$', bval):
-                        report('warning', f'varname: {bval} -> {tval}')
+                    #if tval and re.match(r'^[0-9A-Z_]+$', bval):
+                    for vp in var_prefix:
+                        if bval.startswith(vp):
+                            #report('warning', f'varname: {bval} -> {tval}')
+                            if tval:
+                                tval = '#' + tval
                 rtab[pkey] = [i if i else '' for i in [bval, tval]]
                 if not tval:
                     assert bval
