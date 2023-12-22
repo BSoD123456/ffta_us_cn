@@ -607,13 +607,19 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             stab[sidxp] = val
         dirty = False
         srmks = []
+        ss_cch = {}
         for si, subsect in enumerate(self):
             if si in mtab:
                 srmk, sdirty = subsect.repack_with(mtab[si])
                 if sdirty:
                     dirty = True
             else:
-                srmk = subsect.repack_copy()
+                sk = subsect.real_offset
+                if sk in ss_cch:
+                    srmk = ss_cch[sk]
+                else:
+                    srmk = subsect.repack_copy()
+                    ss_cch[sk] = si
             srmks.append(srmk)
         if not dirty:
             return self, False
@@ -621,12 +627,17 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         cmk = c_mark(bytearray(), 0)
         ewd = self._TAB_WIDTH
         cbase = alignup(ewd * len(srmks), self.sect_align)
+        ents = []
         for si, srmk in enumerate(srmks):
             if srmk is None:
-                rmk.writeval(0, si * ewd, ewd)
-                continue
-            rmk.writeval(cbase + cmk.accessable_top, si * ewd, ewd)
-            cmk.concat(srmk)
+                ent = 0
+            elif isinstance(srmk, int):
+                ent = ents[srmk]
+            else:
+                ent = cbase + cmk.accessable_top
+                cmk.concat(srmk)
+            ents.append(ent)
+            rmk.writeval(ent, si * ewd, ewd)
         assert rmk.accessable_top == cbase
         rmk.concat(cmk)
         self.repack_end(rmk)
