@@ -711,10 +711,9 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         cmk, ents = self._repack_content(tab)
         if cmk is None:
             return self, False
-        host = self._tab_ref_host
-        rmk = host.sub(base, 0, cls = type(self))
+        abase = self._tab_ref_host.aot(base, 'oa')
+        rmk = type(self)(bytearray(), base)
         ewd = self._TAB_WIDTH
-        abase = host.aot(base, 'oa')
         cbase = alignup(ewd * len(ents) + abase, self.sect_align)
         for si, ent in enumerate(ents):
             rmk.writeval(cbase + ent, si * ewd, ewd)
