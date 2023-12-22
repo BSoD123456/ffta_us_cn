@@ -1393,7 +1393,8 @@ class c_ffta_sect_rom(c_ffta_sect):
             naddr = self.aot(tail, 'oa')
             rplc_ptrs[oaddr] = naddr
             ntabs.append((tail, srmk))
-            tail += srmk.accessable_top
+            align = max(subsect.sect_align, subsect.sect_top_align)
+            tail = srmk.realign(align, tail)
         if not ntabs:
             return self, False
         rmk = self.sub(0, self.sect_top, cls = type(self))
