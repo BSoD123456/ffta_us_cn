@@ -351,13 +351,17 @@ class c_ffta_sect(c_mark):
             raise ValueError('can not copy non-top sect')
         return self.sub(0, self.sect_top, cls = type(self))
 
-    def _repack_end(self, rmk):
-        align = self.sect_top_align
-        ac_top = rmk.accessable_top
+    def realign(self, align, base):
+        ac_top = self.accessable_top + base
         align_top = alignup(ac_top, align)
         add_top = align_top - ac_top
         if add_top > 0:
-            rmk.WBYTES(bytes(add_top), ac_top)
+            self.WBYTES(bytes(add_top), self.accessable_top)
+        return align_top
+
+    def _repack_end(self, rmk):
+        align = self.sect_top_align
+        align_top = rmk.realign(align, 0)
         rmk.parse_size(align_top, align)
         rmk.parse()
 
@@ -615,7 +619,8 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         dirty = False
         srmks = []
         ent_cch = {}
-        cent = alignup(self._TAB_WIDTH * self.tsize + base, self.sect_align)
+        cbase = alignup(self._TAB_WIDTH * self.tsize + base, self.sect_align)
+        cent = cbase
         ents = []
         for si, subsect in enumerate(self):
             if subsect is None:
@@ -641,14 +646,15 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
                 srmk = srmk.repack_copy()
             ent_cch[sk] = cent
             ents.append(cent)
+            cent = srmk.realign(subsect.sect_top_align, cent)
             srmks.append(srmk)
-            cent += srmk.accessable_top
         if not dirty:
             return None, None
         cmk = c_mark(bytearray(), 0)
         for srmk in srmks:
             if not srmk is None:
                 cmk.concat(srmk)
+        assert cmk.accessable_top == cent - cbase
         return cmk, ents
 
     def _repack_with(self, tab):
@@ -1570,4 +1576,4 @@ if __name__ == '__main__':
                 (61, 3, 5): t2,
             },
             'fx_text': {(1, 0): t2}})
-    #rmk, rdrt = t01()
+    rmk, rdrt = t01()
