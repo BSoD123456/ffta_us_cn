@@ -607,35 +607,38 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             stab[sidxp] = val
         dirty = False
         srmks = []
-        ss_cch = {}
+        ent_cch = {}
+        cent = 0
+        ents = []
         for si, subsect in enumerate(self):
             if subsect is None:
-                srmk = None
-            elif si in mtab:
+                ents.append(0)
+                srmks.append(None)
+                continue
+            sk = subsect.real_offset
+            if sk in ent_cch:
+                ents.append(ent_cch[sk])
+                srmks.append(None)
+                continue
+            if si in mtab:
                 srmk, sdirty = subsect.repack_with(mtab[si])
                 if sdirty:
                     dirty = True
             else:
-                sk = subsect.real_offset
-                if sk in ss_cch:
-                    srmk = ss_cch[sk]
-                else:
-                    srmk = subsect.repack_copy()
-                    ss_cch[sk] = si
+                srmk = subsect
+                sdirty = False
+            if not sdirty:
+                srmk = srmk.repack_copy()
+            ent_cch[sk] = cent
+            ents.append(cent)
             srmks.append(srmk)
+            cent += srmk.accessable_top
         if not dirty:
             return None, None
         cmk = c_mark(bytearray(), 0)
-        ents = []
-        for si, srmk in enumerate(srmks):
-            if srmk is None:
-                ent = 0
-            elif isinstance(srmk, int):
-                ent = ents[srmk]
-            else:
-                ent = cmk.accessable_top
+        for srmk in srmks:
+            if not srmk is None:
                 cmk.concat(srmk)
-            ents.append(ent)
         return cmk, ents
 
     def repack_with(self, tab):
@@ -657,6 +660,8 @@ class c_ffta_sect_tab_ref_sub(c_ffta_sect_tab_ref):
         self._tab_ref_sub_offset = ofs
     def get_entry(self, idx):
         return super().get_entry(idx) - self._tab_ref_sub_offset
+    def repack_end(self, rmk):
+        pass
 
 class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
     
@@ -1534,13 +1539,18 @@ if __name__ == '__main__':
 
     def t01():
         global foo
-##        foo = rom_us.tabs['s_text']
-##        bar = rom_cn.tabs['s_text']
-##        t = bar[30][16].text.tokens
-##        return foo.repack_with({(30, 16): t})
+        #foo = rom_us.tabs['s_text']
+        bar = rom_cn.tabs['s_text']
+        t1 = bar[30][16].text.tokens
+        #return foo.repack_with({(30, 16): t})
         #foo = rom_us.tabs['fx_text']
         bar = rom_cn.tabs['fx_text']
-        t = bar[1][0].text.tokens
+        t2 = bar[1][0].text.tokens
         #return foo.repack_with({(1, 0): t}, 0x3000000)
-        return rom_us.repack_with({'fx_text': {(1, 0): t}})
+        return rom_us.repack_with({
+            's_text': {
+                (30, 16): t1,
+                (61, 3, 5): t2,
+            },
+            'fx_text': {(1, 0): t2}})
     rmk, rdrt = t01()
