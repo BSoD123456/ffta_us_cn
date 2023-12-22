@@ -1261,6 +1261,7 @@ class c_ffta_sect_rom(c_ffta_sect):
     ARG_SELF = c_symb()
 
     def setup(self, tabs_info, rom_ed = None):
+        self.init_info = tabs_info
         self.set_info(tabs_info)
         self.parse_size(rom_ed, 1)
         self.parse()
@@ -1328,6 +1329,29 @@ class c_ffta_sect_rom(c_ffta_sect):
             else:
                 tabs[tab_name] = subsect
         self.tabs = tabs
+
+    def repack_with(self, tabs):
+        tail = self.sect_top
+        ntabs = []
+        for tname, tab in tabs.items():
+            if not tname in self.tabs:
+                continue
+            subsect = self.tabs[tname]
+            if isinstance(subsect, c_ffta_sect_tab_ref_addr):
+                srmk, sdirty = subsect.repack_with(tab, tail)
+            else:
+                srmk, sdirty = subsect.repack_with(tab)
+            if not sdirty:
+                continue
+            ntabs.append((tail, srmk))
+            tail += srmk.accessable_top
+        if not ntabs:
+            return self, False
+        rmk = self.sub(0, self.sect_top, cls = type(self))
+        for tofs, srmk in ntabs:
+            assert tofs == rmk.accessable_top
+            rmk.concat(srmk)
+        return rmk, True
 
 # ===============
 #      main
@@ -1491,8 +1515,9 @@ if __name__ == '__main__':
 ##        bar = rom_cn.tabs['s_text']
 ##        t = bar[30][16].text.tokens
 ##        return foo.repack_with({(30, 16): t})
-        foo = rom_us.tabs['fx_text']
+        #foo = rom_us.tabs['fx_text']
         bar = rom_cn.tabs['fx_text']
         t = bar[1][0].text.tokens
-        return foo.repack_with({(1, 0): t}, 0x3000000)
+        #return foo.repack_with({(1, 0): t}, 0x3000000)
+        return rom_us.repack_with({'fx_text': {(1, 0): t}})
     rmk, rdrt = t01()
