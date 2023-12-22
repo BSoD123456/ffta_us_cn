@@ -283,6 +283,10 @@ class c_ffta_modifier:
             json.dump(obj, fd,
                 ensure_ascii=False, indent=4, sort_keys=False)
 
+    def save_rom(self, fn, rmk):
+        with open(fn, 'wb') as fd:
+            fd.write(rmk.raw)
+
     @staticmethod
     def _iter_txttab(rom):
         for tname, tab in rom.tabs.items():
@@ -397,6 +401,30 @@ class c_ffta_modifier:
         elif utxt:
             return ut
 
+    def _rplc_txt_tab(self, mtxt):
+        rtabs = {}
+        for tname, tab in mtxt.items():
+            if tname.startswith('#'):
+                continue
+            rtab = {}
+            for idxr, (src, dst) in tab.items():
+                if not dst or dst.startswith('#') or idxr.startswith('#'):
+                    continue
+                idxp = tuple(int(i) for i in idxr.split('/'))
+                rtab[idxp] = dst
+            if rtab:
+                rtabs[tname] = rtab
+        return rtabs
+
+    def repack_rom_with_text(self, mtxt):
+        rtabs = self._rplc_txt_tab(mtxt)
+        if not rtabs:
+            return None
+        rmk, dirty = self.srom['base'].repack_with(rtabs)
+        if not dirty:
+            return None
+        return rmk
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
@@ -414,4 +442,6 @@ if __name__ == '__main__':
         txts, utxts = md.parse_texts(True, True)
         md.save_json('out_wk.json', txts)
         md.save_json('out_ut_wk.json', utxts)
+        rmk = md.repack_rom_with_text(txts)
+        md.save_rom('ffta_tst_uscn.gba', rmk)
     main()
