@@ -351,7 +351,7 @@ class c_ffta_sect(c_mark):
             raise ValueError('can not copy non-top sect')
         return self.sub(0, self.sect_top, cls = type(self))
 
-    def repack_end(self, rmk):
+    def _repack_end(self, rmk):
         align = self.sect_top_align
         ac_top = rmk.accessable_top
         align_top = alignup(ac_top, align)
@@ -360,6 +360,13 @@ class c_ffta_sect(c_mark):
             rmk.WBYTES(bytes(add_top), ac_top)
         rmk.parse_size(align_top, align)
         rmk.parse()
+
+    def repack_with(self, tab, *args, **kargs):
+        rmk, dirty = self._repack_with(tab, *args, **kargs)
+        if not dirty:
+            return rmk, False
+        self._repack_end(rmk, *args, **kargs)
+        return rmk, True
 
 # ===============
 #      tabs
@@ -587,7 +594,7 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
     def iter_item(self, skiprep = False):
         yield from self._iter_item([], skiprep)
 
-    def _repack_content(self, tab):
+    def _repack_content(self, tab, base):
         mtab = {}
         for idxp, val in tab.items():
             si = idxp[0]
@@ -608,7 +615,7 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         dirty = False
         srmks = []
         ent_cch = {}
-        cent = 0
+        cent = alignup(self._TAB_WIDTH * self.tsize + base, self.sect_align)
         ents = []
         for si, subsect in enumerate(self):
             if subsect is None:
@@ -621,7 +628,10 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
                 srmks.append(None)
                 continue
             if si in mtab:
-                srmk, sdirty = subsect.repack_with(mtab[si])
+                if isinstance(subsect, c_ffta_sect_tab_ref_sub):
+                    srmk, sdirty = subsect.repack_with(mtab[si], cent)
+                else:
+                    srmk, sdirty = subsect.repack_with(mtab[si])
                 if sdirty:
                     dirty = True
             else:
@@ -641,18 +651,15 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
                 cmk.concat(srmk)
         return cmk, ents
 
-    def repack_with(self, tab):
-        cmk, ents = self._repack_content(tab)
+    def _repack_with(self, tab):
+        cmk, ents = self._repack_content(tab, 0)
         if cmk is None:
             return self, False
         rmk = self.sub(0, 0, cls = type(self))
         ewd = self._TAB_WIDTH
-        cbase = alignup(ewd * len(ents), self.sect_align)
         for si, ent in enumerate(ents):
-            rmk.writeval(cbase + ent, si * ewd, ewd)
-        assert rmk.accessable_top == cbase
+            rmk.writeval(ent, si * ewd, ewd)
         rmk.concat(cmk)
-        self.repack_end(rmk)
         return rmk, True
 
 class c_ffta_sect_tab_ref_sub(c_ffta_sect_tab_ref):
@@ -660,8 +667,19 @@ class c_ffta_sect_tab_ref_sub(c_ffta_sect_tab_ref):
         self._tab_ref_sub_offset = ofs
     def get_entry(self, idx):
         return super().get_entry(idx) - self._tab_ref_sub_offset
-    def repack_end(self, rmk):
-        pass
+    def _repack_end(self, rmk, base):
+        rmk.set_sub_offset(base)
+        super()._repack_end(rmk)
+    def _repack_with(self, tab, base):
+        cmk, ents = self._repack_content(tab, base)
+        if cmk is None:
+            return self, False
+        rmk = self.sub(0, 0, cls = type(self))
+        ewd = self._TAB_WIDTH
+        for si, ent in enumerate(ents):
+            rmk.writeval(ent, si * ewd, ewd)
+        rmk.concat(cmk)
+        return rmk, True
 
 class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
     
@@ -707,24 +725,21 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         self._tab_ref_size = tbsz
         self.set_nondeterm()
 
-    def repack_end(self, rmk):
+    def _repack_end(self, rmk, base):
         rmk.set_info(rmk, self.tsize,
             self._tab_hole_idxs.copy())
-        super().repack_end(rmk)
+        super()._repack_end(rmk)
 
-    def repack_with(self, tab, base):
-        cmk, ents = self._repack_content(tab)
+    def _repack_with(self, tab, base):
+        abase = self._tab_ref_host.aot(base, 'oa')
+        cmk, ents = self._repack_content(tab, abase)
         if cmk is None:
             return self, False
-        abase = self._tab_ref_host.aot(base, 'oa')
         rmk = type(self)(bytearray(), base)
         ewd = self._TAB_WIDTH
-        cbase = alignup(ewd * len(ents) + abase, self.sect_align)
         for si, ent in enumerate(ents):
-            rmk.writeval(cbase + ent, si * ewd, ewd)
-        assert rmk.accessable_top + abase == cbase
+            rmk.writeval(ent, si * ewd, ewd)
         rmk.concat(cmk)
-        self.repack_end(rmk)
         return rmk, True
 
 # ===============
@@ -998,7 +1013,7 @@ class c_ffta_sect_text_line(c_ffta_sect):
         self.raw_len = src_len
         self.warn_cnt = warn_cnt
 
-    def repack_with(self, toks):
+    def _repack_with(self, toks):
         srmk, dirty = self.text.repack_with(toks)
         if not dirty:
             return self, False
@@ -1006,7 +1021,6 @@ class c_ffta_sect_text_line(c_ffta_sect):
         flags = (self.U16(0) & 0xfc)
         rmk.W16(flags, 0)
         rmk.concat(srmk)
-        self.repack_end(rmk)
         return rmk, True
 
 class c_ffta_sect_text_buf(c_ffta_sect):
@@ -1162,13 +1176,12 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         buf.append(0)
         return buf
 
-    def repack_with(self, toks):
+    def _repack_with(self, toks):
         if not toks:
             return self, False
         buf = self._encode(toks)
         rmk = self.sub(0, 0, cls = c_ffta_sect_text_buf)
         rmk.WBYTES(bytearray(buf), 0)
-        self.repack_end(rmk)
         return rmk, True
 
 class c_ffta_sect_text_buf_ya(c_ffta_sect_text_buf):
@@ -1347,10 +1360,10 @@ class c_ffta_sect_rom(c_ffta_sect):
             if v in rplc_ptrs:
                 self.W32(rplc_ptrs[v], i)
 
-    def repack_end(self, rmk):
+    def _repack_end(self, rmk):
         rmk.setup(self.init_info, rmk.accessable_top)
 
-    def repack_with(self, tabs):
+    def _repack_with(self, tabs):
         tail = self.sect_top
         ntabs = []
         rplc_ptrs = {}
@@ -1378,7 +1391,6 @@ class c_ffta_sect_rom(c_ffta_sect):
         for tofs, srmk in ntabs:
             assert tofs == rmk.accessable_top
             rmk.concat(srmk)
-        self.repack_end(rmk)
         return rmk, True
 
 # ===============
@@ -1553,4 +1565,4 @@ if __name__ == '__main__':
                 (61, 3, 5): t2,
             },
             'fx_text': {(1, 0): t2}})
-    rmk, rdrt = t01()
+    #rmk, rdrt = t01()
