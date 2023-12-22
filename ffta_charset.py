@@ -78,18 +78,7 @@ class c_ffta_charset_ocr(c_ffta_charset):
         else:
             ocr = c_ffta_ocr_parser(None, None)
             ocr.parse(noambi = True)
-        cs_ex = ocr.export_charset()
-        assert len(cs_ex[0][2]) == 0
-        assert len(cs_ex[1][2]) == 0
-        assert len(ocr.get_conflict()) == 0
-        assert len(ocr.uncovered_chrs()[0]) == 0
-        cs_rs = []
-        for c_ex in cs_ex:
-            cs = {}
-            for c in c_ex[:2]:
-                cs.update(c)
-            cs_rs.append(cs)
-        self.chst, self.chst_r = cs_rs
+        self.chst, self.chst_r = ocr.final_charset()
         self.save()
 
     def _decode_unknown(self, typ, code):

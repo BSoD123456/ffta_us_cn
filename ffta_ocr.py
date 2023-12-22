@@ -506,8 +506,9 @@ class c_ffta_ocr_parser:
         self.gsr = c_map_guesser()
         if noambi:
             ocr_ambiguous = {}
+            ocr_normalize = {}
         else:
-            from ffta_ocr_ambi import ocr_ambiguous
+            from ffta_ocr_ambi import ocr_ambiguous, ocr_normalize
         self.gsr.innate({
             # unused, only for charset
             **self._chartab(0, [
@@ -548,6 +549,7 @@ class c_ffta_ocr_parser:
         }
         self.gsr_trim = [' ']
         self.txt_trim_rng = [(0, 0xa4), (0xe4, 0xea), (0xed, 0x118)]
+        self.chst_norm = ocr_normalize
 
     @staticmethod
     def _chartab(base, seq, enc):
@@ -761,7 +763,7 @@ class c_ffta_ocr_parser:
                     rc.add(c)
             if fnd:
                 rs.append(i)
-        return list(rc), rs
+        return sorted(rc), rs
 
     def draw_uncovered(self):
         ch, _ = self.uncovered_chrs()
@@ -829,16 +831,24 @@ class c_ffta_ocr_parser:
                     cndet_r[c2] = c1
         return (cdet, cndet, cndet_mul), (cdet_r, cndet_r, cndet_r_mul)
 
-    def unknown_chars(self):
+    def final_charset(self):
         cs, csr = self.export_charset()
-        uc = set()
-        self.chrs_idx = 0
-        while self.chrs_idx >= 0:
-            txt = self.pick_next(200)
-            for c in txt:
-                if not (c in cs[0] or c in cs[1]):
-                    uc.add(c)
-        return sorted(uc)
+        assert len(cs[2]) == len(csr[2]) == 0
+        assert len(self.get_conflict()) == 0
+        assert len(self.uncovered_chrs()[0]) == 0
+        dcs = {}
+        dcsr = {}
+        for i in range(2):
+            dcs.update(cs[i])
+            dcsr.update(csr[i])
+        fcs = {}
+        for ch, s in dcs.items():
+            if s in self.gsr_norm:
+                s = self.gsr_norm[s]
+            if s in self.chst_norm:
+                s = self.chst_norm[s]
+            fcs[ch] = s
+        return fcs, dcsr
 
 def iter_toks(rom):
     def iter_sect(sect):
