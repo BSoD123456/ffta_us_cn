@@ -1368,9 +1368,14 @@ class c_ffta_sect_rom(c_ffta_sect):
         ntabs = []
         rplc_ptrs = {}
         for tname, tab in tabs.items():
-            if not tname in self.tabs:
+            tgrps = tname.split(':')
+            ctabs = self.tabs
+            try:
+                for tn in tgrps:
+                    ctabs = ctabs[tn]
+            except KeyError:
                 continue
-            subsect = self.tabs[tname]
+            subsect = ctabs
             report('info', f'repack tab:{tname}')
             if isinstance(subsect, c_ffta_sect_tab_ref_addr):
                 srmk, sdirty = subsect.repack_with(tab, tail)
