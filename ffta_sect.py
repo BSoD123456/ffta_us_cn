@@ -609,7 +609,9 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         srmks = []
         ss_cch = {}
         for si, subsect in enumerate(self):
-            if si in mtab:
+            if subsect is None:
+                srmk = None
+            elif si in mtab:
                 srmk, sdirty = subsect.repack_with(mtab[si])
                 if sdirty:
                     dirty = True
@@ -699,6 +701,27 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
                 tbsz[i] = None
         self._tab_ref_size = tbsz
         self.set_nondeterm()
+
+    def repack_end(self, rmk):
+        rmk.set_info(rmk, self.tsize,
+            self._tab_hole_idxs.copy())
+        super().repack_end(rmk)
+
+    def repack_with(self, tab, base):
+        cmk, ents = self._repack_content(tab)
+        if cmk is None:
+            return self, False
+        host = self._tab_ref_host
+        rmk = host.sub(base, 0, cls = type(self))
+        ewd = self._TAB_WIDTH
+        abase = host.aot(base, 'oa')
+        cbase = alignup(ewd * len(ents) + abase, self.sect_align)
+        for si, ent in enumerate(ents):
+            rmk.writeval(cbase + ent, si * ewd, ewd)
+        assert rmk.accessable_top + abase == cbase
+        rmk.concat(cmk)
+        self.repack_end(rmk)
+        return rmk, True
 
 # ===============
 #     scene
@@ -1465,9 +1488,12 @@ if __name__ == '__main__':
 
     def t01():
         global foo
-        foo = rom_us.tabs['s_text']
-        bar = rom_cn.tabs['s_text']
-        t = bar[30][16].text.tokens
-        return foo.repack_with({(30, 16): t})
-        #return foo[30].repack_with({(16,): t})
+##        foo = rom_us.tabs['s_text']
+##        bar = rom_cn.tabs['s_text']
+##        t = bar[30][16].text.tokens
+##        return foo.repack_with({(30, 16): t})
+        foo = rom_us.tabs['fx_text']
+        bar = rom_cn.tabs['fx_text']
+        t = bar[1][0].text.tokens
+        return foo.repack_with({(1, 0): t}, 0x3000000)
     rmk, rdrt = t01()
