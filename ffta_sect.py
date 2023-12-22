@@ -1330,9 +1330,19 @@ class c_ffta_sect_rom(c_ffta_sect):
                 tabs[tab_name] = subsect
         self.tabs = tabs
 
+    def _replace_ptrs(self, rplc_ptrs):
+        for i in range(0, self.accessable_top, 4):
+            v = self.U32(i)
+            if v in rplc_ptrs:
+                self.W32(rplc_ptrs[v], i)
+
+    def repack_end(self, rmk):
+        rmk.setup(self.init_info, rmk.accessable_top)
+
     def repack_with(self, tabs):
         tail = self.sect_top
         ntabs = []
+        rplc_ptrs = {}
         for tname, tab in tabs.items():
             if not tname in self.tabs:
                 continue
@@ -1343,14 +1353,19 @@ class c_ffta_sect_rom(c_ffta_sect):
                 srmk, sdirty = subsect.repack_with(tab)
             if not sdirty:
                 continue
+            oaddr = self.aot(subsect.real_offset, 'oa')
+            naddr = self.aot(tail, 'oa')
+            rplc_ptrs[oaddr] = naddr
             ntabs.append((tail, srmk))
             tail += srmk.accessable_top
         if not ntabs:
             return self, False
         rmk = self.sub(0, self.sect_top, cls = type(self))
+        rmk._replace_ptrs(rplc_ptrs)
         for tofs, srmk in ntabs:
             assert tofs == rmk.accessable_top
             rmk.concat(srmk)
+        self.repack_end(rmk)
         return rmk, True
 
 # ===============
