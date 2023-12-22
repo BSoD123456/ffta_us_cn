@@ -346,6 +346,11 @@ class c_ffta_sect(c_mark):
             ptr = self._addr2offs(ptr)
         return self.aot(self.U32(ptr), typ[1:])
 
+    def repack_copy(self):
+        if self.sect_top is None:
+            raise ValueError('can not copy non-top sect')
+        return self.sub(0, self.sect_top, cls = type(self))
+
     def repack_end(self, rmk):
         align = self.sect_top_align
         ac_top = rmk.accessable_top
@@ -581,6 +586,51 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
 
     def iter_item(self, skiprep = False):
         yield from self._iter_item([], skiprep)
+
+    def repack_with(self, tab):
+        mtab = {}
+        for idxp, val in tab.items():
+            si = idxp[0]
+            sidxp = idxp[1:]
+            if not sidxp:
+                if si in mtab:
+                    raise ValueError(f'dumplicate repack tab index: {si}')
+                mtab[si] = val
+                continue
+            if not si in mtab:
+                stab = {}
+                mtab[si] = stab
+            elif isinstance(mtab[si], dict):
+                stab = mtab[si]
+            else:
+                raise ValueError(f'dumplicate repack tab index: {idxp}/{si}')
+            stab[sidxp] = val
+        dirty = False
+        srmks = []
+        for si, subsect in enumerate(self):
+            if si in mtab:
+                srmk, sdirty = subsect.repack_with(mtab[si])
+                if sdirty:
+                    dirty = True
+            else:
+                srmk = subsect.repack_copy()
+            srmks.append(srmk)
+        if not dirty:
+            return self, False
+        rmk = self.sub(0, 0, cls = type(self))
+        cmk = c_mark(bytearray(), 0)
+        ewd = self._TAB_WIDTH
+        cbase = alignup(ewd * len(srmks), self.sect_align)
+        for si, srmk in enumerate(srmks):
+            if srmk is None:
+                rmk.writeval(0, si * ewd, ewd)
+                continue
+            rmk.writeval(cbase + cmk.accessable_top, si * ewd, ewd)
+            cmk.concat(srmk)
+        assert rmk.accessable_top == cbase
+        rmk.concat(cmk)
+        self.repack_end(rmk)
+        return rmk, True
 
 class c_ffta_sect_tab_ref_sub(c_ffta_sect_tab_ref):
     def set_sub_offset(self, ofs):
@@ -904,12 +954,15 @@ class c_ffta_sect_text_line(c_ffta_sect):
         self.warn_cnt = warn_cnt
 
     def repack_with(self, toks):
+        srmk, dirty = self.text.repack_with(toks)
+        if not dirty:
+            return self, False
         rmk = self.sub(0, 0, cls = type(self))
         flags = (self.U16(0) & 0xfc)
         rmk.W16(flags, 0)
-        rmk.concat(self.text.repack_with(toks))
+        rmk.concat(srmk)
         self.repack_end(rmk)
-        return rmk
+        return rmk, True
 
 class c_ffta_sect_text_buf(c_ffta_sect):
 
@@ -1059,11 +1112,13 @@ class c_ffta_sect_text_buf(c_ffta_sect):
         return buf
 
     def repack_with(self, toks):
+        if not toks:
+            return self, False
         buf = self._encode(toks)
         rmk = self.sub(0, 0, cls = c_ffta_sect_text_buf)
         rmk.WBYTES(bytearray(buf), 0)
         self.repack_end(rmk)
-        return rmk
+        return rmk, True
 
 class c_ffta_sect_text_buf_ya(c_ffta_sect_text_buf):
 
@@ -1389,4 +1444,12 @@ if __name__ == '__main__':
             cmd_addr = bcm.get_cmd_addr(cop)
             print(f'{str(rdy):>5s} 0x{cofs:x}: 0x{cop:x}(0x{cmd_addr:x}) {len(cprms)} cprms:')
             hd(cprms)
-            
+
+    def t01():
+        global foo
+        foo = rom_us.tabs['s_text']
+        bar = rom_cn.tabs['s_text']
+        t = bar[30][16].text.tokens
+        return foo.repack_with({(30, 16): t})
+        #return foo[30].repack_with({(16,): t})
+    rmk, rdrt = t01()
