@@ -30,6 +30,7 @@ CONF = {
             '@[40]@[42]',
             '@[42]',
             'dummy@[40]@[42]',
+            'dummy@[42]',
             'dummy',
             'Dummy',
         },
@@ -58,10 +59,15 @@ CONF = {
     }
 }
 
-import json
+import json, re
 
 from ffta_sect import load_rom
 from ffta_charset import c_ffta_charset_ocr
+
+def report(*args):
+    r = ' '.join(a for a in args if a)
+    print(r)
+    return r
 
 INF = float('inf')
 
@@ -340,6 +346,7 @@ class c_ffta_modifier:
 
     def _merge_texts(self, tbas, ttxt, minfo):
         trslt = {}
+        utrslt = {}
         amaps = self.conf['text']['align']
         trmpgs = self.conf['text']['trim']
         tnames = self._merge_keys(tbas, ttxt)
@@ -347,6 +354,7 @@ class c_ffta_modifier:
             btab = tbas.get(tname, None)
             ttab = ttxt.get(tname, None)
             rtab = {}
+            rutab = {}
             if btab is None:
                 trslt['#' + tname] = rtab
             else:
@@ -360,13 +368,26 @@ class c_ffta_modifier:
                     pkey = '#' + '/'.join(str(i) for i in tidxp)
                 else:
                     pkey = '/'.join(str(i) for i in bidxp)
+                    if tval and re.match(r'^[0-9A-Z_]+$', bval):
+                        report('warning', f'varname: {bval} -> {tval}')
                 rtab[pkey] = [i if i else '' for i in [bval, tval]]
-        return trslt
+                if not tval:
+                    assert bval
+                    rutab[pkey] = [bval, '']
+            if rutab:
+                utrslt[tname] = rutab
+        return trslt, utrslt
 
-    def parse_texts(self):
+    def parse_texts(self, atxt = True, utxt = False):
         bt = self._parse_text('base')
         tt = self._parse_text('text')
-        return self._merge_texts(bt, tt, None)
+        t, ut = self._merge_texts(bt, tt, None)
+        if atxt & utxt:
+            return t, ut
+        elif atxt:
+            return t
+        elif utxt:
+            return ut
 
 if __name__ == '__main__':
     import pdb
@@ -382,6 +403,7 @@ if __name__ == '__main__':
         #md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
         #txts = md._parse_text('base')
         #md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
-        txts = md.parse_texts()
+        txts, utxts = md.parse_texts(True, True)
         md.save_json('out_wk.json', txts)
+        md.save_json('out_ut_wk.json', utxts)
     main()
