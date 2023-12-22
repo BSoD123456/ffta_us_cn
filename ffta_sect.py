@@ -346,6 +346,16 @@ class c_ffta_sect(c_mark):
             ptr = self._addr2offs(ptr)
         return self.aot(self.U32(ptr), typ[1:])
 
+    def repack_end(self, rmk):
+        align = self.sect_top_align
+        ac_top = rmk.accessable_top
+        align_top = alignup(ac_top, align)
+        add_top = align_top - ac_top
+        if add_top > 0:
+            rmk.WBYTES(bytes(add_top), ac_top)
+        rmk.parse_size(align_top, align)
+        rmk.parse()
+
 # ===============
 #      tabs
 # ===============
@@ -1009,6 +1019,44 @@ class c_ffta_sect_text_buf(c_ffta_sect):
             raise ValueError('invalid text buf: decode error')
         self.set_real_top(self.raw_len)
 
+    def _encode_tok(self, buf, tok):
+        ttyp, tchr = tok
+        if ttyp.startswith('CHR_'):
+            ch = ((tchr >> 8) & 0x7f)
+            cl = (tchr & 0xff)
+            buf.append(ch | 0x80)
+            buf.append(cl)
+        elif ttyp == 'CTR_FUNC':
+            tseq = []
+            cchr = tchr
+            while cchr:
+                tseq.append(cchr & 0xff)
+                cchr >>= 8
+            cmd = tseq.pop()
+            assert cmd in self._ctr_tab and self._ctr_tab[cmd] == len(tseq)
+            buf.append(0x40)
+            buf.append(cmd + self._CTR_TOKBASE)
+            for tc in reversed(tseq):
+                buf.append(tc)
+        elif ttyp == 'CTR_EOS':
+            buf.append(0)
+        else:
+            raise ValueError(f'invalid token type to encode: {ttyp}')
+
+    def _encode(self, toks):
+        buf = []
+        for tok in toks:
+            self._encode_tok(buf, tok)
+        buf.append(0)
+        return buf
+
+    def repack_with(self, toks):
+        buf = self._encode(toks)
+        rmk = self.sub(0, 0, cls = c_ffta_sect_text_buf)
+        rmk.WBYTES(bytearray(buf), 0)
+        self.repack_end(rmk)
+        return rmk
+
 class c_ffta_sect_text_buf_ya(c_ffta_sect_text_buf):
 
     _CTR_TRANS = [
@@ -1292,8 +1340,15 @@ if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
     from pprint import pprint as ppr
-    
+
     main()
+
+    from ffta_charset import c_ffta_charset_ocr
+    chs_us = chs_jp = c_ffta_charset_ocr('charset_us.json', None)
+    chs_us.load()
+    chs_cn = c_ffta_charset_ocr('charset_cn.json', rom_cn)
+    chs_cn.load()
+    
     fat = rom_us.tabs['s_fat']
     scr = rom_us.tabs['s_scrpt']
     cmd = rom_us.tabs['s_cmds']
