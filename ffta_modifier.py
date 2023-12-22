@@ -29,6 +29,9 @@ CONF = {
         'skip': {
             '@[40]@[42]',
             '@[42]',
+            'dummy@[40]@[42]',
+            'dummy',
+            'Dummy',
         },
         'align': {
             's_text': [
@@ -92,7 +95,9 @@ class c_tab_align_iter:
         return add_lsts
 
     def _iter_tab(self, idx):
-        yield from self.tabs[idx].items()
+        tab = self.tabs[idx]
+        if tab:
+            yield from tab.items()
 
     def reset(self):
         self.stats = []
@@ -305,22 +310,49 @@ class c_ffta_modifier:
             txts[tname] = ttxts
         return txts
 
+    def _merge_keys(self, t1, t2):
+        t1 = list(t1.keys())
+        t2 = list(t2.keys())
+        r = []
+        i1 = 0
+        i2 = 0
+        while True:
+            if i1 >= len(t1):
+                r.extend(t2[i2:])
+                break
+            if i2 >= len(t2):
+                r.extend(t1[i1:])
+                break
+            k1 = t1[i1]
+            k2 = t2[i2]
+            if k1 == k2:
+                r.append(k1)
+                i1 += 1
+                i2 += 1
+                continue
+            if not k1 in t2:
+                r.append(k1)
+                i1 += 1
+            if not k2 in t1:
+                r.append(k2)
+                i2 += 1
+        return r
+
     def _merge_texts(self, tbas, ttxt, minfo):
         trslt = {}
         amaps = self.conf['text']['align']
         trmpgs = self.conf['text']['trim']
-        for tname, btab in tbas.items():
-            ttab = ttxt[tname]
+        tnames = self._merge_keys(tbas, ttxt)
+        for tname in tnames:
+            btab = tbas.get(tname, None)
+            ttab = ttxt.get(tname, None)
             rtab = {}
-            trslt[tname] = rtab
-            if tname in amaps:
-                amap = amaps[tname]
+            if btab is None:
+                trslt['#' + tname] = rtab
             else:
-                amap = []
-            if tname in trmpgs:
-                trmpg = trmpgs[tname]
-            else:
-                trmpg = []
+                trslt[tname] = rtab
+            amap = amaps.get(tname, [])
+            trmpg = trmpgs.get(tname, [])
             ta = c_tab_align_iter(btab, ttab,
                 align_map = amap, trim_page = trmpg)
             for (bidxp, bval), (tidxp, tval) in ta.iter():
