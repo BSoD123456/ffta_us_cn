@@ -1287,6 +1287,20 @@ class c_ffta_sect_font(c_ffta_sect_tab):
                         yield val
             yield _rowgen()
 
+    def _repack_with(self, finfo):
+        sfnt, (rimin, rimax) = finfo
+        rmin = rimin * self._TAB_WIDTH
+        if rimax is None:
+            rmax = sfnt.sect_top
+        else:
+            rmax = rimax * self._TAB_WIDTH
+        if not rmax > rmin:
+            return self, False
+        assert self.sect_top
+        rmk = self.sub(0, self.sect_top, cls = type(self))
+        rmk.WBYTES(sfnt.BYTES(rmin, rmax - rmin), rmin)
+        return rmk, True
+
 # ===============
 #      rom
 # ===============

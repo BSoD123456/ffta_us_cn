@@ -18,6 +18,8 @@ CONF = {
             'font': {
                 'path': 'fftacns.gba',
                 'type': 'cn',
+                # only hanzi
+                'range': (0x122, None),
             },
         },
         'dst': {
@@ -498,6 +500,15 @@ class c_ffta_modifier:
                 rtab.update(vtab)
         return rtabs
 
+    def _rplc_fnt_tab(self):
+        conf = self.conf['roms']['src']['font']
+        rng = conf.get('range', None)
+        smk = self.srom['font'].tabs['font']
+        if rng:
+            return smk, rng
+        else:
+            return smk
+
     def repack(self):
         tbs = []
         for tn in ['comp', 'trans']:
@@ -508,7 +519,7 @@ class c_ffta_modifier:
         artabs = self._merge_txt_tab(tbs)
         if not artabs:
             return None
-        artabs['font'] = self.srom['font'].tabs['font']
+        artabs['font'] = self._rplc_fnt_tab()
         rmk, dirty = self.srom['base'].repack_with(artabs)
         if not dirty:
             return None
