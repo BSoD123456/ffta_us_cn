@@ -390,11 +390,15 @@ class c_ffta_sect_tab(c_ffta_sect):
             a = 1
         return max(self._SECT_ALIGN, a)
     def parse_size(self, top_ofs, top_align_width):
+        has_tsize = (hasattr(self, 'tsize') and self.tsize < INF)
+        if top_ofs is None and has_tsize:
+            top_ofs = self.tsize * self._TAB_WIDTH
         super().parse_size(top_ofs, top_align_width)
-        if top_ofs is None:
-            self.tsize = INF
-        else:
-            self.tsize = top_ofs // self._TAB_WIDTH
+        if not has_tsize:
+            if top_ofs is None:
+                self.tsize = INF
+            else:
+                self.tsize = top_ofs // self._TAB_WIDTH
     def tbase(self, idx):
         return idx * self._TAB_WIDTH
 
@@ -1245,6 +1249,7 @@ class c_ffta_sect_font(c_ffta_sect_tab):
 
     def set_info(self, info):
         self.char_shape = info['shape']
+        self.tsize = info['size']
         self.rvs_byte = info['rvsbyt']
         char_bits = 1
         for v in self.char_shape:
@@ -1383,7 +1388,10 @@ class c_ffta_sect_rom(c_ffta_sect):
                 continue
             subsect = ctabs
             report('info', f'repack tab:{tname}')
-            if isinstance(subsect, c_ffta_sect_tab_ref_addr):
+            if isinstance(tab, c_ffta_sect):
+                srmk = tab.repack_copy()
+                sdirty = True
+            elif isinstance(subsect, c_ffta_sect_tab_ref_addr):
                 srmk, sdirty = subsect.repack_with(tab, tail)
             else:
                 srmk, sdirty = subsect.repack_with(tab)
@@ -1437,6 +1445,7 @@ def load_rom_us(fn):
             #'ico_text': (0x13c84, c_ffta_sect_text_page),
             'font': (0x013474, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
+                'size': 0xc67,
                 'rvsbyt': False,
             }),
             'fx_text': (0x018050, c_ffta_sect_fixed_text,
@@ -1471,6 +1480,7 @@ def load_rom_jp(fn):
             #'ico_text': (0x13bfc, c_ffta_sect_text_page),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
+                'size': 0xc66,
                 'rvsbyt': False,
             }),
             'fx_text': (0x017f6c, c_ffta_sect_fixed_text,

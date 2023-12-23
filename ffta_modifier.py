@@ -34,6 +34,7 @@ CONF = {
             'dummy',
             'Dummy',
         },
+        'skipf': [],
         'var': {
             'prefix': ['CRN_'],
         },
@@ -61,6 +62,15 @@ CONF = {
         }
     }
 }
+
+def chk_has_japanese(txt):
+    for c in txt:
+        oc = ord(c)
+        if (0x3040 < oc < 0x3094 or
+            0x30a0 < oc < 0x30fb):
+            return True
+    return False
+CONF['text']['skipf'].append(chk_has_japanese)
 
 import json, re
 
@@ -300,6 +310,7 @@ class c_ffta_modifier:
         rom = self.srom[romkey]
         chst = self.chst[romkey]
         txt_skip = self.conf['text']['skip']
+        txt_skip_fs = self.conf['text']['skipf']
         txts = {}
         for tname, tab in self._iter_txttab(rom):
             ttxts = {}
@@ -319,6 +330,11 @@ class c_ffta_modifier:
                 dec = chst.decode(line.tokens)
                 if dec in txt_skip:
                     continue
+                for sf in txt_skip_fs:
+                    if sf(dec):
+                        #report('warning', f'skip text {path}: {dec}')
+                        dec = '#' + dec
+                        break
                 ttxts[pkey] = dec
             txts[tname] = ttxts
         return txts
@@ -383,9 +399,9 @@ class c_ffta_modifier:
                             if tval:
                                 tval = '#' + tval
                 rtab[pkey] = [i if i else '' for i in [bval, tval]]
-                if not tval:
-                    assert bval
-                    rutab[pkey] = [bval, '']
+                if not tval or tval.startswith('#'):
+                    if bval and not bval.startswith('#'):
+                        rutab[pkey] = [bval, tval if tval else '']
             if rutab:
                 utrslt[tname] = rutab
         return trslt, utrslt
@@ -425,6 +441,7 @@ class c_ffta_modifier:
         rtabs = self._rplc_txt_tab(mtxt)
         if not rtabs:
             return None
+        rtabs['font'] = self.srom['font'].tabs['font']
         rmk, dirty = self.srom['base'].repack_with(rtabs)
         if not dirty:
             return None
@@ -440,10 +457,10 @@ if __name__ == '__main__':
         global md
         md = c_ffta_modifier(CONF)
         md.load()
-        #txts = md._parse_text('text')
-        #md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
-        #txts = md._parse_text('base')
-        #md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+        txts = md._parse_text('text')
+        md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+        txts = md._parse_text('base')
+        md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
         txts, utxts = md.parse_texts(True, True)
         md.save_json('out_wk.json', txts)
         md.save_json('out_ut_wk.json', utxts)
