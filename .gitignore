@@ -2,3 +2,4 @@
 *.sav
 __pycache__/*
 *_wk.json
+*_wk.txt
