@@ -513,7 +513,7 @@ class c_ffta_modifier:
         tbs = []
         for tn in ['comp', 'trans']:
             report('info', f'encode txt: {tn}')
-            rt = self._rplc_txt_tab(self.txts['comp'])
+            rt = self._rplc_txt_tab(self.txts[tn])
             if rt:
                 tbs.append(rt)
         artabs = self._merge_txt_tab(tbs)
