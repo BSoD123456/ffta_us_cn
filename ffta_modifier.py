@@ -25,6 +25,20 @@ CONF = {
             'type': 'us',
         },
     },
+    'work': {
+        'text': {
+            'raw': {
+                # comparison
+                'comp': 'raw_txt_comp_wk.json',
+                # uncovered
+                'uncv': 'raw_txt_uncv_wk.json',
+            },
+            'mod': {
+                #translate
+                'trans': 'trans_txt_wk.json',
+            },
+        },
+    },
     'text': {
         'skip': {
             '@[40]@[42]',
@@ -266,6 +280,14 @@ class c_ffta_modifier:
             rom, chst = self.load_rom(rconf)
             self.srom[nm] = rom
             self.chst[nm] = chst
+        self.txts = self.load_texts()
+
+    def export(self):
+        rmk = self.repack()
+        if not rmk:
+            report('warning', f'something wrong while repacking')
+            return
+        self.save_rom(self.conf['roms']['dst']['path'], rmk)
 
     def load_rom(self, rom_conf):
         lfunc = load_rom[rom_conf['type']]
@@ -280,6 +302,31 @@ class c_ffta_modifier:
         else:
             chst = None
         return rom, chst
+
+    def load_texts(self):
+        conf = self.conf['work']['text']
+        txts = {}
+        if self._load_texts_json(conf['raw'], txts):
+            txts['comp'], txts['uncv'] = md.parse_texts(True, True)
+            self._save_texts_json(conf['raw'], txts)
+        if self._load_texts_json(conf['mod'], txts):
+            txts['trans'] = txts['uncv']
+            self._save_texts_json(conf['mod'], txts)
+        return txts
+
+    def _load_texts_json(self, conf, txts):
+        dirty = False
+        for tname, tpath in conf.items():
+            txt = self.load_json(tpath)
+            if txt is None:
+                dirty = True
+                break
+            txts[tname] = txt
+        return dirty
+
+    def _save_texts_json(self, conf, txts):
+        for tname, tpath in conf.items():
+            self.save_json(tpath, txts[tname])
 
     def load_json(self, fn):
         try:
@@ -422,7 +469,7 @@ class c_ffta_modifier:
         for tname, tab in mtxt.items():
             if tname.startswith('#'):
                 continue
-            report('info', f'encode tab:{tname}')
+            report('info', f'encode tab: {tname}')
             rtab = {}
             for idxr, (src, dst) in tab.items():
                 if not dst or idxr.startswith('#'):
@@ -437,12 +484,32 @@ class c_ffta_modifier:
                 rtabs[tname] = rtab
         return rtabs
 
-    def repack_rom_with_text(self, mtxt):
-        rtabs = self._rplc_txt_tab(mtxt)
-        if not rtabs:
+    def _merge_txt_tab(self, tbs):
+        rtabs = {}
+        for tb in tbs:
+            for tname, vtab in tb.items():
+                if not vtab:
+                    continue
+                if tname in rtabs:
+                    rtab = rtabs[tname]
+                else:
+                    rtab = {}
+                    rtabs[tname] = rtab
+                rtab.update(vtab)
+        return rtabs
+
+    def repack(self):
+        tbs = []
+        for tn in ['comp', 'trans']:
+            report('info', f'encode txt: {tn}')
+            rt = self._rplc_txt_tab(self.txts['comp'])
+            if rt:
+                tbs.append(rt)
+        artabs = self._merge_txt_tab(tbs)
+        if not artabs:
             return None
-        rtabs['font'] = self.srom['font'].tabs['font']
-        rmk, dirty = self.srom['base'].repack_with(rtabs)
+        artabs['font'] = self.srom['font'].tabs['font']
+        rmk, dirty = self.srom['base'].repack_with(artabs)
         if not dirty:
             return None
         return rmk
@@ -457,13 +524,14 @@ if __name__ == '__main__':
         global md
         md = c_ffta_modifier(CONF)
         md.load()
-        txts = md._parse_text('text')
-        md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
-        txts = md._parse_text('base')
-        md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
-        txts, utxts = md.parse_texts(True, True)
-        md.save_json('out_wk.json', txts)
-        md.save_json('out_ut_wk.json', utxts)
-        rmk = md.repack_rom_with_text(txts)
-        md.save_rom('ffta_tst_uscn.gba', rmk)
+##        txts = md._parse_text('text')
+##        md.save_json('out_cn_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+##        txts = md._parse_text('base')
+##        md.save_json('out_us_wk.json', {k:{'/'.join(str(i) for i in k):v for k, v in tab.items()} for k, tab in txts.items()})
+##        txts, utxts = md.parse_texts(True, True)
+##        md.save_json('out_wk.json', txts)
+##        md.save_json('out_ut_wk.json', utxts)
+##        rmk = md.repack_rom_with_text(txts)
+##        md.save_rom('ffta_tst_uscn.gba', rmk)
+        md.export()
     main()

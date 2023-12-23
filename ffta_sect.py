@@ -1387,7 +1387,7 @@ class c_ffta_sect_rom(c_ffta_sect):
             except KeyError:
                 continue
             subsect = ctabs
-            report('info', f'repack tab:{tname}')
+            report('info', f'repack tab: {tname}')
             if isinstance(tab, c_ffta_sect):
                 srmk = tab.repack_copy()
                 sdirty = True
