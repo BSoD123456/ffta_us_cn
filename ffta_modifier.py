@@ -37,7 +37,7 @@ CONF = {
             },
             'mod': {
                 #translate
-                'trans': 'trans_txt_wk.json',
+                'trans': 'trans_txt.json',
             },
         },
     },

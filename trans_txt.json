@@ -1,0 +1,5942 @@
+{
+    "s_text": {
+        "0/4": [
+            "I don’t know about@[4D]you, but I’m not@[4D]ready to die!@[4F]@[42]See you back@[4D]at the shop!@[40]@[42]",
+            ""
+        ],
+        "0/5": [
+            "I’m sorry, but I’m@[4D]too wounded to be of@[4D]much use.@[4F]@[42]I’ll return to the@[4D]palace. Farewell.@[40]@[42]",
+            ""
+        ],
+        "0/6": [
+            "I’m not dying here!@[4D]I think I’ll head@[4D]back to my old clan!@[40]@[42]",
+            ""
+        ],
+        "0/7": [
+            "This is my chance to@[4D]get out of here in@[4D]one piece! Later!@[40]@[42]",
+            ""
+        ],
+        "0/8": [
+            "I do not think I’m@[4D]cut out for this@[4D]clan business.@[4F]@[42]I shall leave before@[4D]I burden you further.@[4D]We’ll meet again!@[40]@[42]",
+            ""
+        ],
+        "1/118": [
+            "Everyone ready? Let’s@[4D]get this snowball@[4D]fight started.@[4F]@[42]One snowball, one@[4D]point. First team@[4D]to get 7 points wins!@[40]@[42]",
+            "#カット番号001@[4D][雪合战]@[4D]@[40]@[42]"
+        ],
+        "1/119": [
+            "Gotten used to the@[4D]snow in St. Ivalice@[4D]yet, @[400]?@[4F]@[42]It’s much warmer@[4D]where you’re from,@[4D]isn’t it?@[40]@[42]",
+            "#カット番号002@[4D][雪合战终了]@[4D]@[40]@[42]"
+        ],
+        "1/120": [
+            "Yes, sir. It never@[4D]snowed.@[4F]@[42]This is practically@[4D]my first snowball@[4D]fight...@[40]@[42]",
+            "#カット番号003@[4D][いじめられる@[5103]]@[4D]@[40]@[42]"
+        ],
+        "1/121": [
+            "Really? Then let@[4D]me give you some@[4D]pointers.@[40]@[42]",
+            "#カット番号004@[4D][雪合战のあと]@[4D]@[40]@[42]"
+        ],
+        "1/122": [
+            "@[5104], could you@[4D]help us out?@[40]@[42]",
+            "#カット番号005@[4D][田舍羡イヴァリース]@[4D]@[40]@[42]"
+        ],
+        "1/123": [
+            "Yes, Mr. @[5111].@[40]@[42]",
+            "#カット番号006@[4D][@[5102]の家]@[4D]@[40]@[42]"
+        ],
+        "1/124": [
+            "Kids with the highest@[4D]”speed” move first.@[40]@[42]",
+            "#カット番号007@[4D][ファイナルファンタジー]@[4D]@[40]@[42]"
+        ],
+        "1/125": [
+            "Once your turn comes@[4D]around, first you@[4D]have to ”move.”@[4F]@[42]You can only go a set@[4D]distance, so think@[4D]first, then move.@[40]@[42]",
+            "#カット番号008@[4D][本を读み终わる]@[4D]@[40]@[42]"
+        ],
+        "1/126": [
+            "When the menu isn’t@[4D]up, press the B BUTTON@[4D]to see your move range.@[40]@[42]",
+            "#カット番号009@[4D][魔法の世界へ1]@[4D]@[40]@[42]"
+        ],
+        "1/127": [
+            "You can redo a move@[4D]as many times as you@[4D]want!@[40]@[42]",
+            "#カット番号010@[4D][魔法の世界へ2]@[4D]@[40]@[42]"
+        ],
+        "1/128": [
+            "Ready to move?@[40]@[42]",
+            "#カット番号011@[4D][魔法の世界へ3]@[4D]@[40]@[42]"
+        ],
+        "1/129": [
+            "Okay, now that you’re@[4D]in position, you can@[4D]throw a snowball.@[4F]@[42]Choose ”Snowball”@[4D]from the ”Action”@[4D]menu.@[40]@[42]",
+            ""
+        ],
+        "1/130": [
+            "The green colored@[4D]panels show your@[4D]throwing range.@[4F]@[42]Now choose where@[4D]you want to aim@[4D]within that range!@[40]@[42]",
+            ""
+        ],
+        "1/131": [
+            "If no one from the@[4D]other team is in@[4D]range, just ”wait.”@[40]@[42]",
+            ""
+        ],
+        "1/132": [
+            "Waiting makes your@[4D]next turn come @[4D]around quicker.@[40]@[42]",
+            ""
+        ],
+        "1/133": [
+            "OK...@[4D]Here goes! Hyaah!@[40]@[42]",
+            ""
+        ],
+        "1/134": [
+            "Once you’ve thrown,@[4D]you have to choose@[4D]a ”facing.”@[4F]@[42]Once you’ve chosen@[4D]a facing, your turn@[4D]ends.@[40]@[42]",
+            ""
+        ],
+        "1/135": [
+            "Understand?@[40]@[42]",
+            ""
+        ],
+        "1/136": [
+            "Yeah, I think so.@[4D]Thanks @[5104], Mr.@[4D]@[5111].@[40]@[42]",
+            ""
+        ],
+        "1/137": [
+            "Let’s get back@[4D]to the snowball@[4D]fight, then.@[40]@[42]",
+            ""
+        ],
+        "1/138": [
+            "Good luck,@[4D]@[400]!@[40]@[42]",
+            ""
+        ],
+        "1/139": [
+            "Ah, there’s a trick@[4D]to throwing a snow-@[4D]ball, too.@[40]@[42]",
+            ""
+        ],
+        "1/140": [
+            "It’s easier to hit@[4D]someone from the side@[4D]or behind.@[4F]@[42]Think about which way@[4D]your opponent’s@[4D]facing when you move.@[40]@[42]",
+            ""
+        ],
+        "1/141": [
+            "Hey, stop that! The@[4D]snowball fight’s@[4D]over!@[40]@[42]",
+            ""
+        ],
+        "1/142": [
+            "We only played once!@[4D]It’s best out of@[4D]two. T-W-O!@[40]@[42]",
+            ""
+        ],
+        "1/143": [
+            "C’mon, you wanna play@[4D]again, don’t you,@[4D]@[5103]?@[40]@[42]",
+            ""
+        ],
+        "1/144": [
+            "I, um...@[40]@[42]",
+            ""
+        ],
+        "1/145": [
+            "You guys are just@[4D]grumpy because@[4D]you lost!@[4F]@[42]Grrr... This is why@[4D]I can’t stand boys!@[40]@[42]",
+            ""
+        ],
+        "1/146": [
+            "Can’t you let it@[4D]rest! You won,@[4D]already!@[4F]@[42]Grrr... This is why@[4D]I can’t stand boys!@[40]@[42]",
+            ""
+        ],
+        "1/147": [
+            "Gosh, I’m really@[4D]sorry.@[40]@[42]",
+            ""
+        ],
+        "1/148": [
+            "Uh-oh...@[40]@[42]",
+            ""
+        ],
+        "1/149": [
+            "I’m really, really@[4D]sorry. Please accept@[4D]my apologies...@[40]@[42]",
+            ""
+        ],
+        "1/150": [
+            "Mr. Randell. We@[4D]expect a certain@[4D]level of performance.@[4F]@[42]Regardless of@[4D]circumstances...@[40]@[42]",
+            ""
+        ],
+        "1/151": [
+            "It won’t happen@[4D]again.@[40]@[42]",
+            ""
+        ],
+        "1/152": [
+            "Don’t worry, I’ll@[4D]fix things up here.@[40]@[42]",
+            ""
+        ],
+        "1/153": [
+            "Oh, thanks, thanks!@[40]@[42]",
+            ""
+        ],
+        "1/154": [
+            "Thank you for@[4D]waiting. Shall we?@[40]@[42]",
+            ""
+        ],
+        "1/155": [
+            "Look at that guy@[4D]cringing like that!@[4D]Embarrassing...@[40]@[42]",
+            ""
+        ],
+        "1/156": [
+            "@[5103]?@[4D]@[5103], it is you!@[40]@[42]",
+            ""
+        ],
+        "1/157": [
+            "...Hi, Dad.@[40]@[42]",
+            ""
+        ],
+        "1/158": [
+            "School’s out already?@[40]@[42]",
+            ""
+        ],
+        "1/159": [
+            "Yeah...@[40]@[42]",
+            ""
+        ],
+        "1/160": [
+            "These your friends?@[40]@[42]",
+            ""
+        ],
+        "1/161": [
+            "Um, don’t you still@[4D]have work to do, Dad?@[40]@[42]",
+            ""
+        ],
+        "1/162": [
+            "Ah...yes. You know,@[4D]busy busy busy!@[40]@[42]",
+            ""
+        ],
+        "1/163": [
+            "You all keep an eye@[4D]on @[5103] for me, eh?@[40]@[42]",
+            ""
+        ],
+        "1/164": [
+            "He used to work at@[4D]a bigger company@[4D]before.@[4F]@[42]When Mom died, he@[4D]stopped caring. He@[4D]broke down big time.@[40]@[42]",
+            ""
+        ],
+        "1/165": [
+            "He seems nice. Not@[4D]many parents talk to@[4D]their kids like that.@[4F]@[42]I bet you used to@[4D]go out on vacations@[4D]and stuff a lot.@[40]@[42]",
+            ""
+        ],
+        "1/166": [
+            "I guess your family@[4D]has had its problems,@[4D]too...@[4F]@[42]But I heard that@[4D]@[400] doesn’t@[4D]have a dad...@[40]@[42]",
+            ""
+        ],
+        "1/167": [
+            "Yeah!@[4D]We did it!@[40]@[42]",
+            ""
+        ],
+        "1/168": [
+            "Shucks.@[4D]Can’t win all the@[4D]time, I guess.@[40]@[42]",
+            ""
+        ],
+        "1/169": [
+            "Could you explain@[4D]one more time?@[40]@[42]",
+            ""
+        ],
+        "1/170": [
+            "Sure thing.@[4D]I’m here to teach,@[4D]after all.@[40]@[42]",
+            ""
+        ],
+        "19/101": [
+            "We met you that day@[4D]in town...@[4F]@[42]You were apologizing,@[4D]and I think it made@[4D]@[5103] sad to see you.@[40]@[42]",
+            "#カット番号083@[4D][寻问室にて]@[4D]@[40]@[42]"
+        ],
+        "19/102": [
+            "Gosh, I’m really@[4D]sorry.@[40]@[42]",
+            "#カット番号084@[4D][第四の番人]@[4D]@[40]@[42]"
+        ],
+        "19/103": [
+            "I’m really, really@[4D]sorry. Please accept@[4D]my apologies...@[40]@[42]",
+            "#カット番号085@[4D][@[5109]と会话(M18)]@[4D]@[40]@[42]"
+        ],
+        "19/104": [
+            "When Mom died, he@[4D]stopped caring. He@[4D]made some mistakes...@[40]@[42]",
+            "#カット番号086@[4D][@[5106]と会话(M18)]@[4D]@[40]@[42]"
+        ],
+        "19/105": [
+            "That person... You’re@[4D]saying that’s who@[4D]I really am?@[40]@[42]",
+            "#カット番号087@[4D][エクセデスに胜利]@[4D]@[40]@[42]"
+        ],
+        "19/106": [
+            "Yes...yes, that was@[4D]me. I remember now.@[4F]@[42]Nothing seemed to go@[4D]right, ever since she@[4D]died...@[40]@[42]",
+            "#カット番号088@[4D][四回目の解放]@[4D]@[40]@[42]"
+        ],
+        "23/37": [
+            "@[5105].@[4D]Queen @[5105].@[40]@[42]",
+            "#@[5105],@[4D]女王@[5105]だ@[4D]@[40]@[42]"
+        ],
+        "26/71": [
+            "If I go back everyone@[4D]will pick on me!@[4F]@[42]And Papa will go@[4D]back to the way he@[4D]was before... No!@[4F]@[42]I won’t go back!@[4D]I need magic to make@[4D]things better!@[40]@[42]",
+            "#カット番号118@[4D][@[5103]と再会]@[4D]@[40]@[42]"
+        ],
+        "34/22": [
+            "Mr. Randell!@[40]@[42]",
+            ""
+        ],
+        "34/23": [
+            "Remember me? I...@[4D]I used to work@[4D]for you!@[40]@[42]",
+            ""
+        ],
+        "34/24": [
+            "Yes! Biggs! You look@[4D]well. So, you started@[4D]your own company?@[40]@[42]",
+            ""
+        ],
+        "34/25": [
+            "That’s right, and,@[4D]actually...a big@[4D]project’s coming up.@[4F]@[42]I thought you’d be@[4D]the best man for the@[4D]job! How about it?@[40]@[42]",
+            ""
+        ],
+        "35/0": [
+            "Reinforcements! And@[4D]just in time! @[510C],@[4D]time to strike back!@[40]@[42]",
+            ""
+        ],
+        "35/1": [
+            "@[5104]!@[4D]Glad we made@[4D]it in time!@[40]@[42]",
+            ""
+        ],
+        "35/2": [
+            "That was a close@[4D]one. I owe you@[4D]again, @[400].@[40]@[42]",
+            ""
+        ],
+        "35/3": [
+            "That’s what friends@[4D]are for, @[5104]!@[40]@[42]",
+            ""
+        ],
+        "37/0": [
+            "Watch out,@[4D]@[400]! That’s@[4D]the blade biter!@[4F]@[42]We can beat it,@[4D]but only if we@[4D]work together.@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "37/1": [
+            "It looks tough!@[4D]Is that a spear@[4D]on its back!?@[40]@[42]",
+            ""
+        ],
+        "37/2": [
+            "We did it! We beat@[4D]it. That wraps up@[4D]that job nicely.@[40]@[42]",
+            ""
+        ],
+        "37/3": [
+            "Yeah. Say, @[5104]...@[4D]You given any more@[4D]thought to going...@[4F]@[42]Um...never mind.@[4D](Ritz and @[5103]...@[4F]@[42]... Will I have to@[4D]fight them before@[4D]this is over?)@[40]@[42]",
+            ""
+        ],
+        "38/0": [
+            "You’re not a Borzoi!@[4D]What are you@[4D]doing here?@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "38/1": [
+            "Mommieeeee!@[40]@[42]",
+            ""
+        ],
+        "38/2": [
+            "N-No...it can’t be.@[40]@[42]",
+            ""
+        ],
+        "38/3": [
+            "Sorry, Boss...@[40]@[42]",
+            ""
+        ],
+        "39/0": [
+            "How’d they find@[4D]us here!?@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "39/1": [
+            "Boss...!@[40]@[42]",
+            ""
+        ],
+        "39/2": [
+            "Didn’t think it@[4D]would end like@[4D]this...Boss...@[40]@[42]",
+            ""
+        ],
+        "42/0": [
+            "Well, well!@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "42/1": [
+            "We are the Magus@[4D]Sisters three!@[4F]@[42]Before us all@[4D]foes flee!@[40]@[42]",
+            ""
+        ],
+        "42/2": [
+            "Get ’em, girls!@[40]@[42]",
+            ""
+        ],
+        "42/3": [
+            "H-How...can it be?@[40]@[42]",
+            ""
+        ],
+        "42/4": [
+            "We...never lose!@[40]@[42]",
+            ""
+        ],
+        "42/5": [
+            "If I’d only used@[4D]my secret attack...@[40]@[42]",
+            ""
+        ],
+        "44/0": [
+            "I am unused to@[4D]these sorts of@[4D]places...@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "44/1": [
+            "@[5109]...?@[4D]@[5109] Swain?@[40]@[42]",
+            ""
+        ],
+        "44/2": [
+            "I am.@[4D]Who are you?@[40]@[42]",
+            ""
+        ],
+        "44/3": [
+            "I’m @[5107] Radijiu.@[4D]@[400]’s little@[4D]brother.@[40]@[42]",
+            ""
+        ],
+        "44/4": [
+            "@[400]’s...@[4D]brother?@[40]@[42]",
+            ""
+        ],
+        "44/5": [
+            "You’re waiting here@[4D]for him, right?@[4D]He’ll be here soon.@[40]@[42]",
+            ""
+        ],
+        "44/6": [
+            "Hey! @[400]!@[4D]Over here.@[40]@[42]",
+            ""
+        ],
+        "44/7": [
+            "@[5109]? You came@[4D]all the way here?@[40]@[42]",
+            ""
+        ],
+        "44/8": [
+            "I had some time@[4D]on my hands.@[40]@[42]",
+            ""
+        ],
+        "44/9": [
+            "How did it go,@[4D]@[400]?@[40]@[42]",
+            ""
+        ],
+        "44/10": [
+            "I found out where@[4D]it’s likely to be...@[4F]@[42]Ambervale.@[40]@[42]",
+            ""
+        ],
+        "44/11": [
+            "Ambervale?@[40]@[42]",
+            ""
+        ],
+        "44/12": [
+            "I hope you find@[4D]whatever it is@[4D]@[5103] lost.@[40]@[42]",
+            ""
+        ],
+        "44/13": [
+            "You want to come@[4D]along?@[40]@[42]",
+            ""
+        ],
+        "44/14": [
+            "Who, me?@[4D]Um, you sure@[4D]that’d be OK?@[40]@[42]",
+            ""
+        ],
+        "44/15": [
+            "Certainly.@[4F]@[42]It might even be@[4D]better for you to@[4D]go than me.@[40]@[42]",
+            ""
+        ],
+        "44/16": [
+            "What? Why?@[40]@[42]",
+            ""
+        ],
+        "44/17": [
+            "Well...no, forget@[4D]I said anything.@[40]@[42]",
+            ""
+        ],
+        "44/18": [
+            "Drop by if you feel@[4D]like going with me.@[4F]@[42]Thank you for finding@[4D]the location.@[40]@[42]",
+            ""
+        ],
+        "44/19": [
+            "What are you going@[4D]to do, @[400]?@[4F]@[42]I’m sure curious to@[4D]find out what it is@[4D]that @[5103] forgot...@[40]@[42]",
+            ""
+        ],
+        "44/20": [
+            "Yeah, me too.@[4F]@[42]What could he have@[4D]possibly forgotten?@[40]@[42]",
+            ""
+        ],
+        "44/21": [
+            "Say, @[5109], what@[4D]is it that @[5103]@[4D]forgot, anyway?@[40]@[42]",
+            ""
+        ],
+        "44/22": [
+            "Well...@[40]@[42]",
+            ""
+        ],
+        "44/23": [
+            "What?@[40]@[42]",
+            ""
+        ],
+        "44/24": [
+            "Is something wrong?@[40]@[42]",
+            ""
+        ],
+        "44/25": [
+            "I feel a strong@[4D]force...magical...@[4D]and violent!@[40]@[42]",
+            ""
+        ],
+        "44/26": [
+            "!!@[40]@[42]",
+            ""
+        ],
+        "44/27": [
+            "Your Majesty!@[40]@[42]",
+            ""
+        ],
+        "44/28": [
+            "What are you doing@[4D]here, @[5109]?@[40]@[42]",
+            ""
+        ],
+        "44/29": [
+            "Looking for something@[4D]the prince lost...@[40]@[42]",
+            ""
+        ],
+        "44/30": [
+            "Poor child...@[4D]Devoting yourself@[4D]to a dream.@[4F]@[42]@[5103] has long@[4D]forgotten that you@[4D]ever existed.@[40]@[42]",
+            ""
+        ],
+        "44/31": [
+            "But...I still follow@[4D]Prince @[5103].@[4F]@[42]I will always@[4D]be loyal!@[4F]@[42]Please, do not@[4D]stop me from doing@[4D]my sworn duty.@[40]@[42]",
+            ""
+        ],
+        "44/32": [
+            "And if I stop you?@[40]@[42]",
+            ""
+        ],
+        "44/33": [
+            "Do not.@[40]@[42]",
+            ""
+        ],
+        "44/34": [
+            "You would raise a@[4D]sword against me,@[4D]your queen?@[40]@[42]",
+            ""
+        ],
+        "44/35": [
+            "I have no qualms@[4D]about fighting you.@[4F]@[42]You are a ghost.@[4D]The real queen left@[4D]with the prince!@[40]@[42]",
+            ""
+        ],
+        "44/36": [
+            "A stuffed bear?@[4D]This is what@[4D]@[5103] forgot?@[40]@[42]",
+            ""
+        ],
+        "44/37": [
+            "This bear...this@[4D]is proof that @[5103]@[4D]was in this world.@[4F]@[42]It’s all you@[4D]have to remember@[4D]him by, isn’t it?@[40]@[42]",
+            ""
+        ],
+        "44/38": [
+            "....@[40]@[42]",
+            ""
+        ],
+        "44/39": [
+            "Are you going to@[4D]bring that back to@[4D]his palace room?@[40]@[42]",
+            ""
+        ],
+        "44/40": [
+            "Of course. This@[4D]belongs to the@[4D]prince.@[40]@[42]",
+            ""
+        ],
+        "44/41": [
+            "You know, @[5109].@[4D]I’ve been thinking.@[4F]@[42]Maybe we could,@[4D]y’know, be friends?@[40]@[42]",
+            ""
+        ],
+        "44/42": [
+            "Friends...?@[4D]You, friends with me?@[40]@[42]",
+            ""
+        ],
+        "44/43": [
+            "Yeah.@[4D]I mean, we had our@[4D]troubles in the past.@[4F]@[42]But, why not?@[40]@[42]",
+            ""
+        ],
+        "44/44": [
+            "...Yes. I see no@[4D]reason to object.@[40]@[42]",
+            ""
+        ],
+        "44/45": [
+            "Then that settles@[4D]it! Friends!@[40]@[42]",
+            ""
+        ],
+        "44/46": [
+            "Friends. But...not@[4D]close friends.@[4F]@[42]Farewell.@[40]@[42]",
+            ""
+        ],
+        "44/47": [
+            "I...do not think@[4D]that would be@[4D]possible.@[40]@[42]",
+            ""
+        ],
+        "44/48": [
+            "Oh. I see.@[40]@[42]",
+            ""
+        ],
+        "44/49": [
+            "I still have much@[4D]to think about.@[40]@[42]",
+            ""
+        ],
+        "44/50": [
+            "OK, I understand.@[4F]@[42]At least, there’s@[4D]hope, right?@[40]@[42]",
+            ""
+        ],
+        "44/51": [
+            "Now let’s go bring@[4D]this back to @[5103].@[40]@[42]",
+            ""
+        ],
+        "45/0": [
+            "Thanks! It’s hard to@[4D]find people for these@[4D]snowy missions.@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "45/1": [
+            "Oh right, nobody here@[4D]would be used to the@[4D]snow, would they?@[4F]@[42]I remember how hard@[4D]it was after I@[4D]moved...@[40]@[42]",
+            ""
+        ],
+        "45/2": [
+            "Good news for you@[4D]though--there’s@[4D]hazard pay!@[40]@[42]",
+            ""
+        ],
+        "45/3": [
+            "Hey Pubmaster!@[4D]That snow mission@[4D]still available?@[40]@[42]",
+            ""
+        ],
+        "45/4": [
+            "@[5104]?@[4D]What about the@[4D]snow mission?@[40]@[42]",
+            ""
+        ],
+        "45/5": [
+            "@[400]...@[4D]Oh, so you were the@[4D]one who took it.@[4F]@[42]That works out@[4D]perfectly, then!@[40]@[42]",
+            ""
+        ],
+        "45/6": [
+            "Wanna take me@[4D]along with you?@[4F]@[42]I don’t need any@[4D]pay or anything!@[40]@[42]",
+            ""
+        ],
+        "45/7": [
+            "Well, sure, but...@[4F]@[42]Mind telling me why@[4D]you want to go so@[4D]much?@[40]@[42]",
+            ""
+        ],
+        "45/8": [
+            "Dead people in the@[4D]snow intrigue me,@[4D]what can I say?@[4F]@[42]That’s all,@[4D]really.@[40]@[42]",
+            ""
+        ],
+        "45/9": [
+            "Pretty please?@[4D]I promise I won’t @[4D]get in your way!@[40]@[42]",
+            ""
+        ],
+        "45/10": [
+            "OK, let’s go@[4D]together, then.@[40]@[42]",
+            ""
+        ],
+        "45/11": [
+            "Thanks, @[400].@[40]@[42]",
+            ""
+        ],
+        "45/12": [
+            "You kids watch@[4D]yourselves out there!@[40]@[42]",
+            ""
+        ],
+        "45/13": [
+            "@[5104]! Look!@[40]@[42]",
+            ""
+        ],
+        "45/14": [
+            "We won! This snowball@[4D]fight’s over, OK?@[40]@[42]",
+            ""
+        ],
+        "45/15": [
+            "Snowball fight...?@[40]@[42]",
+            ""
+        ],
+        "45/16": [
+            "Say, @[5104]. Just now,@[4D]you said ”snowball@[4D]fight”...@[4F]@[42]What did you mean?@[40]@[42]",
+            ""
+        ],
+        "45/17": [
+            "They were throwing@[4D]snowballs and hurting@[4D]people...@[4F]@[42]Didn’t it remind@[4D]you of anything?@[40]@[42]",
+            ""
+        ],
+        "45/18": [
+            "Oh...@[4D]@[5103]!@[40]@[42]",
+            ""
+        ],
+        "45/19": [
+            "Right.@[4F]@[42]I’m not saying those@[4D]monsters were @[510E]’s@[4D]bunch, mind you.@[40]@[42]",
+            ""
+        ],
+        "45/20": [
+            "Just, when I saw that@[4D]mission listed back@[4D]at the pub...@[4F]@[42]I knew, for some@[4D]reason, I had to@[4D]take it.@[40]@[42]",
+            ""
+        ],
+        "45/21": [
+            "I...I wish I could@[4D]do the same back@[4D]there.@[40]@[42]",
+            ""
+        ],
+        "45/22": [
+            "Huh?@[40]@[42]",
+            ""
+        ],
+        "45/23": [
+            "I mean, in the@[4D]real world.@[4F]@[42]Throw snowballs back@[4D]at the bullies.@[40]@[42]",
+            ""
+        ],
+        "45/24": [
+            "Of course you can!@[4D]That’s easy!@[40]@[42]",
+            ""
+        ],
+        "45/25": [
+            "...It never seemed@[4D]that easy. I guess@[4D]you’re right, though.@[40]@[42]",
+            ""
+        ],
+        "45/26": [
+            "So, @[400],@[4D]you want me to @[4D]help out?@[40]@[42]",
+            ""
+        ],
+        "45/27": [
+            "Help out?@[4D]With what?@[40]@[42]",
+            ""
+        ],
+        "45/28": [
+            "With your clan.@[4F]@[42]I’m saying I’ll@[4D]join if you like.@[40]@[42]",
+            ""
+        ],
+        "45/29": [
+            "Uh, um...@[4D]Why all of a sudden?@[40]@[42]",
+            ""
+        ],
+        "45/30": [
+            "Why not? C’mon!@[4D]I just thought it@[4D]might be fun.@[4F]@[42]Hey, if you’ve got@[4D]a problem with it,@[4D]just let me know.@[40]@[42]",
+            ""
+        ],
+        "45/31": [
+            "With me on your team,@[4D]you can’t lose!@[40]@[42]",
+            ""
+        ],
+        "45/32": [
+            "Ah ha ha.@[4D]You’re right.@[4D]Welcome aboard, @[5104].@[40]@[42]",
+            ""
+        ],
+        "45/33": [
+            "Well, if you say so.@[4D]Too bad.@[4F]@[42]See you later!@[40]@[42]",
+            ""
+        ],
+        "46/0": [
+            "Phew... Thanks!@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "46/1": [
+            "I had no idea you@[4D]were here!@[40]@[42]",
+            ""
+        ],
+        "46/2": [
+            "I had no idea you@[4D]would come here@[4D]either, @[400]!@[4F]@[42]I can’t believe@[4D]someone put a notice@[4D]up at the pub.@[40]@[42]",
+            ""
+        ],
+        "46/3": [
+            "You must really have@[4D]been screaming!@[40]@[42]",
+            ""
+        ],
+        "46/4": [
+            "@[5107]!@[40]@[42]",
+            ""
+        ],
+        "46/5": [
+            "Sorry...@[4D]This is my brother.@[40]@[42]",
+            ""
+        ],
+        "46/6": [
+            "Heh. I think he’s@[4D]probably right.@[4F]@[42]I thought I was@[4D]going to lose my@[4D]mind!@[40]@[42]",
+            ""
+        ],
+        "46/7": [
+            "Can I ask what@[4D]was in the cave?@[40]@[42]",
+            ""
+        ],
+        "46/8": [
+            "....@[40]@[42]",
+            ""
+        ],
+        "46/9": [
+            "I understand if@[4D]you don’t want@[4D]to talk about it.@[40]@[42]",
+            ""
+        ],
+        "46/10": [
+            "...It fell on me.@[40]@[42]",
+            ""
+        ],
+        "46/11": [
+            "Huh?@[40]@[42]",
+            ""
+        ],
+        "46/12": [
+            "An antlion larva.@[4D]Right on my head.@[40]@[42]",
+            ""
+        ],
+        "46/13": [
+            "Oh, one of those big@[4D]white grubs as big@[4D]as your arm...@[40]@[42]",
+            ""
+        ],
+        "46/14": [
+            "Aaah! Stop talking@[4D]about it! Don’t make@[4D]me remember!@[40]@[42]",
+            ""
+        ],
+        "46/15": [
+            "Wow, that must have@[4D]been pretty rough.@[40]@[42]",
+            ""
+        ],
+        "46/16": [
+            "But, you’re safe now,@[4D]and that’s what@[4D]matters!@[40]@[42]",
+            ""
+        ],
+        "46/17": [
+            "Yes. Thank you.@[4D]Thank you so much!@[40]@[42]",
+            ""
+        ],
+        "46/18": [
+            "Well, I should@[4D]be getting back.@[40]@[42]",
+            ""
+        ],
+        "46/19": [
+            "Hey, wait up!@[40]@[42]",
+            ""
+        ],
+        "46/20": [
+            "I was wondering@[4D]if you could help us?@[40]@[42]",
+            ""
+        ],
+        "46/21": [
+            "@[5107]?@[40]@[42]",
+            ""
+        ],
+        "46/22": [
+            "See, it’s about my@[4D]brother and @[5104]...@[40]@[42]",
+            ""
+        ],
+        "46/23": [
+            "@[400] and @[5104]?@[40]@[42]",
+            ""
+        ],
+        "46/24": [
+            "They’re both pretty@[4D]bad at talking, see.@[4F]@[42]I was wondering if@[4D]you could, kind of@[4D]help them out.@[40]@[42]",
+            ""
+        ],
+        "46/25": [
+            "I mean, I get the@[4D]feeling they still@[4D]haven’t made up.@[4F]@[42]I was hoping you@[4D]could, kind of@[4D]help them out.@[40]@[42]",
+            ""
+        ],
+        "46/26": [
+            "Well, sure.@[4D]I wouldn’t mind@[4D]doing that.@[40]@[42]",
+            ""
+        ],
+        "46/27": [
+            "Can @[510C] join@[4D]the clan,@[4D]@[400]? Please?@[40]@[42]",
+            ""
+        ],
+        "46/28": [
+            "Just let me know@[4D]what you want me@[4D]to do.@[4F]@[42]I’ll help where@[4D]I’m able!@[40]@[42]",
+            ""
+        ],
+        "46/29": [
+            "Great!@[4D]@[40]@[42]",
+            ""
+        ],
+        "46/30": [
+            "OK, thanks,@[4D]@[510C].@[40]@[42]",
+            ""
+        ],
+        "46/31": [
+            "Why not?@[4F]@[42]I thought it would@[4D]be a good chance for@[4D]you and @[5104]...@[40]@[42]",
+            ""
+        ],
+        "46/32": [
+            "@[5104] and I can handle@[4D]our own problems.@[40]@[42]",
+            ""
+        ],
+        "46/33": [
+            "Fine. Just trying@[4D]to help. Geez.@[40]@[42]",
+            ""
+        ],
+        "46/34": [
+            "OK, @[400].@[4D]See you later.@[4F]@[42]Thanks for helping@[4D]me out!@[40]@[42]",
+            ""
+        ],
+        "46/35": [
+            "Any time. See ya.@[40]@[42]",
+            ""
+        ],
+        "46/36": [
+            "@[510C]? Are you OK?@[40]@[42]",
+            ""
+        ],
+        "46/37": [
+            "I am so embarrassed.@[40]@[42]",
+            ""
+        ],
+        "46/38": [
+            "What is it this@[4D]time? Step on a @[4D]grub or something?@[40]@[42]",
+            ""
+        ],
+        "46/39": [
+            "Hey, but this is@[4D]a great second chance@[4D]for you, @[400]!@[4F]@[42]How about letting@[4D]her into the clan?@[40]@[42]",
+            ""
+        ],
+        "46/40": [
+            "You happy now?@[40]@[42]",
+            ""
+        ],
+        "46/41": [
+            "Welcome to the clan,@[4D]@[510C].@[40]@[42]",
+            ""
+        ],
+        "46/42": [
+            "Sure thing.@[40]@[42]",
+            ""
+        ],
+        "46/43": [
+            "Not again! C’mon@[4D]@[400]!@[40]@[42]",
+            ""
+        ],
+        "46/44": [
+            "That’s my line,@[4D]@[5107]. Stop@[4D]bugging me.@[40]@[42]",
+            ""
+        ],
+        "46/45": [
+            "See you two around.@[40]@[42]",
+            ""
+        ],
+        "46/46": [
+            "Yup. Take care.@[40]@[42]",
+            ""
+        ],
+        "47/0": [
+            "Reporting,@[4D]Judgemaster @[5106]!@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "47/1": [
+            "Well? Did you find@[4D]any proof of@[4D]corruption?@[40]@[42]",
+            ""
+        ],
+        "47/2": [
+            "Nothing. Whoever is@[4D]responsible is very@[4D]good at covering up.@[4F]@[42]It’s hard to catch@[4D]a judge who doesn’t@[4D]want to be found...@[40]@[42]",
+            ""
+        ],
+        "47/3": [
+            "Our split from the@[4D]palace is a two-edged@[4D]sword, it seems.@[4F]@[42]This is my@[4D]responsibility.@[40]@[42]",
+            ""
+        ],
+        "47/4": [
+            "Judgemaster @[5106]...@[40]@[42]",
+            ""
+        ],
+        "47/5": [
+            "If our resources are@[4D]at their limits,@[4D]then...@[40]@[42]",
+            ""
+        ],
+        "47/6": [
+            "The clans?@[40]@[42]",
+            ""
+        ],
+        "47/7": [
+            "They’re the ones most@[4D]affected by corrupt@[4D]judges’ actions.@[4F]@[42]They should be@[4D]willing to help.@[40]@[42]",
+            ""
+        ],
+        "47/8": [
+            "Can we trust them?@[4D]What if the judges@[4D]bribe them?@[40]@[42]",
+            ""
+        ],
+        "47/9": [
+            "Do not worry.@[4D]There’s at least one@[4D]clan we can trust.@[40]@[42]",
+            ""
+        ],
+        "47/10": [
+            "I hereby bestow you@[4D]with ”justice”--@[4D]red card immunity!@[40]@[42]",
+            ""
+        ],
+        "47/11": [
+            "What are you doing@[4D]here? You pledged@[4D]to defend the law!@[40]@[42]",
+            ""
+        ],
+        "47/12": [
+            "Judgemaster @[5106]!@[4D]I’ve done nothing...@[4F]@[42]I was just passing@[4D]judgement on this@[4D]fellow here.@[40]@[42]",
+            ""
+        ],
+        "47/13": [
+            "Is this true,@[4D]@[400]?@[40]@[42]",
+            ""
+        ],
+        "47/14": [
+            "He was about to give@[4D]me immunity to red@[4D]cards.@[40]@[42]",
+            ""
+        ],
+        "47/15": [
+            "Giving out immunity@[4D]on your own? That’s@[4D]illegal, you know.@[40]@[42]",
+            ""
+        ],
+        "47/16": [
+            "I was asked to root@[4D]out corruption...@[4F]@[42]The request came from@[4D]an official at the@[4D]@[5117]Watch board!@[40]@[42]",
+            ""
+        ],
+        "47/17": [
+            "Wait a second, so you@[4D]two were in cahoots@[4D]this whole time!@[40]@[42]",
+            ""
+        ],
+        "47/18": [
+            "Indeed. My checkers@[4D]weren’t able to catch@[4D]judges like you.@[4F]@[42]So I had to go to@[4D]the clans for some@[4D]assistance...@[40]@[42]",
+            ""
+        ],
+        "47/19": [
+            "Curses!@[40]@[42]",
+            ""
+        ],
+        "47/20": [
+            "I’ll take that as an@[4D]admission of guilt.@[4D]You’ll be punished.@[40]@[42]",
+            ""
+        ],
+        "47/21": [
+            "That’s your@[4D]answer?@[40]@[42]",
+            ""
+        ],
+        "47/22": [
+            "@[5117]master!?@[40]@[42]",
+            ""
+        ],
+        "47/23": [
+            "I’ll be joining@[4D]you this time.@[40]@[42]",
+            ""
+        ],
+        "47/24": [
+            "Ha...hah hah!@[4D]This is rich!@[4F]@[42]I hope you intend to@[4D]follow the law, Sir@[4D]@[5117]master!@[40]@[42]",
+            ""
+        ],
+        "47/25": [
+            "Of course. @[4D]And I expect to be@[4D]judged fairly.@[40]@[42]",
+            ""
+        ],
+        "47/26": [
+            "@[5117]s have absolute@[4D]power, and that power@[4D]must not be abused!@[4F]@[42]You understand the@[4D]consequences of@[4D]your actions?@[40]@[42]",
+            ""
+        ],
+        "47/27": [
+            "....@[40]@[42]",
+            ""
+        ],
+        "47/28": [
+            "Thank you for your@[4D]help, @[400].@[40]@[42]",
+            ""
+        ],
+        "47/29": [
+            "I’m glad we could@[4D]catch the rotten@[4D]judge.@[40]@[42]",
+            ""
+        ],
+        "47/30": [
+            "Yes...@[4F]@[42]But I fear this is@[4D]only the tip of the@[4D]iceberg.@[40]@[42]",
+            ""
+        ],
+        "47/31": [
+            "The society of judges@[4D]is in upheaval since@[4D]the split...@[40]@[42]",
+            ""
+        ],
+        "47/32": [
+            "Without the ordering@[4D]force of the palace,@[4D]they have more power.@[40]@[42]",
+            ""
+        ],
+        "47/33": [
+            "We can monitor the@[4D]cities, but not the@[4D]outlying areas...@[4F]@[42]If only I could@[4D]patrol them myself!@[40]@[42]",
+            ""
+        ],
+        "47/34": [
+            "Is there anything@[4D]I can do to help?@[40]@[42]",
+            ""
+        ],
+        "47/35": [
+            "Hmm...@[40]@[42]",
+            ""
+        ],
+        "47/36": [
+            "Would you mind me@[4D]imposing myself on@[4D]your clan a while?@[40]@[42]",
+            ""
+        ],
+        "47/37": [
+            "What!?@[40]@[42]",
+            ""
+        ],
+        "47/38": [
+            "Joining a clan would@[4D]be a perfect way to@[4D]monitor the country.@[4F]@[42]I could devote myself@[4D]to the task, going@[4D]incognito.@[40]@[42]",
+            ""
+        ],
+        "47/39": [
+            "Hmm...I guess it@[4D]sounds doable.@[40]@[42]",
+            ""
+        ],
+        "47/40": [
+            "Perhaps just until@[4D]I’ve completed my@[4D]survey?@[40]@[42]",
+            ""
+        ],
+        "47/41": [
+            "A-Absolutely!@[4D]Welcome!@[40]@[42]",
+            ""
+        ],
+        "47/42": [
+            "I am in your hands,@[4D]then.@[4F]@[42]Treat me as you would@[4D]any other new recruit,@[4D]please.@[40]@[42]",
+            ""
+        ],
+        "47/43": [
+            "Hmm...it’d be hard@[4D]for me to give orders@[4D]to the judgemaster!@[40]@[42]",
+            ""
+        ],
+        "47/44": [
+            "Hah! I’ll do my best@[4D]so you won’t have to@[4D]give too many, then!@[40]@[42]",
+            ""
+        ],
+        "47/45": [
+            "Y-Yes, sir!@[40]@[42]",
+            ""
+        ],
+        "47/46": [
+            "I...No, I’m sorry.@[4D]I don’t think it@[4D]would be a good idea.@[40]@[42]",
+            ""
+        ],
+        "47/47": [
+            "I expected you to@[4D]say something of@[4D]the sort.@[4F]@[42]Me being there would@[4D]hamper your clan’s@[4D]freedom, no doubt.@[40]@[42]",
+            ""
+        ],
+        "47/48": [
+            "I’m sorry.@[40]@[42]",
+            ""
+        ],
+        "47/49": [
+            "Not at all.@[4F]@[42]This problem is one@[4D]for us judges to@[4D]work out.@[40]@[42]",
+            ""
+        ],
+        "47/50": [
+            "You don’t mind if I@[4D]ask you to do other@[4D]tasks now and then?@[40]@[42]",
+            ""
+        ],
+        "47/51": [
+            "Not at all! We’re @[4D]here to help whenever@[4D]you need it!@[40]@[42]",
+            ""
+        ],
+        "48/0": [
+            "Whew, I’m bushed!@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "48/1": [
+            "You were going@[4D]all out in that@[4D]engagement!@[4F]@[42]How many of them@[4D]did you KO?@[40]@[42]",
+            ""
+        ],
+        "48/2": [
+            "They weren’t much@[4D]of a challenge.@[40]@[42]",
+            ""
+        ],
+        "48/3": [
+            "You’re too good,@[4D]that’s the problem!@[40]@[42]",
+            ""
+        ],
+        "48/4": [
+            "?@[4D]@[5104]? What’s wrong?@[40]@[42]",
+            ""
+        ],
+        "48/5": [
+            "@[510C]...@[4D]Be honest with me.@[40]@[42]",
+            ""
+        ],
+        "48/6": [
+            "What?@[40]@[42]",
+            ""
+        ],
+        "48/7": [
+            "I’m...@[40]@[42]",
+            ""
+        ],
+        "48/8": [
+            "I’m not very cute,@[4D]am I?@[40]@[42]",
+            ""
+        ],
+        "48/9": [
+            "What?@[40]@[42]",
+            ""
+        ],
+        "48/10": [
+            "I mean, I say what@[4D]I think all the time.@[4F]@[42]And I love swinging@[4D]my sword around in@[4D]engagements...@[40]@[42]",
+            ""
+        ],
+        "48/11": [
+            "....@[40]@[42]",
+            ""
+        ],
+        "48/12": [
+            "...tee hee!@[40]@[42]",
+            ""
+        ],
+        "48/13": [
+            "What’s so funny?@[4D]Hey, I’m being@[4D]serious, here!@[4F]@[42]I just don’t think@[4D]I fit the ”cute”@[4D]model, that’s all.@[40]@[42]",
+            ""
+        ],
+        "48/14": [
+            "Why don’t you ask@[4D]@[400] what@[4D]he thinks?@[40]@[42]",
+            ""
+        ],
+        "48/15": [
+            "No way! Why should@[4D]I care what he says?@[40]@[42]",
+            ""
+        ],
+        "48/16": [
+            "@[5104]! Shara!@[4D]What’s up?@[40]@[42]",
+            ""
+        ],
+        "48/17": [
+            "You’re here at@[4D]just the right@[4D]time!@[40]@[42]",
+            ""
+        ],
+        "48/18": [
+            "@[510C]!@[40]@[42]",
+            ""
+        ],
+        "48/19": [
+            "??@[40]@[42]",
+            ""
+        ],
+        "48/20": [
+            "Nothing! Nothing!@[4D]So, @[400],@[4D]um, what’s up?@[40]@[42]",
+            ""
+        ],
+        "48/21": [
+            "Ah, um, nothing@[4D]much I guess?@[40]@[42]",
+            ""
+        ],
+        "48/22": [
+            "@[5104], now you can’t@[4D]just leave him @[4D]hanging like this...@[40]@[42]",
+            ""
+        ],
+        "48/23": [
+            "Yes, I can!@[4D]Uh...@[40]@[42]",
+            ""
+        ],
+        "48/24": [
+            "I...I mean, sorry.@[4D]It’s really nothing.@[4D]Nothing at all!@[40]@[42]",
+            ""
+        ],
+        "48/25": [
+            "Let’s talk about@[4D]the next mission,@[4D]shall we?@[40]@[42]",
+            ""
+        ],
+        "49/0": [
+            "...alta orran...@[4D]No no... That wasn’t@[4D]it, was it?@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "49/1": [
+            "Casting spells@[4D]now, @[5109]?@[40]@[42]",
+            ""
+        ],
+        "49/2": [
+            "Lord @[5106]!@[40]@[42]",
+            ""
+        ],
+        "49/3": [
+            "Not a spell, just,@[4D]well, something that@[4D]was stuck in my head.@[4F]@[42]I can’t remember@[4D]where I heard it@[4D]for certain...@[40]@[42]",
+            ""
+        ],
+        "49/4": [
+            "Yes, of course!@[4D]The prince kept@[4D]saying it to himself!@[4F]@[42]”Alta Oron Sondus@[4D]Kameela.”@[40]@[42]",
+            ""
+        ],
+        "49/5": [
+            "@[5103]?@[40]@[42]",
+            ""
+        ],
+        "49/6": [
+            "Yes. I’m sure@[4D]of it now.@[4F]@[42]It sounded like some@[4D]ancient spell to me@[4D]at the time.@[40]@[42]",
+            ""
+        ],
+        "49/7": [
+            "The words do have a@[4D]nice ring to them.@[4D]What do they mean?@[40]@[42]",
+            ""
+        ],
+        "49/8": [
+            "I do not know, but @[4D]it must be something@[4D]auspicious.@[40]@[42]",
+            ""
+        ],
+        "49/9": [
+            "Ancient tongues@[4D]placed a lot of@[4D]value on sounds...@[4F]@[42]Good sounds often@[4D]mean good things.@[40]@[42]",
+            ""
+        ],
+        "49/10": [
+            "Blessings unto you?@[4D]That sort of thing?@[4F]@[42]I wonder if @[5103]@[4D]knows what those@[4D]words mean?@[40]@[42]",
+            ""
+        ],
+        "49/11": [
+            "I wonder?@[40]@[42]",
+            ""
+        ],
+        "49/12": [
+            "Regardless, it’s@[4D]strange he’d know@[4D]such a thing at all.@[40]@[42]",
+            ""
+        ],
+        "49/13": [
+            "Prince...@[40]@[42]",
+            ""
+        ],
+        "49/14": [
+            "By the way, @[5109],@[4D]what were you doing@[4D]here?@[40]@[42]",
+            ""
+        ],
+        "49/15": [
+            "Oh...@[4D]I was just whiling@[4D]away the day here.@[40]@[42]",
+            ""
+        ],
+        "49/16": [
+            "That’s good.@[4F]@[42]You always worked too@[4D]hard for your age.@[40]@[42]",
+            ""
+        ],
+        "49/17": [
+            "Thank you.@[40]@[42]",
+            ""
+        ],
+        "49/18": [
+            "It wasn’t a@[4D]compliment,@[4D]@[5109].@[40]@[42]",
+            ""
+        ],
+        "49/19": [
+            "Sir?@[40]@[42]",
+            ""
+        ],
+        "49/20": [
+            "You worked so hard,@[4D]none of us could@[4D]slack off!@[40]@[42]",
+            ""
+        ],
+        "49/21": [
+            "My apologies!@[40]@[42]",
+            ""
+        ],
+        "49/22": [
+            "Hah ha ha! I’m@[4D]joking, @[5109]!@[4F]@[42]You are quite a@[4D]character.@[40]@[42]",
+            ""
+        ],
+        "49/23": [
+            "I’ve never been@[4D]good with jokes.@[40]@[42]",
+            ""
+        ],
+        "49/24": [
+            "Yes, you are @[5109]@[4D]Swain, personal mage@[4D]to the prince.@[40]@[42]",
+            ""
+        ],
+        "49/25": [
+            "....@[40]@[42]",
+            ""
+        ],
+        "49/26": [
+            "And that’s good@[4D]enough for anyone,@[4D]I should think.@[40]@[42]",
+            ""
+        ],
+        "49/27": [
+            "Yes.@[40]@[42]",
+            ""
+        ],
+        "50/0": [
+            "@[103]Miss Mogumi..@[4D]I...I read your@[4D]letter, kupo!@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "50/1": [
+            "@[101]You...You’re not@[4D]Mogumi, kupo!@[4F]@[42]@[101]Noooooo! I’ve been@[4D]had, kupo! That’s@[4D]not very nice, kupo!@[40]@[42]",
+            ""
+        ],
+        "50/2": [
+            "@[101]You fell for@[4D]it, kupo!@[4F]@[42]@[102]Now you’ll get a@[4D]lesson in humility@[4D]from Clan Rose!@[40]@[42]",
+            ""
+        ],
+        "50/3": [
+            "@[104]Ku-Kupo... We could@[4D]have been great@[4D]together, kupo...@[40]@[42]",
+            ""
+        ],
+        "51/0": [
+            "Our income has gone@[4D]up ten percent from@[4D]last month.@[4F]@[42]Of course, the ”blank@[4D]card” laws are to@[4D]thank...@[4F]@[42]But I think the @[4D]”seals of immunity”@[4D]are helping, too.@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "51/1": [
+            "I like those numbers.@[4D]What about the@[4D]other regions?@[40]@[42]",
+            ""
+        ],
+        "51/2": [
+            "They’ve spread to@[4D]all but a few certain@[4D]areas...@[40]@[42]",
+            ""
+        ],
+        "51/3": [
+            "A few certain areas?@[4D]What’s the deal with@[4D]that?@[40]@[42]",
+            ""
+        ],
+        "51/4": [
+            "It is only a@[4D]rumor...@[4F]@[42]But they say that the@[4D]judgemaster is on a@[4D]crackdown of sorts.@[40]@[42]",
+            ""
+        ],
+        "51/5": [
+            "The judgemaster?@[4D]@[40]@[42]",
+            ""
+        ],
+        "51/6": [
+            "Yes. He’s using the@[4D]clans to help him,@[4D]it seems.@[4F]@[42]They’re seizing@[4D]immunity seals and@[4D]blank cards...@[40]@[42]",
+            ""
+        ],
+        "51/7": [
+            "Shall we reduce@[4D]production of@[4D]the seals?@[40]@[42]",
+            ""
+        ],
+        "51/8": [
+            "No, I see no reason@[4D]to change our current@[4D]operations.@[4F]@[42]As long as their@[4D]secrecy remains@[4D]uncompromised...@[40]@[42]",
+            ""
+        ],
+        "51/9": [
+            "I understand.@[40]@[42]",
+            ""
+        ],
+        "51/10": [
+            "So... @[5117]master@[4D]@[5106] is finally@[4D]making his move...@[40]@[42]",
+            ""
+        ],
+        "51/11": [
+            "Terrible news! Our@[4D]”seal of immunity”@[4D]deal was discovered!@[4F]@[42]Leave this area at@[4D]once! We’ll handle@[4D]the...@[40]@[42]",
+            ""
+        ],
+        "51/12": [
+            "Ah, the local@[4D]official. Just who@[4D]I was looking for.@[4F]@[42]Were you on your@[4D]way somewhere? Just@[4D]as I was arriving?@[40]@[42]",
+            ""
+        ],
+        "51/13": [
+            "I...I had no idea@[4D]you’d be gracing us@[4D]with your presence!@[4F]@[42]I’ll stay, of course!@[40]@[42]",
+            ""
+        ],
+        "51/14": [
+            "Actually, my search@[4D]for a wanted criminal@[4D]led me here.@[4F]@[42]I’ll have to make a@[4D]brief investigation.@[4D]If you don’t mind?@[40]@[42]",
+            ""
+        ],
+        "51/15": [
+            "....@[40]@[42]",
+            ""
+        ],
+        "51/16": [
+            "@[400]?@[40]@[42]",
+            ""
+        ],
+        "51/17": [
+            "Judgemaster @[5106]!@[40]@[42]",
+            ""
+        ],
+        "51/18": [
+            "Excuse me? Is there@[4D]a problem?@[4F]@[42]Not hiding any@[4D]”seals of immunity”@[4D]now, are you?@[40]@[42]",
+            ""
+        ],
+        "51/19": [
+            "So, you already@[4D]know, do you!?@[40]@[42]",
+            ""
+        ],
+        "51/20": [
+            "Then, @[5117]master@[4D]@[5106], I’m afraid you@[4D]must...die!@[40]@[42]",
+            ""
+        ],
+        "51/21": [
+            "Sorry to barge in@[4D]all of a sudden@[4D]like this.@[4F]@[42]We’re with@[4D]Clan @[403].@[4F]@[42]We’re here to meet@[4D]you at @[5117]master@[4D]@[5106]’s request.@[40]@[42]",
+            ""
+        ],
+        "51/22": [
+            "Might I ask why?@[40]@[42]",
+            ""
+        ],
+        "51/23": [
+            "We heard a fugitive@[4D]from the law was in@[4D]hiding here.@[4F]@[42]Sorry, but we have@[4D]to make a brief@[4D]investigation...@[40]@[42]",
+            ""
+        ],
+        "51/24": [
+            "How do I know you’re@[4D]really working for@[4D]the judgemaster?@[40]@[42]",
+            ""
+        ],
+        "51/25": [
+            "The pub has records@[4D]of the judgemaster’s@[4D]request...@[40]@[42]",
+            ""
+        ],
+        "51/26": [
+            "We’d like to start@[4D]our investigation,@[4D]if you don’t mind.@[40]@[42]",
+            ""
+        ],
+        "51/27": [
+            "Wait!@[40]@[42]",
+            ""
+        ],
+        "51/28": [
+            "Is there a problem?@[4F]@[42]Not hiding any ”seals@[4D]of immunity” by any@[4D]chance, are you?@[40]@[42]",
+            ""
+        ],
+        "51/29": [
+            "I’m sorry, but you@[4D]have to die.@[4F]@[42]I’ll let the pub@[4D]know of your wish to@[4D]cancel this mission!@[40]@[42]",
+            ""
+        ],
+        "51/30": [
+            "Gah...@[4D]Th-This...is bigger@[4D]than just me!@[40]@[42]",
+            ""
+        ],
+        "51/31": [
+            "Oh, I’m under no@[4D]delusions that this@[4D]is the end.@[40]@[42]",
+            ""
+        ],
+        "51/32": [
+            "I can’t believe he’d@[4D]break the law like@[4D]that--a judge!@[40]@[42]",
+            ""
+        ],
+        "52/0": [
+            "Reporting.@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "52/1": [
+            "What is it?@[40]@[42]",
+            ""
+        ],
+        "52/2": [
+            "We’re expecting a@[4D]visit from the@[4D]judgemaster soon.@[40]@[42]",
+            ""
+        ],
+        "52/3": [
+            "I see.@[40]@[42]",
+            ""
+        ],
+        "52/4": [
+            "Cyril’s judge was @[4D]sent to prison@[4D]you know...@[4F]@[42]What do you intend @[4D]to do?@[40]@[42]",
+            ""
+        ],
+        "52/5": [
+            "Unlike my peer in@[4D]Cyril, I don’t sell@[4D]seals of immunity.@[4F]@[42]All I do is judge@[4D]engagements--my job.@[40]@[42]",
+            ""
+        ],
+        "52/6": [
+            "Excuse me, your@[4D]honor. The donations@[4D]for the month are in.@[4F]@[42]The usual seven clans@[4D]gave generously. And@[4D]two new ones as well.@[40]@[42]",
+            ""
+        ],
+        "52/7": [
+            "Very well. Give me@[4D]the names of the new@[4D]clans...@[4F]@[42]And add them onto@[4D]the law benefits@[4D]list.@[40]@[42]",
+            ""
+        ],
+        "52/8": [
+            "Well, if it isn’t@[4D]Judgemaster @[5106]!@[4F]@[42]Welcome, welcome.@[40]@[42]",
+            ""
+        ],
+        "52/9": [
+            "You know why I@[4D]am here today.@[4F]@[42]We’ve received word@[4D]that your judging@[4D]is unfairly biased.@[40]@[42]",
+            ""
+        ],
+        "52/10": [
+            "Indeed! Me? Play@[4D]favorites?@[4F]@[42]What ever could I@[4D]hope to gain from@[4D]fixing an engagement?@[40]@[42]",
+            ""
+        ],
+        "52/11": [
+            "Indeed...what ever?@[40]@[42]",
+            ""
+        ],
+        "52/12": [
+            "@[5117]master!@[4D]I found it!@[4F]@[42]It’s the list of@[4D]clan ”donations.”@[40]@[42]",
+            ""
+        ],
+        "52/13": [
+            "Ah, yes. Thank you.@[40]@[42]",
+            ""
+        ],
+        "52/14": [
+            "!!@[40]@[42]",
+            ""
+        ],
+        "52/15": [
+            "What were you asking@[4D]just now? Oh yes...@[4D]what could you gain?@[40]@[42]",
+            ""
+        ],
+        "52/16": [
+            "Grr...@[4D]That does it!@[40]@[42]",
+            ""
+        ],
+        "52/17": [
+            "We are from@[4D]Clan @[403].@[4F]@[42]We’re here on a@[4D]mission.@[40]@[42]",
+            ""
+        ],
+        "52/18": [
+            "A mission? What@[4D]might that be?@[40]@[42]",
+            ""
+        ],
+        "52/19": [
+            "We’ve been asked to@[4D]find out whether you@[4D]are being unfair.@[40]@[42]",
+            ""
+        ],
+        "52/20": [
+            "You mean the rumors@[4D]of me playing@[4D]favorites? Please!@[4F]@[42]What ever could I@[4D]hope to gain from@[4D]fixing an engagement?@[40]@[42]",
+            ""
+        ],
+        "52/21": [
+            "Well...@[40]@[42]",
+            ""
+        ],
+        "52/22": [
+            "I’d think if you @[4D]were willing to relax@[4D]certain laws for gil,@[4F]@[42]many clans would be@[4D]interested in doing@[4D]business with you.@[40]@[42]",
+            ""
+        ],
+        "52/23": [
+            "Are you saying I’m@[4D]taking bribes to make@[4D]unfair judgements!?@[40]@[42]",
+            ""
+        ],
+        "52/24": [
+            "I’ve heard from the@[4D]clans giving you@[4D]”donations.”@[4F]@[42]I think you should@[4D]come with me to see@[4D]Judgemaster @[5106].@[40]@[42]",
+            ""
+        ],
+        "52/25": [
+            "First ”seals of@[4D]immunity.” Now ”blank@[4D]cards” and donations!@[40]@[42]",
+            ""
+        ],
+        "52/26": [
+            "@[5117]s are the arm@[4D]of the law. They@[4D]can’t play favorites!@[4F]@[42]Think about what@[4D]you’ve done...@[4D]in prison!@[40]@[42]",
+            ""
+        ],
+        "53/0": [
+            "As you know, judges@[4D]in Cyril and@[4D]Baguba...@[4F]@[42]have been sent to@[4D]prison.@[4F]@[42]They were abusing@[4D]their power as@[4D]judges.@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "53/1": [
+            "Seals of immunity,@[4D]”blank cards,” and@[4D]judicial bribery!@[40]@[42]",
+            ""
+        ],
+        "53/2": [
+            "The split from the@[4D]palace was supposed@[4D]to be good for us...@[4F]@[42]But corruption among@[4D]the judges is worse@[4D]now than ever!@[40]@[42]",
+            ""
+        ],
+        "53/3": [
+            "Indeed.@[4F]@[42]It seems the split@[4D]from the palace was@[4D]an unwise decision.@[40]@[42]",
+            ""
+        ],
+        "53/4": [
+            "I, too, believed the@[4D]judges should be@[4D]separate.@[4F]@[42]But, perhaps the@[4D]timing was too soon?@[40]@[42]",
+            ""
+        ],
+        "53/5": [
+            "Timing has nothing@[4D]to do with it.@[4F]@[42]It is a problem with@[4D]the moral fiber of@[4D]judges themselves!@[40]@[42]",
+            ""
+        ],
+        "53/6": [
+            "What!? You claim@[4D]that our judges are@[4D]morally lacking?@[4F]@[42]Th-This is@[4D]sacrilege!@[40]@[42]",
+            ""
+        ],
+        "53/7": [
+            "So, you think our@[4D]morals are in@[4D]top shape, then?@[40]@[42]",
+            ""
+        ],
+        "53/8": [
+            "Such words I did not@[4D]expect from our@[4D]judgemaster!@[4F]@[42]Or are you admitting@[4D]a personal failing?@[40]@[42]",
+            ""
+        ],
+        "53/9": [
+            "I feel responsible@[4D]for what is going@[4D]on, yes.@[4F]@[42]I am prepared to@[4D]resign once I finish@[4D]my current survey.@[40]@[42]",
+            ""
+        ],
+        "53/10": [
+            "...!@[40]@[42]",
+            ""
+        ],
+        "53/11": [
+            "However, there is@[4D]something I have@[4D]already learned.@[4F]@[42]Both of the judges@[4D]we have captured@[4D]so far...@[4F]@[42]were following orders@[4D]from higher up.@[40]@[42]",
+            ""
+        ],
+        "53/12": [
+            "Someone who knows@[4D]the judges, the laws,@[4D]and the prison.@[40]@[42]",
+            ""
+        ],
+        "53/13": [
+            "If come across any@[4D]information, please@[4D]let me know.@[40]@[42]",
+            ""
+        ],
+        "53/14": [
+            "Willing to resign,@[4D]you say? Hmm...@[40]@[42]",
+            ""
+        ],
+        "53/15": [
+            "Tell me--who’s the@[4D]source of all this@[4D]corruption?@[4F]@[42]You know, do you@[4D]not?@[40]@[42]",
+            ""
+        ],
+        "53/16": [
+            "Why...it’s the judge@[4D]right here in @[4D]Sprohm.@[40]@[42]",
+            ""
+        ],
+        "53/17": [
+            "The judge in charge@[4D]of the prison!?@[40]@[42]",
+            ""
+        ],
+        "53/18": [
+            "....@[4D]What does he want?@[40]@[42]",
+            ""
+        ],
+        "53/19": [
+            "The rank of@[4D]judgemaster.@[40]@[42]",
+            ""
+        ],
+        "53/20": [
+            "@[5117]master?@[40]@[42]",
+            ""
+        ],
+        "53/21": [
+            "I see what you’re@[4D]trying to do.@[4F]@[42]If judges everywhere@[4D]are cheating, the@[4D]blame falls on me.@[40]@[42]",
+            ""
+        ],
+        "53/22": [
+            "You’re trying to@[4D]force @[5117]master@[4D]@[5106] to resign!@[40]@[42]",
+            ""
+        ],
+        "53/23": [
+            "I had no idea you@[4D]were contemplating@[4D]resignation...@[4F]@[42]No matter. The end@[4D]result is the same.@[40]@[42]",
+            ""
+        ],
+        "53/24": [
+            "I would never pass@[4D]my judge sword on@[4D]to the likes of you!@[40]@[42]",
+            ""
+        ],
+        "53/25": [
+            "I don’t need you to@[4D]pass me anything.@[4D]I’ll just take it!@[40]@[42]",
+            ""
+        ],
+        "53/26": [
+            "Tell me--who’s the@[4D]source of all this@[4D]corruption?@[4F]@[42]You know, don’t you?@[40]@[42]",
+            ""
+        ],
+        "53/27": [
+            "Why...it’s the judge@[4D]right here in @[4D]Sprohm.@[40]@[42]",
+            ""
+        ],
+        "53/28": [
+            "The judge in charge@[4D]of the prison!?@[4D]What does he want?@[40]@[42]",
+            ""
+        ],
+        "53/29": [
+            "The title of@[4D]judgemaster!@[40]@[42]",
+            ""
+        ],
+        "53/30": [
+            "I get it...@[4F]@[42]If judges everywhere@[4D]are corrupt, the@[4D]blame falls on @[5106].@[4F]@[42]You’re trying to force@[4D]Judgemaster @[5106]@[4D]to resign!@[40]@[42]",
+            ""
+        ],
+        "53/31": [
+            "You know, you could@[4D]always join me?@[4F]@[42]Many judges have made@[4D]that choice.@[40]@[42]",
+            ""
+        ],
+        "53/32": [
+            "Never! I’ll never@[4D]betray @[5117]master@[4D]@[5106]’s trust!@[40]@[42]",
+            ""
+        ],
+        "53/33": [
+            "Unfortunate.@[4D]Then I’m afraid I@[4D]must ask you to die!@[40]@[42]",
+            ""
+        ],
+        "53/34": [
+            "@[5117]s trying to gain@[4D]ranks by breaking@[4D]the law...@[40]@[42]",
+            ""
+        ],
+        "53/35": [
+            "Even I can see that@[4D]you can’t become@[4D]judgemaster...@[4F]@[42]By breaking the very@[4D]laws it’s your duty@[4D]to uphold!@[40]@[42]",
+            ""
+        ],
+        "53/36": [
+            "It’s over.@[40]@[42]",
+            ""
+        ],
+        "53/37": [
+            "Thank you,@[4D]@[400].@[4F]@[42]You went above and@[4D]beyond the call of@[4D]duty.@[40]@[42]",
+            ""
+        ],
+        "53/38": [
+            "Not at all!@[4D]I’m glad I was@[4D]able to help!@[40]@[42]",
+            ""
+        ],
+        "53/39": [
+            "You know...@[40]@[42]",
+            ""
+        ],
+        "53/40": [
+            "What?@[40]@[42]",
+            ""
+        ],
+        "53/41": [
+            "I would give you@[4D]my judge sword.@[40]@[42]",
+            ""
+        ],
+        "53/42": [
+            "What!?@[40]@[42]",
+            ""
+        ],
+        "53/43": [
+            "Ah ha ha. That@[4D]surprised, are you?@[40]@[42]",
+            ""
+        ],
+        "53/44": [
+            "I just, I...me!?@[40]@[42]",
+            ""
+        ],
+        "53/45": [
+            "All I said is I would@[4D]give it to you. Not@[4D]that I will give it.@[4F]@[42]But, if you are as@[4D]just when you grow@[4D]older as you are now,@[4F]@[42]then you will be@[4D]deserving of it.@[40]@[42]",
+            ""
+        ],
+        "53/46": [
+            "...Thank you.@[4F]@[42]I’ll do my best.@[40]@[42]",
+            ""
+        ],
+        "55/0": [
+            "Howdy.@[40]@[42]",
+            "#repeat from 35"
+        ],
+        "55/1": [
+            "Oh ho! Nice timing!@[4D]I’ve been waiting@[4D]for you, @[400].@[40]@[42]",
+            ""
+        ],
+        "55/2": [
+            "Huh? For me?@[40]@[42]",
+            ""
+        ],
+        "55/3": [
+            "That’s right!@[4D]For you!@[40]@[42]",
+            ""
+        ],
+        "55/4": [
+            "Let’s see...@[4D]you need my help?@[40]@[42]",
+            ""
+        ],
+        "55/5": [
+            "Bingo!@[4D]You always were a@[4D]sharp one, my boy!@[40]@[42]",
+            ""
+        ],
+        "55/6": [
+            "You want me to gather@[4D]ingredients for your@[4D]antilaw cards?@[40]@[42]",
+            ""
+        ],
+        "55/7": [
+            "No, no, nothing like@[4D]that. @[4F]@[42]I want you to be a@[4D]mediator with me!@[40]@[42]",
+            ""
+        ],
+        "55/8": [
+            "Excuse me?@[4D]A...mediator?@[40]@[42]",
+            ""
+        ],
+        "55/9": [
+            "See, the resistance@[4D]and the palace have@[4D]agreed to hold talks.@[40]@[42]",
+            ""
+        ],
+        "55/10": [
+            "Wow! I can’t imagine@[4D]either of them in the@[4D]same room!@[4F]@[42]Let alone talking!@[40]@[42]",
+            ""
+        ],
+        "55/11": [
+            "Amazing though it may@[4D]sound, they are@[4D]willing to talk.@[4F]@[42]And they need a@[4D]mediator.@[4F]@[42]I tried to weasel@[4D]out of it, but they@[4D]insisted.@[40]@[42]",
+            ""
+        ],
+        "55/12": [
+            "So they talked@[4D]you into it, then?@[40]@[42]",
+            ""
+        ],
+        "55/13": [
+            "Um...so where do@[4D]I come into the@[4D]picture?@[4F]@[42]Aren’t you enough@[4D]of a mediator by@[4D]yourself?@[40]@[42]",
+            ""
+        ],
+        "55/14": [
+            "Oh, just the usual:@[4D]some people are@[4D]against the talks...@[4F]@[42]So they need a guard@[4D]to make sure no one@[4D]interferes, see?@[40]@[42]",
+            ""
+        ],
+        "55/15": [
+            "Oh, I see. That@[4D]doesn’t sound too...@[4D]oh. Uh oh.@[40]@[42]",
+            ""
+        ],
+        "55/16": [
+            "What’s wrong?@[40]@[42]",
+            ""
+        ],
+        "55/17": [
+            "I forgot. The palace@[4D]still has a bounty@[4D]on my head.@[4F]@[42]If I go there,@[4D]they’ll throw me in@[4D]prison for sure.@[40]@[42]",
+            ""
+        ],
+        "55/18": [
+            "Not a chance! Heck,@[4D]they made ME the@[4D]mediator...@[4F]@[42]And I’m at least the@[4D]second most wanted@[4D]man in the land!@[40]@[42]",
+            ""
+        ],
+        "55/19": [
+            "....@[40]@[42]",
+            ""
+        ],
+        "55/20": [
+            "Don’t worry so much!@[4F]@[42]If things start@[4D]going wrong, just@[4D]split!@[40]@[42]",
+            ""
+        ],
+        "55/21": [
+            "Yeah...@[4D]Yeah, I guess.@[40]@[42]",
+            ""
+        ],
+        "55/22": [
+            "I’ll put a request@[4D]in at the pub, just@[4D]to make it official.@[40]@[42]",
+            ""
+        ],
+        "55/23": [
+            "Oh, OK.@[40]@[42]",
+            ""
+        ],
+        "55/24": [
+            "That @[510A] sure has@[4D]nerves of steel...@[40]@[42]",
+            ""
+        ],
+        "55/25": [
+            "Things seem to@[4D]be going pretty@[4D]well.@[40]@[42]",
+            ""
+        ],
+        "55/26": [
+            "I sure hope so!@[40]@[42]",
+            ""
+        ],
+        "55/27": [
+            "So, you’ll sign the@[4D]non-action treaty?@[40]@[42]",
+            ""
+        ],
+        "55/28": [
+            "And you’ll allow@[4D]limited use of@[4D]selected antilaws...@[4F]@[42]And promise not to@[4D]persecute ex-members@[4D]of the resistance?@[40]@[42]",
+            ""
+        ],
+        "55/29": [
+            "Bervenia Palace@[4D]agrees to both@[4D]of those demands.@[40]@[42]",
+            ""
+        ],
+        "55/30": [
+            "Yaaaah!@[40]@[42]",
+            ""
+        ],
+        "55/31": [
+            "Here they come.@[40]@[42]",
+            ""
+        ],
+        "55/32": [
+            "Don’t listen to them,@[4D]they’re playing you@[4D]for fools!@[4F]@[42]The palace has only@[4D]lied to us in the@[4D]past! Why trust them?@[40]@[42]",
+            ""
+        ],
+        "55/33": [
+            "Trust or no trust,@[4D]we’re here to get@[4D]this treaty signed.@[4F]@[42]And I’ll stand@[4D]witness to its@[4D]signing.@[40]@[42]",
+            ""
+        ],
+        "55/34": [
+            "Then we’ll bury you@[4D]along with that@[4D]stupid treaty!@[40]@[42]",
+            ""
+        ],
+        "55/35": [
+            "@[510A], they’re@[4D]engaging us!@[40]@[42]",
+            ""
+        ],
+        "55/36": [
+            "Any more of them@[4D]hiding out there?@[4F]@[42]One engagement a@[4D]day is enough for@[4D]me, thanks!@[40]@[42]",
+            ""
+        ],
+        "55/37": [
+            "Looks like the@[4D]coast is clear.@[40]@[42]",
+            ""
+        ],
+        "55/38": [
+            "Then let’s get on@[4D]with the talks.@[4F]@[42]I want to get this@[4D]done with and go@[4D]home!@[40]@[42]",
+            ""
+        ],
+        "55/39": [
+            "May the words spoken@[4D]here be honored for@[4D]all time.@[40]@[42]",
+            ""
+        ],
+        "55/40": [
+            "It’s over! Finally!@[4D]Man, my shoulders@[4D]are stiff...@[40]@[42]",
+            ""
+        ],
+        "55/41": [
+            "I’m glad they managed@[4D]to make peace with@[4D]the palace.@[40]@[42]",
+            ""
+        ],
+        "55/42": [
+            "Yeah, well, it’s@[4D]going to mean more@[4D]free time for me.@[40]@[42]",
+            ""
+        ],
+        "55/43": [
+            "Why’s that?@[40]@[42]",
+            ""
+        ],
+        "55/44": [
+            "Antilaws are legal@[4D]now!@[4F]@[42]So no more hiding@[4D]and running around.@[40]@[42]",
+            ""
+        ],
+        "55/45": [
+            "Hey, that’s great!@[40]@[42]",
+            ""
+        ],
+        "55/46": [
+            "And I’ve you to@[4D]thank for it, kiddo.@[40]@[42]",
+            ""
+        ],
+        "55/47": [
+            "Aw, gee, don’t@[4D]mention it.@[4F]@[42]Eh heh...eh heh.@[4D]Now I’m all@[4D]embarrassed...@[40]@[42]",
+            ""
+        ],
+        "55/48": [
+            "So, how should I pay@[4D]you for helping me?@[40]@[42]",
+            ""
+        ],
+        "55/49": [
+            "Pay me? Oh, I’m fine,@[4D]really. You don’t@[4D]have to pay me.@[4F]@[42]I already got paid@[4D]for the mission,@[4D]anyway.@[40]@[42]",
+            ""
+        ],
+        "55/50": [
+            "Yeah, but I feel like@[4D]I should give you@[4D]something, after all.@[40]@[42]",
+            ""
+        ],
+        "55/51": [
+            "Um, well...@[40]@[42]",
+            ""
+        ],
+        "55/52": [
+            "I know! I’ll give you@[4D]the greatest gift@[4D]of all... Me!@[4F]@[42]I’ll join your@[4D]clan!@[40]@[42]",
+            ""
+        ],
+        "55/53": [
+            "Wha--!?@[4D]Are you serious!?@[40]@[42]",
+            ""
+        ],
+        "55/54": [
+            "Of course, I’ll be@[4D]busy with my shop@[4D]most days...@[4F]@[42]Maybe I can be a kind@[4D]of honorary member?@[40]@[42]",
+            ""
+        ],
+        "55/55": [
+            "So, @[510A] reporting,@[4D]sir!@[40]@[42]",
+            ""
+        ],
+        "55/56": [
+            "Well, welcome to@[4D]the clan, @[510A]!@[40]@[42]",
+            ""
+        ],
+        "55/57": [
+            "Just...one thing.@[40]@[42]",
+            ""
+        ],
+        "55/58": [
+            "What’s that?@[40]@[42]",
+            ""
+        ],
+        "55/59": [
+            "Don’t expect any@[4D]favors at the shop!@[4F]@[42]Business is business,@[4D]after all.@[40]@[42]",
+            ""
+        ],
+        "55/60": [
+            "Roger!@[40]@[42]",
+            ""
+        ],
+        "55/61": [
+            "I think I’ll have@[4D]to decline@[4D]your offer.@[4F]@[42]I mean, you’re@[4D]so busy and all...@[40]@[42]",
+            ""
+        ],
+        "55/62": [
+            "Well, I don’t want@[4D]to be a burden...@[40]@[42]",
+            ""
+        ],
+        "55/63": [
+            "Hmm. OK, I’ll@[4D]think of something@[4D]else to give you.@[4F]@[42]How about dinner,@[4D]for starters?@[40]@[42]",
+            ""
+        ],
+        "55/64": [
+            "Hah ha!@[4D]Sounds great!@[40]@[42]",
+            ""
+        ],
+        "61/3/230": [
+            "@[103]We did it, kupo! Now@[4D]we can find @[5160]’s@[4D]legendary village!@[40]@[42]",
+            ""
+        ],
+        "61/6/200": [
+            "I see you have the@[4D]wyrmstone@[1D03]and@[1D03]strength.@[4F]@[42]We shall offer our@[4D]help in driving away@[4D]the Roda Dragon.@[40]@[42]",
+            ""
+        ],
+        "61/16/24": [
+            "Who are you!?@[4F]@[42]Mess with my weapon@[4D]collecting and I’ll@[4D]send you to prison!@[4F]@[42]...Ack! Can’t use my@[4D]new law in battle.@[4D]I’ll have to fight!@[40]@[42]",
+            ""
+        ],
+        "61/16/25": [
+            "The rumors were true!@[4D]These officials are@[4D]out of control!@[40]@[42]",
+            ""
+        ],
+        "61/16/26": [
+            "You’ll be stopping@[4D]your capricious law-@[4D]making or else!@[40]@[42]",
+            ""
+        ],
+        "61/16/27": [
+            "You should be ashamed@[4D]to call yoursself an@[4D]official!@[40]@[42]",
+            ""
+        ],
+        "61/16/28": [
+            "We have found you@[4D]at last. Tell me, who@[4D]is behind all this?@[40]@[42]",
+            ""
+        ],
+        "61/16/29": [
+            "I can’t believe you’d@[4D]just change the laws@[4D]on a whim! Really!@[40]@[42]",
+            ""
+        ],
+        "61/16/30": [
+            "@[103]The law isn’t yours@[4D]to change, kupo!@[40]@[42]",
+            ""
+        ],
+        "61/16/31": [
+            "You’re the reason my@[4D]antilaws are needed,@[4D]creep!@[40]@[42]",
+            ""
+        ],
+        "61/16/32": [
+            "You have shamed the@[4D]palace, and for that@[4D]you must pay!@[40]@[42]",
+            ""
+        ],
+        "61/16/33": [
+            "I can’t believe you’d@[4D]just make up laws@[4D]as you please!@[40]@[42]",
+            ""
+        ],
+        "61/16/34": [
+            "Bad is bad, and@[4D]bad must be punished.@[40]@[42]",
+            ""
+        ],
+        "61/16/35": [
+            "No judge will side@[4D]with you, understand?@[4D]You act alone!@[40]@[42]",
+            ""
+        ],
+        "61/16/36": [
+            "No...no...@[4D]Not my weapons!@[4D]My lovely weapons...@[40]@[42]",
+            ""
+        ],
+        "61/16/37": [
+            "The law is not for@[4D]you to decide.@[40]@[42]",
+            ""
+        ],
+        "61/16/38": [
+            "Hope some time in@[4D]prison restores@[4D]your sense!@[40]@[42]",
+            ""
+        ],
+        "61/16/39": [
+            "Hmph. They weren’t@[4D]yourss to begin with!@[40]@[42]",
+            ""
+        ],
+        "61/16/40": [
+            "Tell me: where did@[4D]you get that blank@[4D]card?@[40]@[42]",
+            ""
+        ],
+        "61/16/41": [
+            "You can think of all@[4D]the trouble you’ve@[4D]caused--in prison!@[40]@[42]",
+            ""
+        ],
+        "61/16/42": [
+            "@[103]Your plans are done@[4D]for, and the world is@[4D]a better place, kupo!@[40]@[42]",
+            ""
+        ],
+        "61/16/43": [
+            "There will always be@[4D]people like this in@[4D]the world, sadly.@[40]@[42]",
+            ""
+        ],
+        "61/16/44": [
+            "Repent in prison. It’s@[4D]not too late to change@[4D]your life.@[40]@[42]",
+            ""
+        ],
+        "61/16/45": [
+            "Your kind really@[4D]rub me the wrong way!@[40]@[42]",
+            ""
+        ],
+        "61/16/46": [
+            "Another mission@[4D]completed...@[40]@[42]",
+            ""
+        ],
+        "61/16/47": [
+            "You’ll be telling me@[4D]where you got that@[4D]blank card now.@[40]@[42]",
+            ""
+        ],
+        "61/16/48": [
+            "@[5117]Watch!? I’m@[4D]innocent! What’s@[4D]wrong with kissing?@[40]@[42]",
+            ""
+        ],
+        "61/16/49": [
+            "Kissing may be fine,@[4D]but you can’t make@[4D]it into a law!@[40]@[42]",
+            ""
+        ],
+        "61/16/50": [
+            "That kind of attitude@[4D]is causing a lot@[4D]of grief out there.@[40]@[42]",
+            ""
+        ],
+        "61/16/51": [
+            "People should be able@[4D]to choosse who they@[4D]kisss!@[40]@[42]",
+            ""
+        ],
+        "61/16/52": [
+            "Couldn’t you think of@[4D]a better way to@[4D]promote kissing?@[40]@[42]",
+            ""
+        ],
+        "61/16/53": [
+            "What’s the point of@[4D]kissing under duress?@[40]@[42]",
+            ""
+        ],
+        "61/16/54": [
+            "@[103]I’d kiss without a@[4D]silly law, kupo!@[4F]@[42]@[104]But no way do I@[4D]want to be told@[4D]what to do, kupo!@[40]@[42]",
+            ""
+        ],
+        "61/16/55": [
+            "Please don’t make@[4D]laws for such@[4D]silly things!@[40]@[42]",
+            ""
+        ],
+        "61/16/56": [
+            "I’d watch out for@[4D]irritated women if@[4D]I were you.@[40]@[42]",
+            ""
+        ],
+        "61/16/57": [
+            "I understand what you@[4D]mean, but isn’t there@[4D]a better way?@[40]@[42]",
+            ""
+        ],
+        "61/16/58": [
+            "Nothing wrong, but@[4D]read my lips: no@[4D]new laws for you!@[40]@[42]",
+            ""
+        ],
+        "61/16/59": [
+            "As long as it isn’t@[4D]ratified by the other@[4D]judges, it’s wrong.@[40]@[42]",
+            ""
+        ],
+        "61/16/60": [
+            "All I wanted was for@[4D]people to be friends@[4D]with me...@[40]@[42]",
+            ""
+        ],
+        "61/16/61": [
+            "(Enforced kissing@[4D]doesn’t seem like the@[4D]answer...?)@[40]@[42]",
+            ""
+        ],
+        "61/16/62": [
+            "If you wanted friends@[4D]you could ask a clan@[4D]for help...?@[40]@[42]",
+            ""
+        ],
+        "61/16/63": [
+            "Ssometimess, you have@[4D]to take matterss into@[4D]your own hands.@[40]@[42]",
+            ""
+        ],
+        "61/16/64": [
+            "Proper negotiation@[4D]will get you further@[4D]than inane laws.@[40]@[42]",
+            ""
+        ],
+        "61/16/65": [
+            "Then go out and@[4D]make lots of@[4D]friends!@[40]@[42]",
+            ""
+        ],
+        "61/16/66": [
+            "@[101]How about becoming a@[4D]juggler, kupo?@[4F]@[42]Everyone likes@[4D]jugglers, kupo!@[40]@[42]",
+            ""
+        ],
+        "61/16/67": [
+            "Where’s the fun in@[4D]forcing people to@[4D]be your friend?@[40]@[42]",
+            ""
+        ],
+        "61/16/68": [
+            "You should consider@[4D]the effect of your@[4D]actions well.@[40]@[42]",
+            ""
+        ],
+        "61/16/69": [
+            "Just tell them how@[4D]you really feel. That@[4D]works for me.@[40]@[42]",
+            ""
+        ],
+        "61/16/70": [
+            "...It’s over.@[4D]Time to report.@[40]@[42]",
+            ""
+        ],
+        "61/16/71": [
+            "Officials should@[4D]always separate @[4D]private from public.@[40]@[42]",
+            ""
+        ],
+        "61/16/96": [
+            "Yah hah hah! Isn’t it@[4D]fun to see everyone@[4D]hitting each other?@[40]@[42]",
+            ""
+        ],
+        "61/16/97": [
+            "Promoting violence@[4D]is no laughing@[4D]matter!@[40]@[42]",
+            ""
+        ],
+        "61/16/98": [
+            "I can see there’s no@[4D]helping you. Feel@[4D]some pain yourself!@[40]@[42]",
+            ""
+        ],
+        "61/16/99": [
+            "Let’s ssee how much@[4D]you laugh when it’ss@[4D]me hitting you!@[40]@[42]",
+            ""
+        ],
+        "61/16/100": [
+            "It is wrong to@[4D]delight in hurting@[4D]others.@[40]@[42]",
+            ""
+        ],
+        "61/16/101": [
+            "Hurting people just@[4D]to get your yucks@[4D]off. You slime!@[40]@[42]",
+            ""
+        ],
+        "61/16/102": [
+            "@[103]If you think its that@[4D]fun, try hitting@[4D]yourself, kupo!@[40]@[42]",
+            ""
+        ],
+        "61/16/103": [
+            "Then it’s high@[4D]time you got hit.@[40]@[42]",
+            ""
+        ],
+        "61/16/104": [
+            "I am shocked you@[4D]find such things@[4D]funny! You shall pay!@[40]@[42]",
+            ""
+        ],
+        "61/16/105": [
+            "If you knew real@[4D]pain, you would@[4D]never say that.@[40]@[42]",
+            ""
+        ],
+        "61/16/106": [
+            "What’s so funny?@[4D]You’re just hurting@[4D]people!@[40]@[42]",
+            ""
+        ],
+        "61/16/107": [
+            "You seem to lack the@[4D]basic qualities of@[4D]an official.@[40]@[42]",
+            ""
+        ],
+        "61/16/108": [
+            "Ow ow ow! Please,@[4D]stop! Owwwwch!@[40]@[42]",
+            ""
+        ],
+        "61/16/109": [
+            "Now you know how@[4D]everyone in your@[4D]region feels!@[40]@[42]",
+            ""
+        ],
+        "61/16/110": [
+            "Guess some things@[4D]you have to feel@[4D]for yourself, eh?@[40]@[42]",
+            ""
+        ],
+        "61/16/111": [
+            "What, you weren’t@[4D]having fun?@[40]@[42]",
+            ""
+        ],
+        "61/16/112": [
+            "Have a kind heart@[4D]towards others,@[4D]alwasy.@[40]@[42]",
+            ""
+        ],
+        "61/16/113": [
+            "Of course it hurts,@[4D]I was hitting you!@[40]@[42]",
+            ""
+        ],
+        "61/16/114": [
+            "@[102]So, reconsidered your@[4D]law, kupo?@[40]@[42]",
+            ""
+        ],
+        "61/16/115": [
+            "Are all officials@[4D]this dumb!?@[40]@[42]",
+            ""
+        ],
+        "61/16/116": [
+            "Repent behind bars,@[4D]felon.@[40]@[42]",
+            ""
+        ],
+        "61/16/117": [
+            "I can’t STAND people@[4D]who hurt others.@[4D]Bully!@[40]@[42]",
+            ""
+        ],
+        "61/16/118": [
+            "There’s a lot you@[4D]can learn from pain.@[4D]Another lesson?@[40]@[42]",
+            ""
+        ],
+        "61/16/119": [
+            "For an official to@[4D]fall so far...I am@[4D]responsible for this.@[40]@[42]",
+            ""
+        ],
+        "61/16/120": [
+            "Reading and writing@[4D]should be banned!@[4D]Paperwork sickens me!@[40]@[42]",
+            ""
+        ],
+        "61/16/121": [
+            "If it’s that annoying,@[4D]why don’t you just@[4D]quit your job?@[40]@[42]",
+            ""
+        ],
+        "61/16/122": [
+            "I’m not that excited@[4D]about paperwork,@[4D]myself, but a law!?@[40]@[42]",
+            ""
+        ],
+        "61/16/123": [
+            "But what about a@[4D]good novel? Or love@[4D]letterss...@[40]@[42]",
+            ""
+        ],
+        "61/16/124": [
+            "I cannot condone any@[4D]law that would hinder@[4D]knowledge.@[40]@[42]",
+            ""
+        ],
+        "61/16/125": [
+            "You can’t just ban@[4D]something that bugs@[4D]you!@[40]@[42]",
+            ""
+        ],
+        "61/16/126": [
+            "@[103]I totally agree, kupo!@[4D]But I’m on a mission@[4D]here. Sorry, kupo!@[40]@[42]",
+            ""
+        ],
+        "61/16/127": [
+            "Just skip the@[4D]paperwork! What’s@[4D]the big fuss?@[40]@[42]",
+            ""
+        ],
+        "61/16/128": [
+            "Isn’t that your job?@[4D]It’s wrong to shirk@[4D]your duties.@[40]@[42]",
+            ""
+        ],
+        "61/16/129": [
+            "Reading’s boring, but@[4D]couldn’t you think of@[4D]a better law?@[40]@[42]",
+            ""
+        ],
+        "61/16/130": [
+            "That doesn’t sound@[4D]like my kind of law.@[40]@[42]",
+            ""
+        ],
+        "61/16/131": [
+            "You don’t seem to@[4D]understand the@[4D]weight of your crime.@[40]@[42]",
+            ""
+        ],
+        "61/16/132": [
+            "S-Sorry. I’ll do my@[4D]paperwork, I promise!@[40]@[42]",
+            ""
+        ],
+        "61/16/133": [
+            "Well, that wraps@[4D]that one up.@[40]@[42]",
+            ""
+        ],
+        "61/16/134": [
+            "Well, as long as you@[4D]realize you did@[4D]wrong. @[40]@[42]",
+            ""
+        ],
+        "61/16/135": [
+            "I expect you to@[4D]apologize to everyone@[4D]...in writing!@[40]@[42]",
+            ""
+        ],
+        "61/16/136": [
+            "Yes, working hard is@[4D]the best course for@[4D]you to take.@[40]@[42]",
+            ""
+        ],
+        "61/16/137": [
+            "Don’t go making any@[4D]more laws all by@[4D]yourself anymore, OK?@[40]@[42]",
+            ""
+        ],
+        "61/16/138": [
+            "It was a good idea!@[4D]Hopefully, they’ll@[4D]make a real law, kupo!@[40]@[42]",
+            ""
+        ],
+        "61/16/139": [
+            "You were just taking@[4D]your job too @[4D]seriously! Relax!@[40]@[42]",
+            ""
+        ],
+        "61/16/140": [
+            "Be always diligent@[4D]in your work.@[40]@[42]",
+            ""
+        ],
+        "61/16/141": [
+            "I’m sure there’s@[4D]laws that people’d@[4D]be happy about...@[40]@[42]",
+            ""
+        ],
+        "61/16/142": [
+            "That’s that.@[4D]Time to report to@[4D]@[400].@[40]@[42]",
+            ""
+        ],
+        "61/16/143": [
+            "I have to put an end@[4D]to people treating@[4D]laws like toys!@[40]@[42]",
+            ""
+        ],
+        "61/16/168": [
+            "Wh-Who are you?@[4D]What are you doing@[4D]here?@[40]@[42]",
+            ""
+        ],
+        "61/16/169": [
+            "....@[4D](Hey, the laws says@[4D]”no-answers”!)@[40]@[42]",
+            ""
+        ],
+        "61/16/170": [
+            "How am I supposed@[4D]to answer that@[4D]question?@[40]@[42]",
+            ""
+        ],
+        "61/16/171": [
+            "Clan @[403]!@[4D]Darn! I wassn’t@[4D]ssupossed to ansswer!@[40]@[42]",
+            ""
+        ],
+        "61/16/172": [
+            "....@[4D](I have no answer for@[4D]the likes of you.)@[40]@[42]",
+            ""
+        ],
+        "61/16/173": [
+            "Sorry--@[4D]Isn’t this a ”no-@[4D]answer” zone?@[40]@[42]",
+            ""
+        ],
+        "61/16/174": [
+            "...Kupo.@[4D](No answers allowed,@[4D]right, kupo?)@[40]@[42]",
+            ""
+        ],
+        "61/16/175": [
+            "Sorry, can’t answer@[4D]that. Some idiot@[4D]law, you know...@[40]@[42]",
+            ""
+        ],
+        "61/16/176": [
+            "Clan @[403]!@[4D]Here investigating@[4D]unfair laws!@[40]@[42]",
+            ""
+        ],
+        "61/16/177": [
+            "I can’t answer that,@[4D]isn’t it against the@[4D]law?@[40]@[42]",
+            ""
+        ],
+        "61/16/178": [
+            "Clan @[403]...@[4D]Get ready to engage!@[40]@[42]",
+            ""
+        ],
+        "61/16/179": [
+            "I am Jud... No.@[4D]I’m with@[4D]Clan @[403]!@[40]@[42]",
+            ""
+        ],
+        "61/16/180": [
+            "Grr...@[4D]Why did it have to be@[4D]me that got caught?@[40]@[42]",
+            ""
+        ],
+        "61/16/181": [
+            "....@[4D](Bad guys always@[4D]get caught!)@[40]@[42]",
+            ""
+        ],
+        "61/16/182": [
+            "You want to know@[4D]the answer? Oops,@[4D]sorry! Out of luck!@[40]@[42]",
+            ""
+        ],
+        "61/16/183": [
+            "It’s not jusst you,@[4D]sso come along@[4D]quietly. @[40]@[42]",
+            ""
+        ],
+        "61/16/184": [
+            "I thought you did not@[4D]like answers? Think it@[4D]over yourself.@[40]@[42]",
+            ""
+        ],
+        "61/16/185": [
+            "...@[4D](You did wrong,@[4D]that’s why!)@[40]@[42]",
+            ""
+        ],
+        "61/16/186": [
+            "@[102]No answering, kupo!@[4D]So I can’t tell@[4D]you, kupo! Hah!@[40]@[42]",
+            ""
+        ],
+        "61/16/187": [
+            "Figure it out. I@[4D]thought you didn’t@[4D]like answers?@[40]@[42]",
+            ""
+        ],
+        "61/16/188": [
+            "Wrongdoers will be@[4D]punished. It’s as@[4D]simple as that.@[40]@[42]",
+            ""
+        ],
+        "61/16/189": [
+            "Everyone in town is@[4D]suffering because of@[4D]your law!@[40]@[42]",
+            ""
+        ],
+        "61/16/190": [
+            "Well, now, I wonder?@[4D]Why don’t you try@[4D]thinking for yourself?@[40]@[42]",
+            ""
+        ],
+        "61/16/191": [
+            "Why you? Do you mean@[4D]there are others?@[4D]Tell me!@[40]@[42]",
+            ""
+        ],
+        "61/16/192": [
+            "No jumping! No@[4D]climbing stairs!@[4D]No no no!@[40]@[42]",
+            ""
+        ],
+        "61/16/193": [
+            "Gimme a break!@[4D]You can’t engage@[4D]with a law like that!@[40]@[42]",
+            ""
+        ],
+        "61/16/194": [
+            "Check the books.@[4D]There’s no such@[4D]law like that.@[40]@[42]",
+            ""
+        ],
+        "61/16/195": [
+            "Got ssomething@[4D]againsst dragoons?@[40]@[42]",
+            ""
+        ],
+        "61/16/196": [
+            "Is that a blank card?@[4D]I would hope it does@[4D]not get completed.@[40]@[42]",
+            ""
+        ],
+        "61/16/197": [
+            "I won’t be held to@[4D]a law that doesn’t@[4D]make any sense!@[40]@[42]",
+            ""
+        ],
+        "61/16/198": [
+            "@[101]So I can hit you@[4D]with spells and@[4D]arrows, kupo? OK!@[40]@[42]",
+            ""
+        ],
+        "61/16/199": [
+            "No no no? Hmm...@[4D]I’ve got a ”no” for@[4D]you--an antilaw!@[40]@[42]",
+            ""
+        ],
+        "61/16/200": [
+            "What sense is there@[4D]in preventing@[4D]everything?@[40]@[42]",
+            ""
+        ],
+        "61/16/201": [
+            "No no no, please!@[4D]Can it with the@[4D]fake laws.@[40]@[42]",
+            ""
+        ],
+        "61/16/202": [
+            "Hmm, I wonder if I@[4D]can beat you without@[4D]moving?@[40]@[42]",
+            ""
+        ],
+        "61/16/203": [
+            "It is taboo for a@[4D]judge to make laws@[4D]on a whim!@[40]@[42]",
+            ""
+        ],
+        "61/16/204": [
+            "No... No...@[4D]Gaaaah....@[40]@[42]",
+            ""
+        ],
+        "61/16/205": [
+            "You can’t be free@[4D]by restricting@[4D]other people!@[40]@[42]",
+            ""
+        ],
+        "61/16/206": [
+            "I’m making a new law@[4D]just for you:@[4D]No ”no”s !@[40]@[42]",
+            ""
+        ],
+        "61/16/207": [
+            "No one persson should@[4D]have ssuch power over@[4D]the lawss.@[40]@[42]",
+            ""
+        ],
+        "61/16/208": [
+            "I believe lawmaking@[4D]should be left to@[4D]the palace.@[40]@[42]",
+            ""
+        ],
+        "61/16/209": [
+            "You could have made@[4D]laws that make people@[4D]happy, you know...@[40]@[42]",
+            ""
+        ],
+        "61/16/210": [
+            "@[103]Why not just say@[4D]”no laws”!?@[4D]Just kidding, kupo!@[40]@[42]",
+            ""
+        ],
+        "61/16/211": [
+            "Those who love power@[4D]usually can’t handle@[4D]it.@[4F]@[42]With a few@[4D]exceptions,@[4D] of course.@[40]@[42]",
+            ""
+        ],
+        "61/16/212": [
+            "Your goals and methods@[4D]do not meet with@[4D]official approval.@[40]@[42]",
+            ""
+        ],
+        "61/16/213": [
+            "Some laws should be@[4D]honored, but you’re@[4D]way out of line!@[40]@[42]",
+            ""
+        ],
+        "61/16/214": [
+            "All this ”no”-ing’s@[4D]given me a headache.@[40]@[42]",
+            ""
+        ],
+        "61/16/215": [
+            "Tell me who gave you@[4D]that blank card!@[4D]You will confess!@[40]@[42]",
+            ""
+        ]
+    },
+    "b_text": {
+        "13": [
+            "@[441] broken!@[42]",
+            "#「@[441]」をこわした!@[42]"
+        ],
+        "51": [
+            "@[441] received JP!@[42]",
+            ""
+        ],
+        "52": [
+            "Yellow card canceled!@[42]",
+            ""
+        ],
+        "53": [
+            "Yellow card!@[42]",
+            ""
+        ],
+        "60": [
+            "Auto KO revive!@[42]",
+            "#以神圣之力オート恢复战斗不能!@[42]"
+        ],
+        "393": [
+            "Cancels judge’s turn once!@[42]",
+            ""
+        ],
+        "394": [
+            "Damage & steal JP!@[42]",
+            ""
+        ],
+        "395": [
+            "Immobilize & disable!@[42]",
+            ""
+        ],
+        "396": [
+            "Give own JP!@[42]",
+            ""
+        ],
+        "397": [
+            "Nullify a yellow card!@[42]",
+            ""
+        ],
+        "398": [
+            "Yellow-card a foe!@[42]",
+            ""
+        ],
+        "399": [
+            "All-direction damage!@[42]",
+            ""
+        ],
+        "400": [
+            "Random law change!@[42]",
+            ""
+        ]
+    },
+    "fx_text": {
+        "1/40": [
+            "Press SELECT to display@[4D]the list of jobs.@[40]@[42]",
+            ""
+        ],
+        "1/41": [
+            "Save game?@[4D]@[3210]Yes/@[ ]No@[ ]@[42]",
+            ""
+        ],
+        "1/42": [
+            "Back to clan menu?@[4D]@[3210]Yes/@[ ]No@[ ]@[42]",
+            ""
+        ],
+        "1/43": [
+            "Clan full.@[4D]This unit cannot join.@[56]@[42]",
+            ""
+        ],
+        "1/44": [
+            "Erase all save data?@[4D]@[3211]Yes/@[ ]No@[ ]@[42]",
+            ""
+        ],
+        "1/45": [
+            "Repeat lesson?@[4D]@[3211]Yes/@[ ]No@[ ]@[42]",
+            ""
+        ],
+        "1/46": [
+            "All data have been erased.@[40]@[42]",
+            ""
+        ],
+        "8/58": [
+            "[Unfair @[5117]s?]@[4D]@[5117]s are supposed to be@[4D]the justice of the land,@[4D]but rumors have surfaced@[4D]that immunity from the@[4D]law is for sale.@[4F]@[42]The judges deny the@[4D]claims, but we hear that@[4D]the @[5117]Watch board has@[4D]agents looking into the@[4D]matter!@[40]@[42]",
+            ""
+        ],
+        "8/59": [
+            "[Blank Cards]@[4D]Apparently, the new laws@[4D]springing up all over the@[4D]place are the result of@[4D]experimental ”blank@[4D]cards” hitting the market.@[4F]@[42]The source of the leak is@[4D]unknown, but it’s clear@[4D]that corrupt officials are@[4D]using the cards to make@[4D]laws as they please.@[4D]Are the judges involved?@[4D]Are they to blame!?@[40]@[42]",
+            ""
+        ],
+        "9/8": [
+            "@[433]@[1D23]Lvl.@[434]@[4D]Joined Battle@[1D18]Success@[1D03]:@[1D02]@[436]@[4D]@[1D68]Failure@[1D09]:@[1D02]@[437]@[4D]Record@[1D3F]Wins@[1D17]:@[1D02]@[442]@[4D]@[1D68]Losses@[1D0B]:@[1D02]@[443]@[4D]@[468E]Joined@[1D03]mission@[1D04]success@[1D03]:@[1D02]@[435]@[42]",
+            "#@[433]@[1D10]L@[1B02]v.@[434]@[4D]■共同战线@[1D11]成功!@[1D08]@[436]回@[4D]@[1D48]失败…@[1D07]@[437]回@[4D]■胜败@[1D27]胜利!@[1D08]@[442]胜@[4D]@[1D48]败北…@[1D07]@[443]败@[4D]@[468E]@[1D02]共同クリアクエスト数@[1D07]@[435]@[42]"
+        ],
+        "10/3": [
+            "Press the select button@[4D]to@[1D03]display@[1D02]the@[1D03]list@[1D03]of@[1D03]jobs.@[40]@[42]",
+            ""
+        ],
+        "10/4": [
+            "Save game?@[4D]@[3210]YES/@[ ]NO@[ ]@[56]@[42]",
+            ""
+        ],
+        "10/5": [
+            "Back to clan menu?@[4D]@[3210]YES/@[ ]NO@[ ]@[56]@[42]",
+            ""
+        ],
+        "10/6": [
+            "Clan full.@[4D]This unit cannot join.@[40]@[42]",
+            ""
+        ],
+        "11/48": [
+            "@[510A]@[1D04]here.@[1D04]If@[1D04]you@[1D04]ask@[1D04]me,@[4D]@[4600][@[41C]]@[4D]was a big success!@[56]@[42]",
+            ""
+        ],
+        "11/49": [
+            "@[510A] here.@[4D]@[4600][@[41C]]@[4D]was no problem!@[56]@[42]",
+            ""
+        ],
+        "11/50": [
+            "@[510A] here...kind of.@[4D]@[4600][@[41C]] @[4D]went fine.@[56]@[42]",
+            ""
+        ],
+        "11/51": [
+            "@[510A] here. With me@[4D]as@[1D03]leader,@[1D03]ther@[1B01]e’s@[1D03]no@[1D03]need@[4D]to fear, right?@[56]@[42]",
+            ""
+        ],
+        "11/52": [
+            "@[510A] here. Um...@[4D]@[4600][@[41C]]@[4D]was a washout. Sorry! @[56]@[42]",
+            ""
+        ],
+        "11/53": [
+            "@[510A] here. Sorry...@[4D]@[4600][@[41C]]@[4D]didn’t go so well.@[56]@[42]",
+            ""
+        ],
+        "11/54": [
+            "@[510A] here. I’m beat.@[4D]@[4600][@[41C]]@[4D]was a failure. Sorry.@[56]@[42]",
+            ""
+        ],
+        "11/55": [
+            "@[510A] here. Sorry! It was@[4D]a total failure... I@[4D]thought@[1D04]I@[1D04]could@[1D04]make@[1D04]it!@[56]@[42]",
+            ""
+        ],
+        "11/56": [
+            "@[5109] Swain reporting.@[4D]We’ve received a bonus@[4D]for@[1D03]@[4600][@[41C]]!@[56]@[42]",
+            ""
+        ],
+        "11/57": [
+            "@[5109] Swain reporting.@[4D]@[4600][@[41C]]@[4D]was successful.@[56]@[42]",
+            ""
+        ],
+        "11/58": [
+            "@[5109] Swain reporting.@[4D]@[4600][@[41C]]@[4D]went without a hitch.@[56]@[42]",
+            ""
+        ],
+        "11/59": [
+            "@[5109] Swain reporting.@[4D]Mission accomplished.@[4D]Returning to clan now.@[56]@[42]",
+            ""
+        ],
+        "11/60": [
+            "@[5109] Swain reporting.@[4D]@[4600][@[41C]]...@[4D]was a failure. I’m sorry.@[56]@[42]",
+            ""
+        ],
+        "11/61": [
+            "@[5109] Swain reporting.@[4D]@[4600][@[41C]] did@[4D]not@[1D04]go@[1D04]as@[1D04]well@[1D04]as@[1D04]hoped.@[56]@[42]",
+            ""
+        ],
+        "11/62": [
+            "@[5109] Swain reporting.@[4D]@[4600][@[41C]]@[4D]failed.@[1D02]The@[1D03]fault.@[1B01].@[1B01].is@[1D03]mine.@[56]@[42]",
+            ""
+        ],
+        "11/63": [
+            "@[5109] Swain reporting.@[4D]I@[1D04]have@[1D04]failed,@[1D04]but@[1D04]I@[1D04]have@[4D]hope for next time!@[56]@[42]",
+            ""
+        ],
+        "11/64": [
+            "Hey, @[400]!@[4D]@[4600][@[41C]]@[4D]was a total success! @[56]@[42]",
+            ""
+        ],
+        "11/65": [
+            "Whew, it was a woosey,@[4D]but @[4600][@[41C]]@[4D]is all done!@[56]@[42]",
+            ""
+        ],
+        "11/66": [
+            "@[4600][@[41C]]@[1D03]was@[4D]a success. Our clan’s@[4D]looking@[1D04]pretty@[1D04]good,@[1D04]eh?@[56]@[42]",
+            ""
+        ],
+        "11/67": [
+            "@[5104] here.@[4D]It was tough, but@[4D]I made it somehow.@[56]@[42]",
+            ""
+        ],
+        "11/68": [
+            "Sorry, sorry!@[4D]@[4600][@[41C]]@[4D]was a total failure...@[56]@[42]",
+            ""
+        ],
+        "11/69": [
+            "How could this happen?@[4D]@[4600][@[41C]]@[4D]didn’t@[1D03]go@[1D03]so@[1D03]well@[1D03]after@[1D03]all.@[56]@[42]",
+            ""
+        ],
+        "11/70": [
+            "@[4600][@[41C]]@[1D03]was@[4D]a mess. I’m sorry,@[4D]I@[1D04]know@[1D04]you@[1D04]trusted@[1D04]me...@[56]@[42]",
+            ""
+        ],
+        "11/71": [
+            "Urm...I kinda messed@[4D]up big time. Sorry.@[4D]Really, I am!@[56]@[42]",
+            ""
+        ],
+        "11/72": [
+            "@[510C]@[1D03]back,@[1D03]with@[1D03]a@[1D03]bonus!@[4D]@[4600][@[41C]]@[1D03]was@[4D]a big success!@[56]@[42]",
+            ""
+        ],
+        "11/73": [
+            "@[510C] back from duty.@[4D]@[4600][@[41C]]@[4D]wasn@[1B01]’t@[1D03]much@[1D03]of@[1D03]a@[1D03]problem.@[56]@[42]",
+            ""
+        ],
+        "11/74": [
+            "@[510C] back from duty.@[4D]@[4600][@[41C]]@[1D04]was@[4D]a success. That’s all!@[56]@[42]",
+            ""
+        ],
+        "11/75": [
+            "@[510C] here. It was a@[4D]success! Heading back@[4D]to the clan now.@[56]@[42]",
+            ""
+        ],
+        "11/76": [
+            "@[510C]@[1D02]with@[1D02]some@[1D02]bad@[1D02]news.@[4D]@[4600][@[41C]]@[1D03]was@[4D]a failure.@[56]@[42]",
+            ""
+        ],
+        "11/77": [
+            "@[510C] here.@[4D]@[4600][@[41C]]@[4D]didn’t@[1D03]go@[1D03]well.@[1D03]That@[1D03]is@[1D03]all.@[56]@[42]",
+            ""
+        ],
+        "11/78": [
+            "...@[510C] here.@[4D]@[4600][@[41C]]@[1D03]was@[4D]a total failure. Sorry...@[56]@[42]",
+            ""
+        ],
+        "11/79": [
+            "@[510C] here. I’ll keep@[4D]my report quick:@[4D]I goofed. Sorry.@[56]@[42]",
+            ""
+        ],
+        "11/80": [
+            "My report is as follows:@[4D]@[4600][@[41C]]@[1D03]was@[4D]a smashing success!@[4D]@[56]@[42]",
+            ""
+        ],
+        "11/81": [
+            "@[400],@[4D]@[4600][@[41C]]@[4D]went well, as expected.@[56]@[42]",
+            ""
+        ],
+        "11/82": [
+            "@[5106] reporting back.@[4D]@[4600][@[41C]]@[4D]wasn@[1B01]’t@[1D03]much@[1D03]of@[1D03]a@[1D03]problem.@[56]@[42]",
+            ""
+        ],
+        "11/83": [
+            "@[5106] reporting back.@[4D]@[4600][@[41C]]@[4D]wasn@[1B01]’t@[1D03]much@[1D03]of@[1D03]a@[1D03]problem.@[56]@[42]",
+            ""
+        ],
+        "11/84": [
+            "My apologies. I seem@[4D]to have failed@[4D]@[4600][@[41C]]...@[56]@[42]",
+            ""
+        ],
+        "11/85": [
+            "@[400].@[4D]@[4600][@[41C]]@[4D]did not go well. Sorry.@[56]@[42]",
+            ""
+        ],
+        "11/86": [
+            "It pains me to tell you@[4D]this, but I failed@[4D]@[4600][@[41C]].@[56]@[42]",
+            ""
+        ],
+        "11/87": [
+            "The battle did not go@[4D]well, and I was forced@[4D]to retreat. Sorry.@[56]@[42]",
+            ""
+        ],
+        "15/15": [
+            "It’s about time I got@[4D]back to my work.@[4D]Later!@[56]@[42]",
+            ""
+        ],
+        "15/16": [
+            "It’s about time I got@[4D]back to my work.@[4D]Later!@[56]@[42]",
+            ""
+        ],
+        "15/17": [
+            "It’s about time I got@[4D]back to my work.@[4D]Later!@[56]@[42]",
+            ""
+        ],
+        "15/18": [
+            "This may be goodbye,@[4D]but we will always@[4D]be friends.@[56]@[42]",
+            ""
+        ],
+        "15/19": [
+            "This may be goodbye,@[4D]but we will always@[4D]be friends.@[56]@[42]",
+            ""
+        ],
+        "15/20": [
+            "This may be goodbye,@[4D]but we will always@[4D]be friends.@[56]@[42]",
+            ""
+        ],
+        "15/21": [
+            "Are you sure you’ll be@[4D]OK without me?@[4D]Call any time!@[56]@[42]",
+            ""
+        ],
+        "15/22": [
+            "Are you sure you’ll be@[4D]OK without me?@[4D]Call any time!@[56]@[42]",
+            ""
+        ],
+        "15/23": [
+            "Are you sure you’ll be@[4D]OK without me?@[4D]Call any time!@[56]@[42]",
+            ""
+        ],
+        "15/24": [
+            "You know, your clan’s@[4D]pretty fun. See ya!@[56]@[42]",
+            ""
+        ],
+        "15/25": [
+            "You know, your clan’s@[4D]pretty fun. See ya!@[56]@[42]",
+            ""
+        ],
+        "15/26": [
+            "You know, your clan’s@[4D]pretty fun. See ya!@[56]@[42]",
+            ""
+        ],
+        "15/27": [
+            "May your way be paved@[4D]with good fortune!@[4D]So long!@[56]@[42]",
+            ""
+        ],
+        "15/28": [
+            "May your way be paved@[4D]with good fortune!@[4D]So long!@[56]@[42]",
+            ""
+        ],
+        "15/29": [
+            "May your way be paved@[4D]with good fortune!@[4D]So long!@[56]@[42]",
+            ""
+        ],
+        "17/364": [
+            "Skips judge’s turn once@[4D]to allow law violation.@[40]@[42]",
+            ""
+        ],
+        "17/365": [
+            "Slash to damage and@[4D]steal JP.@[40]@[42]",
+            ""
+        ],
+        "17/366": [
+            "Immobilizes and disables@[4D]target for arrest.@[40]@[42]",
+            ""
+        ],
+        "17/367": [
+            "Give own JP to@[4D]a deserving friend.@[40]@[42]",
+            ""
+        ],
+        "17/368": [
+            "Nullifies a yellow@[4D]card from record.@[40]@[42]",
+            ""
+        ],
+        "17/369": [
+            "Slash to damage and@[4D]steal JP.@[40]@[42]",
+            ""
+        ],
+        "17/370": [
+            "Gives target a@[4D]yellow card.@[40]@[42]",
+            ""
+        ],
+        "17/371": [
+            "Deadly whirl to@[4D]deal damage around.@[40]@[42]",
+            ""
+        ],
+        "17/372": [
+            "Blank law card.@[4D]Change law at will.@[40]@[42]",
+            ""
+        ],
+        "18/70": [
+            "@[5117]master command.@[4D]Laws @[1B01]reserved @[1B01]for @[1B01]@[5117]master.@[40]@[42]",
+            ""
+        ],
+        "18/71": [
+            "@[5117] command.@[4D]Sentence given to criminals.@[40]@[42]",
+            ""
+        ],
+        "18/72": [
+            "Blank law card.@[4D]Allows law making.@[40]@[42]",
+            ""
+        ],
+        "21/101": [
+            "Shining rapier. Swordsmith@[4D]Pemier’s 26th piece.@[4F]@[42]Rapier/1-hand@[40]@[42]",
+            "#闪耀白色光芒的西洋剑。@[4D]铸刀匠ペミエ的第26号作品。@[4F]@[42]属性:无@[1D1E]分类:西洋剑/单手@[4D]效果:无@[4F]@[42]@[497]@[40]@[42]"
+        ],
+        "21/321": [
+            "Uniform of a long-gone@[4D]order of knights.@[4F]@[42]Clothing@[40]@[42]",
+            "#得到神之守护的神圣外套。@[4D]现在是なき骑士团的正装。@[4F]@[42]属性:无@[1D2E]分类:衣服@[4D]效果:无@[4F]@[42]@[4A8]@[40]@[42]"
+        ],
+        "22/121": [
+            "Officials responsible for@[4D]administrating Ivalice on@[4F]@[42]behalf of the palace.@[40]@[42]",
+            ""
+        ],
+        "23/262": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Tech” A-abilities.@[4D](ex: ”Combat Tech”)@[40]@[42]",
+            ""
+        ],
+        "23/263": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Skill” A-abilities.@[4D](ex: ”Ninja Skill”)@[40]@[42]",
+            ""
+        ],
+        "23/264": [
+            "@[5117] point bonus for@[4D]a successful:@[4F]@[42]Bow/greatbow/gun hit.@[40]@[42]",
+            ""
+        ],
+        "23/265": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Charge” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/266": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Corner” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/267": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Hunt” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/268": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Time Magic”@[4D]A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/269": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Defend” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/270": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Chivalry” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/271": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Spirit Magic”@[4D]A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/272": [
+            "@[5117] point bonus@[4D]for successful:@[4F]@[42]”Steal” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/273": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Call” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/274": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Summon” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/275": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Aim” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/276": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Prayer” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/277": [
+            "@[5117] point bonus@[4D]for successful:@[4F]@[42]”Morph” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/278": [
+            "@[5117] point bonus@[4D]for successful:@[4F]@[42]”Control” A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/279": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Sharpshoot”@[4D]A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/280": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]”Gunmanship”@[4D]A-abilities.@[40]@[42]",
+            ""
+        ],
+        "23/281": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Dark actions/@[4D]A-abilities.@[4F]@[42]Dark weapons are not@[4D]rewarded.@[40]@[42]",
+            ""
+        ],
+        "23/282": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Ice actions/@[4D]A-abilities.@[4F]@[42]Ice weapons are not@[4D]rewarded.@[40]@[42]",
+            ""
+        ],
+        "23/283": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Fire actions/@[4D]A-abilities.@[4F]@[42]Fire weapons are not@[4D]rewarded.@[40]@[42]",
+            ""
+        ],
+        "23/284": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Wind actions/@[4D]A-abilities.@[4F]@[42]Wind weapons are not@[4D]rewarded.@[40]@[42]",
+            ""
+        ],
+        "23/285": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Dark actions/@[4D]A-abilities.@[4F]@[42]Dark weapons are not@[4D]rewarded.@[40]@[42]",
+            ""
+        ],
+        "23/286": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Lightning actions/@[4D]A-abilities.@[4F]@[42]Lightning weapons@[4D]are not rewarded.@[40]@[42]",
+            ""
+        ],
+        "23/291": [
+            "@[5117] point bonus for:@[4F]@[42]Mimicking action of@[4D]previous unit.@[40]@[42]",
+            ""
+        ],
+        "23/294": [
+            "@[5117] point bonus for:@[4D]Using a combo.@[4F]@[42]Only the initiating@[4D]unit is rewarded.@[40]@[42]",
+            ""
+        ],
+        "23/295": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]White, black, red, or@[4D]blue magic.@[40]@[42]",
+            ""
+        ],
+        "23/296": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]A-abilities affecting@[4D]the entire field.@[40]@[42]",
+            ""
+        ],
+        "23/297": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]A-abilities with area@[4D]effect of 2+ panels.@[40]@[42]",
+            ""
+        ],
+        "23/298": [
+            "@[5117] point bonus for@[4D]a staff hit.@[40]@[42]",
+            ""
+        ],
+        "23/299": [
+            "@[5117] point bonus for@[4D]a rod hit.@[40]@[42]",
+            ""
+        ],
+        "23/300": [
+            "@[5117] point bonus for@[4D]a knife hit.@[40]@[42]",
+            ""
+        ],
+        "23/301": [
+            "@[5117] point bonus for@[4D]an instrument hit.@[40]@[42]",
+            ""
+        ],
+        "23/302": [
+            "@[5117] point bonus for@[4D]a rapier hit.@[40]@[42]",
+            ""
+        ],
+        "23/303": [
+            "@[5117] point bonus for@[4D]a spear hit.@[40]@[42]",
+            ""
+        ],
+        "23/304": [
+            "@[5117] point bonus for@[4D]a saber hit.@[40]@[42]",
+            ""
+        ],
+        "23/305": [
+            "@[5117] point bonus for@[4D]a greatsword hit.@[40]@[42]",
+            ""
+        ],
+        "23/306": [
+            "@[5117] point bonus for@[4D]a mace hit.@[40]@[42]",
+            ""
+        ],
+        "23/307": [
+            "@[5117] point bonus for@[4D]a broadsword hit.@[40]@[42]",
+            ""
+        ],
+        "23/308": [
+            "@[5117] point bonus for@[4D]a knightsword hit.@[40]@[42]",
+            ""
+        ],
+        "23/309": [
+            "@[5117] point bonus for@[4D]a soul hit.@[40]@[42]",
+            ""
+        ],
+        "23/310": [
+            "@[5117] point bonus for@[4D]a knuckles hit.@[40]@[42]",
+            ""
+        ],
+        "23/311": [
+            "@[5117] point bonus for@[4D]a swords hit.@[40]@[42]",
+            ""
+        ],
+        "23/322": [
+            "@[5117] point bonus for@[4D]causing status ailment.@[40]@[42]",
+            ""
+        ],
+        "23/323": [
+            "@[5117] point bonus for@[4D]frogshaping.@[40]@[42]",
+            ""
+        ],
+        "23/324": [
+            "@[5117] point bonus for@[4D]petrifying.@[40]@[42]",
+            ""
+        ],
+        "23/325": [
+            "@[5117] point bonus for@[4D]immobilizing/disabling.@[40]@[42]",
+            ""
+        ],
+        "23/326": [
+            "@[5117] point bonus for@[4D]driving berserk.@[40]@[42]",
+            ""
+        ],
+        "23/327": [
+            "@[5117] point bonus for@[4D]charming.@[40]@[42]",
+            ""
+        ],
+        "23/328": [
+            "@[5117] point bonus for@[4D]addling.@[40]@[42]",
+            ""
+        ],
+        "23/329": [
+            "@[5117] point bonus for@[4D]confusing.@[40]@[42]",
+            ""
+        ],
+        "23/330": [
+            "@[5117] point bonus for@[4D]slowing a unit.@[40]@[42]",
+            ""
+        ],
+        "23/331": [
+            "@[5117] point bonus for@[4D]stopping a unit.@[40]@[42]",
+            ""
+        ],
+        "23/332": [
+            "@[5117] point bonus for@[4D]poisoning.@[40]@[42]",
+            ""
+        ],
+        "23/333": [
+            "@[5117] point bonus for@[4D]silencing.@[40]@[42]",
+            ""
+        ],
+        "23/334": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Offensive actions@[4D]against a monster.@[40]@[42]",
+            ""
+        ],
+        "23/335": [
+            "@[5117] point bonus for@[4D]silencing.@[40]@[42]",
+            ""
+        ],
+        "23/336": [
+            "@[5117] point bonus for@[4D]poisoning.@[40]@[42]",
+            ""
+        ],
+        "23/337": [
+            "@[5117] point bonus for@[4D]slowing a unit.@[40]@[42]",
+            ""
+        ],
+        "23/338": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Offensive actions@[4D]against a bangaa.@[40]@[42]",
+            ""
+        ],
+        "23/339": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Offensive actions@[4D]against a nu mou.@[40]@[42]",
+            ""
+        ],
+        "23/340": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Offensive actions@[4D]against a viera.@[40]@[42]",
+            ""
+        ],
+        "23/341": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Offensive actions@[4D]against a moogle.@[40]@[42]",
+            ""
+        ],
+        "23/342": [
+            "@[5117] point bonus for@[4D]a successful hit with:@[4F]@[42]Offensive actions@[4D]against a human.@[40]@[42]",
+            ""
+        ],
+        "23/343": [
+            "@[5117] point bonus for@[4D]causing status ailment.@[40]@[42]",
+            ""
+        ]
+    },
+    "words:ico": {
+        "0": [
+            "FIRE",
+            ""
+        ],
+        "1": [
+            "WND",
+            ""
+        ],
+        "2": [
+            "ERT",
+            ""
+        ],
+        "3": [
+            "WTR",
+            ""
+        ],
+        "4": [
+            "ICE",
+            ""
+        ],
+        "5": [
+            "LGT",
+            ""
+        ],
+        "6": [
+            "HLY",
+            ""
+        ],
+        "7": [
+            "DRK",
+            ""
+        ],
+        "8": [
+            "/",
+            ""
+        ],
+        "9": [
+            "-△△○○◎",
+            ""
+        ]
+    },
+    "words:name1": {
+        "0": [
+            "CRN_NONE",
+            "#一一一一一"
+        ],
+        "1": [
+            "CRN_DEF",
+            "#一一一"
+        ],
+        "28": [
+            "CRN_RES6",
+            "#如果装备了在那个时候掉落的「灵魂」,"
+        ],
+        "29": [
+            "CRN_RES7",
+            "#解放地区数:@[1D18]"
+        ],
+        "100": [
+            "CRN_NAME071",
+            "#就再也不必害怕宫廷、裁判了。"
+        ],
+        "101": [
+            "CRN_NAME072",
+            "#[! 技能等级]@[4D]技能等级有8个种类。@[4D]@[4D]"
+        ],
+        "104": [
+            "Dredd",
+            ""
+        ],
+        "105": [
+            "Reinhold",
+            ""
+        ],
+        "106": [
+            "Mike",
+            ""
+        ]
+    },
+    "words:battle": {
+        "755": [
+            "LCD A",
+            ""
+        ],
+        "756": [
+            "LCD B",
+            ""
+        ],
+        "757": [
+            "TV",
+            ""
+        ],
+        "758": [
+            "Type A",
+            ""
+        ],
+        "759": [
+            "Type B",
+            ""
+        ],
+        "760": [
+            "Fast",
+            ""
+        ],
+        "761": [
+            "Normal",
+            ""
+        ],
+        "762": [
+            "Slow",
+            ""
+        ],
+        "763": [
+            "Slow",
+            ""
+        ],
+        "764": [
+            "Quick",
+            ""
+        ],
+        "765": [
+            "ON",
+            ""
+        ],
+        "766": [
+            "OFF",
+            ""
+        ]
+    },
+    "words:quest": {
+        "377": [
+            "Reconcilliation",
+            "#クエスト377"
+        ],
+        "378": [
+            "Left Behind",
+            "#クエスト378"
+        ],
+        "379": [
+            "With Babus",
+            "#クエスト379"
+        ],
+        "380": [
+            "Mortal Snow",
+            "#クエスト380"
+        ],
+        "381": [
+            "A@[1D04]Maiden’s@[1D04]Cry",
+            "#クエスト381"
+        ],
+        "382": [
+            "Cleanup Time",
+            "#クエスト382"
+        ],
+        "383": [
+            "Memories",
+            "#クエスト383"
+        ],
+        "384": [
+            "Bored!",
+            "#クエスト384"
+        ],
+        "385": [
+            "Doned Here!",
+            "#クエスト385"
+        ],
+        "386": [
+            "Ritz’s Offer",
+            "#クエスト386"
+        ],
+        "387": [
+            "Cid’s Mission",
+            "#クエスト387"
+        ],
+        "388": [
+            "No Arms Rule",
+            "#クエスト388"
+        ],
+        "389": [
+            "Kissing Rule",
+            "#クエスト389"
+        ],
+        "390": [
+            "Immunity Pass",
+            "#クエスト390"
+        ],
+        "391": [
+            "No Full HP",
+            "#クエスト391"
+        ],
+        "392": [
+            "No Literacy",
+            "#クエスト392"
+        ],
+        "393": [
+            "Favoritism",
+            "#クエスト393"
+        ],
+        "394": [
+            "No Answers",
+            "#クエスト394"
+        ],
+        "395": [
+            "No Jumping",
+            "#クエスト395"
+        ],
+        "396": [
+            "Decision Time",
+            "#クエスト396"
+        ]
+    },
+    "words:system": {
+        "73": [
+            "Mission Cleared",
+            ""
+        ],
+        "74": [
+            "Dispatched unit returned.",
+            ""
+        ],
+        "75": [
+            "mastered",
+            ""
+        ],
+        "76": [
+            "Place location symbol.",
+            ""
+        ],
+        "77": [
+            "Select empty slot.",
+            ""
+        ],
+        "78": [
+            "......Searching......",
+            ""
+        ],
+        "79": [
+            "Auto",
+            ""
+        ],
+        "80": [
+            "Manual",
+            ""
+        ],
+        "81": [
+            "Found",
+            ""
+        ],
+        "82": [
+            "!",
+            ""
+        ],
+        "83": [
+            "is under attack!",
+            ""
+        ]
+    },
+    "words:name2": {
+        "128": [
+            "Chelney",
+            ""
+        ],
+        "129": [
+            "Chita",
+            ""
+        ],
+        "130": [
+            "Chibot",
+            ""
+        ],
+        "131": [
+            "Chaka",
+            ""
+        ],
+        "132": [
+            "Chad",
+            ""
+        ],
+        "133": [
+            "Chandler",
+            ""
+        ],
+        "134": [
+            "Chaucer",
+            ""
+        ],
+        "135": [
+            "Zwingley",
+            ""
+        ],
+        "136": [
+            "Deisel",
+            ""
+        ],
+        "137": [
+            "Deiter",
+            ""
+        ],
+        "138": [
+            "Deen",
+            ""
+        ],
+        "139": [
+            "Dickens",
+            ""
+        ],
+        "140": [
+            "Dino",
+            ""
+        ],
+        "141": [
+            "Timothy",
+            ""
+        ],
+        "142": [
+            "Devange",
+            ""
+        ],
+        "143": [
+            "Dave",
+            ""
+        ],
+        "144": [
+            "Theodore",
+            ""
+        ],
+        "145": [
+            "Thenardi",
+            ""
+        ],
+        "146": [
+            "Tennesey",
+            ""
+        ],
+        "147": [
+            "Devoe",
+            ""
+        ],
+        "148": [
+            "Duler",
+            ""
+        ],
+        "149": [
+            "Dylan",
+            ""
+        ],
+        "150": [
+            "Toynbee",
+            ""
+        ],
+        "151": [
+            "Domie",
+            ""
+        ],
+        "152": [
+            "Tony",
+            ""
+        ],
+        "153": [
+            "Tonio",
+            ""
+        ],
+        "154": [
+            "Toby",
+            ""
+        ],
+        "155": [
+            "Thomson",
+            ""
+        ],
+        "156": [
+            "Domenic",
+            ""
+        ],
+        "157": [
+            "Travis",
+            ""
+        ],
+        "158": [
+            "Trevor",
+            ""
+        ],
+        "159": [
+            "Dwight",
+            ""
+        ],
+        "160": [
+            "Nat",
+            ""
+        ],
+        "161": [
+            "Nabkov",
+            ""
+        ],
+        "162": [
+            "Nansen",
+            ""
+        ],
+        "163": [
+            "Nikolai",
+            ""
+        ],
+        "164": [
+            "Neuman",
+            ""
+        ],
+        "165": [
+            "Nils",
+            ""
+        ],
+        "166": [
+            "Nusratt",
+            ""
+        ],
+        "167": [
+            "Nume",
+            ""
+        ],
+        "168": [
+            "Nate",
+            ""
+        ],
+        "169": [
+            "Nevil",
+            ""
+        ],
+        "170": [
+            "Neksu",
+            ""
+        ],
+        "171": [
+            "Neddy",
+            ""
+        ],
+        "172": [
+            "Nelin",
+            ""
+        ],
+        "173": [
+            "Nelson",
+            ""
+        ],
+        "174": [
+            "Nero",
+            ""
+        ],
+        "175": [
+            "Nothclif",
+            ""
+        ],
+        "176": [
+            "Norbert",
+            ""
+        ],
+        "177": [
+            "Nobel",
+            ""
+        ],
+        "178": [
+            "Noman",
+            ""
+        ],
+        "179": [
+            "Nol",
+            ""
+        ],
+        "180": [
+            "Hardy",
+            ""
+        ],
+        "181": [
+            "Basil",
+            ""
+        ],
+        "182": [
+            "Pablo",
+            ""
+        ],
+        "183": [
+            "Parish",
+            ""
+        ],
+        "184": [
+            "Baldwin",
+            ""
+        ],
+        "185": [
+            "Barley",
+            ""
+        ],
+        "186": [
+            "Hans",
+            ""
+        ],
+        "187": [
+            "Heath",
+            ""
+        ],
+        "188": [
+            "Peet",
+            ""
+        ],
+        "189": [
+            "Higgins",
+            ""
+        ],
+        "190": [
+            "Victor",
+            ""
+        ],
+        "191": [
+            "Visconti",
+            ""
+        ],
+        "192": [
+            "Bismark",
+            ""
+        ],
+        "193": [
+            "Bjorn",
+            ""
+        ],
+        "194": [
+            "Bingley",
+            ""
+        ],
+        "195": [
+            "Finnagan",
+            ""
+        ],
+        "196": [
+            "Phil",
+            ""
+        ],
+        "197": [
+            "Foobar",
+            ""
+        ],
+        "198": [
+            "Ford",
+            ""
+        ],
+        "199": [
+            "Brown",
+            ""
+        ],
+        "200": [
+            "Frantz",
+            ""
+        ],
+        "201": [
+            "Brean",
+            ""
+        ],
+        "202": [
+            "Brish",
+            ""
+        ],
+        "203": [
+            "Hastings",
+            ""
+        ],
+        "204": [
+            "Pedro",
+            ""
+        ],
+        "205": [
+            "Velasquez",
+            ""
+        ],
+        "206": [
+            "Beltran",
+            ""
+        ],
+        "207": [
+            "Bernardo",
+            ""
+        ],
+        "208": [
+            "Belnini",
+            ""
+        ],
+        "209": [
+            "Brunhart",
+            ""
+        ],
+        "210": [
+            "Benkman",
+            ""
+        ],
+        "211": [
+            "Bensom",
+            ""
+        ],
+        "212": [
+            "Benjamin",
+            ""
+        ],
+        "213": [
+            "Benton",
+            ""
+        ],
+        "214": [
+            "Homer",
+            ""
+        ],
+        "215": [
+            "Hodges",
+            ""
+        ],
+        "216": [
+            "Hopper",
+            ""
+        ],
+        "217": [
+            "Hoffman",
+            ""
+        ],
+        "218": [
+            "Holbin",
+            ""
+        ],
+        "219": [
+            "Hores",
+            ""
+        ],
+        "220": [
+            "Miles",
+            ""
+        ],
+        "221": [
+            "Mauritz",
+            ""
+        ],
+        "222": [
+            "Mack",
+            ""
+        ],
+        "223": [
+            "Macgregor",
+            ""
+        ],
+        "224": [
+            "Matias",
+            ""
+        ],
+        "225": [
+            "Mackenroe",
+            ""
+        ],
+        "226": [
+            "Marty",
+            ""
+        ],
+        "227": [
+            "Marius",
+            ""
+        ],
+        "228": [
+            "Malchelo",
+            ""
+        ],
+        "229": [
+            "Martinez",
+            ""
+        ],
+        "230": [
+            "Mick",
+            ""
+        ],
+        "231": [
+            "Michaelov",
+            ""
+        ],
+        "232": [
+            "Michael",
+            ""
+        ],
+        "233": [
+            "Milton",
+            ""
+        ],
+        "234": [
+            "Milay",
+            ""
+        ],
+        "235": [
+            "Mujika",
+            ""
+        ],
+        "236": [
+            "Mulat",
+            ""
+        ],
+        "237": [
+            "Muglio",
+            ""
+        ],
+        "238": [
+            "Major",
+            ""
+        ],
+        "239": [
+            "Meiyou",
+            ""
+        ],
+        "240": [
+            "Messara",
+            ""
+        ],
+        "241": [
+            "Melanor",
+            ""
+        ],
+        "242": [
+            "Mendoza",
+            ""
+        ],
+        "243": [
+            "Monid",
+            ""
+        ],
+        "244": [
+            "Mosley",
+            ""
+        ],
+        "245": [
+            "Moby",
+            ""
+        ],
+        "246": [
+            "Moritz",
+            ""
+        ],
+        "247": [
+            "Morry",
+            ""
+        ],
+        "248": [
+            "Monte",
+            ""
+        ],
+        "249": [
+            "Mondo",
+            ""
+        ],
+        "250": [
+            "Javet",
+            ""
+        ],
+        "251": [
+            "Jalam",
+            ""
+        ],
+        "252": [
+            "Jang",
+            ""
+        ],
+        "253": [
+            "Yuwain",
+            ""
+        ],
+        "254": [
+            "Eugene",
+            ""
+        ],
+        "255": [
+            "Euver",
+            ""
+        ],
+        "256": [
+            "Yuri",
+            ""
+        ],
+        "257": [
+            "Yutolio",
+            ""
+        ],
+        "258": [
+            "Juris",
+            ""
+        ],
+        "259": [
+            "Joseph",
+            ""
+        ],
+        "260": [
+            "Jon",
+            ""
+        ],
+        "261": [
+            "Joshua",
+            ""
+        ],
+        "262": [
+            "Jona",
+            ""
+        ],
+        "263": [
+            "Johanes",
+            ""
+        ],
+        "264": [
+            "Yolando",
+            ""
+        ],
+        "265": [
+            "Ravel",
+            ""
+        ],
+        "266": [
+            "Raol",
+            ""
+        ],
+        "267": [
+            "Lezaford",
+            ""
+        ],
+        "268": [
+            "Ramsey",
+            ""
+        ],
+        "269": [
+            "Ramses",
+            ""
+        ],
+        "270": [
+            "Largo",
+            ""
+        ],
+        "271": [
+            "Randorf",
+            ""
+        ],
+        "272": [
+            "Ranbard",
+            ""
+        ],
+        "273": [
+            "Liam",
+            ""
+        ],
+        "274": [
+            "Lidenbok",
+            ""
+        ],
+        "275": [
+            "Leo",
+            ""
+        ],
+        "276": [
+            "Ricardo",
+            ""
+        ],
+        "277": [
+            "Lizzo",
+            ""
+        ],
+        "278": [
+            "Rickman",
+            ""
+        ],
+        "279": [
+            "Ridley",
+            ""
+        ],
+        "280": [
+            "Lief",
+            ""
+        ],
+        "281": [
+            "Leroy",
+            ""
+        ],
+        "282": [
+            "Luan",
+            ""
+        ],
+        "283": [
+            "Looie",
+            ""
+        ],
+        "284": [
+            "Rooster",
+            ""
+        ],
+        "285": [
+            "Bellini",
+            ""
+        ],
+        "286": [
+            "Lucas",
+            ""
+        ],
+        "287": [
+            "Lukino",
+            ""
+        ],
+        "288": [
+            "Lunais",
+            ""
+        ],
+        "289": [
+            "Rayton",
+            ""
+        ],
+        "290": [
+            "Raif",
+            ""
+        ],
+        "291": [
+            "Rain",
+            ""
+        ],
+        "292": [
+            "Leonard",
+            ""
+        ],
+        "293": [
+            "Lester",
+            ""
+        ],
+        "294": [
+            "Lex",
+            ""
+        ],
+        "295": [
+            "Lenny",
+            ""
+        ],
+        "296": [
+            "Lendle",
+            ""
+        ],
+        "297": [
+            "Roland",
+            ""
+        ],
+        "298": [
+            "Rockwell",
+            ""
+        ],
+        "299": [
+            "Rodrigo",
+            ""
+        ],
+        "300": [
+            "Rober",
+            ""
+        ],
+        "301": [
+            "Rolan",
+            ""
+        ],
+        "302": [
+            "Rolf",
+            ""
+        ],
+        "303": [
+            "Lorek",
+            ""
+        ],
+        "304": [
+            "Roker",
+            ""
+        ],
+        "305": [
+            "Wagner",
+            ""
+        ],
+        "306": [
+            "Willy",
+            ""
+        ],
+        "307": [
+            "Wilder",
+            ""
+        ],
+        "308": [
+            "Watz",
+            ""
+        ],
+        "309": [
+            "Watoo",
+            ""
+        ],
+        "310": [
+            "Annie",
+            ""
+        ],
+        "311": [
+            "Agatha",
+            ""
+        ],
+        "312": [
+            "Adelaid",
+            ""
+        ],
+        "313": [
+            "Amelia",
+            ""
+        ],
+        "314": [
+            "Alison",
+            ""
+        ],
+        "315": [
+            "Angeline",
+            ""
+        ],
+        "316": [
+            "Anne",
+            ""
+        ],
+        "317": [
+            "Annette",
+            ""
+        ],
+        "318": [
+            "Iona",
+            ""
+        ],
+        "319": [
+            "Iliana",
+            ""
+        ],
+        "320": [
+            "Erma",
+            ""
+        ],
+        "321": [
+            "Elaine",
+            ""
+        ],
+        "322": [
+            "Ingrid",
+            ""
+        ],
+        "323": [
+            "Virginia",
+            ""
+        ],
+        "324": [
+            "Viola",
+            ""
+        ],
+        "325": [
+            "Edda",
+            ""
+        ],
+        "326": [
+            "Etoile",
+            ""
+        ],
+        "327": [
+            "Eponine",
+            ""
+        ],
+        "328": [
+            "Erika",
+            ""
+        ],
+        "329": [
+            "Elma",
+            ""
+        ],
+        "330": [
+            "Elayne",
+            ""
+        ],
+        "331": [
+            "Elena",
+            ""
+        ],
+        "332": [
+            "Aurelie",
+            ""
+        ],
+        "333": [
+            "Odette",
+            ""
+        ],
+        "334": [
+            "Undine",
+            ""
+        ],
+        "335": [
+            "Gertrude",
+            ""
+        ],
+        "336": [
+            "Katarina",
+            ""
+        ],
+        "337": [
+            "Cassandra",
+            ""
+        ],
+        "338": [
+            "Katie",
+            ""
+        ],
+        "339": [
+            "Katejina",
+            ""
+        ],
+        "340": [
+            "Catrine",
+            ""
+        ],
+        "341": [
+            "Camilla",
+            ""
+        ],
+        "342": [
+            "Caroline",
+            ""
+        ],
+        "343": [
+            "Kiana",
+            ""
+        ],
+        "344": [
+            "Kim",
+            ""
+        ],
+        "345": [
+            "Catherine",
+            ""
+        ],
+        "346": [
+            "Karin",
+            ""
+        ],
+        "347": [
+            "Candice",
+            ""
+        ],
+        "348": [
+            "Gwyneth",
+            ""
+        ],
+        "349": [
+            "Gelazela",
+            ""
+        ],
+        "350": [
+            "Grisanbela",
+            ""
+        ],
+        "351": [
+            "Cristine",
+            ""
+        ],
+        "352": [
+            "Clementina",
+            ""
+        ],
+        "353": [
+            "Katie",
+            ""
+        ],
+        "354": [
+            "Kelly",
+            ""
+        ],
+        "355": [
+            "Gelda",
+            ""
+        ],
+        "356": [
+            "Corelie",
+            ""
+        ],
+        "357": [
+            "Colleen",
+            ""
+        ],
+        "358": [
+            "Colette",
+            ""
+        ],
+        "359": [
+            "Concetta",
+            ""
+        ],
+        "360": [
+            "Saskia",
+            ""
+        ],
+        "361": [
+            "Sabina",
+            ""
+        ],
+        "362": [
+            "Xia",
+            ""
+        ],
+        "363": [
+            "Jeanne",
+            ""
+        ],
+        "364": [
+            "Shelly",
+            ""
+        ],
+        "365": [
+            "Sheryl",
+            ""
+        ],
+        "366": [
+            "Sharon",
+            ""
+        ],
+        "367": [
+            "Cici",
+            ""
+        ],
+        "368": [
+            "Cecille",
+            ""
+        ],
+        "369": [
+            "Sis",
+            ""
+        ],
+        "370": [
+            "Sybil",
+            ""
+        ],
+        "371": [
+            "Jacqulin",
+            ""
+        ],
+        "372": [
+            "Janeth",
+            ""
+        ],
+        "373": [
+            "Shanon",
+            ""
+        ],
+        "374": [
+            "Jocie",
+            ""
+        ],
+        "375": [
+            "Gillian",
+            ""
+        ],
+        "376": [
+            "Swena",
+            ""
+        ],
+        "377": [
+            "Suzanna",
+            ""
+        ],
+        "378": [
+            "Sesily",
+            ""
+        ],
+        "379": [
+            "Cecile",
+            ""
+        ],
+        "380": [
+            "Serina",
+            ""
+        ],
+        "381": [
+            "Thelma",
+            ""
+        ],
+        "382": [
+            "Sonja",
+            ""
+        ],
+        "383": [
+            "Sonia",
+            ""
+        ],
+        "384": [
+            "Soraya",
+            ""
+        ],
+        "385": [
+            "Diane",
+            ""
+        ],
+        "386": [
+            "Dana",
+            ""
+        ],
+        "387": [
+            "Tamara",
+            ""
+        ],
+        "388": [
+            "Dalia",
+            ""
+        ],
+        "389": [
+            "Daryle",
+            ""
+        ],
+        "390": [
+            "Darcie",
+            ""
+        ],
+        "391": [
+            "Chiko",
+            ""
+        ],
+        "392": [
+            "Chareen",
+            ""
+        ],
+        "393": [
+            "Cecelia",
+            ""
+        ],
+        "394": [
+            "Diana",
+            ""
+        ],
+        "395": [
+            "Tina",
+            ""
+        ],
+        "396": [
+            "Tifone",
+            ""
+        ],
+        "397": [
+            "Tinfany",
+            ""
+        ],
+        "398": [
+            "Tia",
+            ""
+        ],
+        "399": [
+            "Della",
+            ""
+        ],
+        "400": [
+            "Delia",
+            ""
+        ],
+        "401": [
+            "Delphine",
+            ""
+        ],
+        "402": [
+            "Telma",
+            ""
+        ],
+        "403": [
+            "Teresya",
+            ""
+        ],
+        "404": [
+            "Dusya",
+            ""
+        ],
+        "405": [
+            "Tonya",
+            ""
+        ],
+        "406": [
+            "Dora",
+            ""
+        ],
+        "407": [
+            "Tosca",
+            ""
+        ],
+        "408": [
+            "Trixie",
+            ""
+        ],
+        "409": [
+            "Trudy",
+            ""
+        ],
+        "410": [
+            "Natalia",
+            ""
+        ],
+        "411": [
+            "Nana",
+            ""
+        ],
+        "412": [
+            "Nanette",
+            ""
+        ],
+        "413": [
+            "Nan",
+            ""
+        ],
+        "414": [
+            "Nieve",
+            ""
+        ],
+        "415": [
+            "Nicole",
+            ""
+        ],
+        "416": [
+            "Nina",
+            ""
+        ],
+        "417": [
+            "Nelly",
+            ""
+        ],
+        "418": [
+            "Norma",
+            ""
+        ],
+        "419": [
+            "Noleen",
+            ""
+        ],
+        "420": [
+            "Bertha",
+            ""
+        ],
+        "421": [
+            "Pat",
+            ""
+        ],
+        "422": [
+            "Babette",
+            ""
+        ],
+        "423": [
+            "Hariette",
+            ""
+        ],
+        "424": [
+            "Bianka",
+            ""
+        ],
+        "425": [
+            "Vivian",
+            ""
+        ],
+        "426": [
+            "Hilary",
+            ""
+        ],
+        "427": [
+            "Hildegard",
+            ""
+        ],
+        "428": [
+            "Viana",
+            ""
+        ],
+        "429": [
+            "Pheobe",
+            ""
+        ],
+        "430": [
+            "Fio",
+            ""
+        ],
+        "431": [
+            "Blanch",
+            ""
+        ],
+        "432": [
+            "Francheska",
+            ""
+        ],
+        "433": [
+            "Frida",
+            ""
+        ],
+        "434": [
+            "Prisya",
+            ""
+        ],
+        "435": [
+            "Flora",
+            ""
+        ],
+        "436": [
+            "Beatrice",
+            ""
+        ],
+        "437": [
+            "Hazel",
+            ""
+        ],
+        "438": [
+            "Becile",
+            ""
+        ],
+        "439": [
+            "Betti",
+            ""
+        ],
+        "440": [
+            "Bela",
+            ""
+        ],
+        "441": [
+            "Bonita",
+            ""
+        ],
+        "442": [
+            "Polly",
+            ""
+        ],
+        "443": [
+            "Pauline",
+            ""
+        ],
+        "444": [
+            "Martha",
+            ""
+        ],
+        "445": [
+            "Marcy",
+            ""
+        ],
+        "446": [
+            "Marjorie",
+            ""
+        ],
+        "447": [
+            "Mila",
+            ""
+        ],
+        "448": [
+            "Madeline",
+            ""
+        ],
+        "449": [
+            "Madrine",
+            ""
+        ],
+        "450": [
+            "Mariette",
+            ""
+        ],
+        "451": [
+            "Marielle",
+            ""
+        ],
+        "452": [
+            "Marion",
+            ""
+        ],
+        "453": [
+            "Marisa",
+            ""
+        ],
+        "454": [
+            "Malta",
+            ""
+        ],
+        "455": [
+            "Mareen",
+            ""
+        ],
+        "456": [
+            "Mallory",
+            ""
+        ],
+        "457": [
+            "Mikella",
+            ""
+        ],
+        "458": [
+            "Miserie",
+            ""
+        ],
+        "459": [
+            "Miriam",
+            ""
+        ],
+        "460": [
+            "Milly",
+            ""
+        ],
+        "461": [
+            "Mua",
+            ""
+        ],
+        "462": [
+            "Maryane",
+            ""
+        ],
+        "463": [
+            "Melissa",
+            ""
+        ],
+        "464": [
+            "Meryl",
+            ""
+        ],
+        "465": [
+            "Mel",
+            ""
+        ],
+        "466": [
+            "Melora",
+            ""
+        ],
+        "467": [
+            "Maude",
+            ""
+        ],
+        "468": [
+            "Molly",
+            ""
+        ],
+        "469": [
+            "Eunice",
+            ""
+        ],
+        "470": [
+            "Euphem",
+            ""
+        ],
+        "471": [
+            "Eudit",
+            ""
+        ],
+        "472": [
+            "Eustine",
+            ""
+        ],
+        "473": [
+            "Julianne",
+            ""
+        ],
+        "474": [
+            "Laura",
+            ""
+        ],
+        "475": [
+            "Lana",
+            ""
+        ],
+        "476": [
+            "Labinya",
+            ""
+        ],
+        "477": [
+            "Larisa",
+            ""
+        ],
+        "478": [
+            "Lisa",
+            ""
+        ],
+        "479": [
+            "Liza",
+            ""
+        ],
+        "480": [
+            "Richane",
+            ""
+        ],
+        "481": [
+            "Lita",
+            ""
+        ],
+        "482": [
+            "Lilila",
+            ""
+        ],
+        "483": [
+            "Louize",
+            ""
+        ],
+        "484": [
+            "Luise",
+            ""
+        ],
+        "485": [
+            "Lucretia",
+            ""
+        ],
+        "486": [
+            "Lutia",
+            ""
+        ],
+        "487": [
+            "Lune",
+            ""
+        ],
+        "488": [
+            "Leona",
+            ""
+        ],
+        "489": [
+            "Regina",
+            ""
+        ],
+        "490": [
+            "Lesley",
+            ""
+        ],
+        "491": [
+            "Laetitia",
+            ""
+        ],
+        "492": [
+            "Roxanne",
+            ""
+        ],
+        "493": [
+            "Rosaline",
+            ""
+        ],
+        "494": [
+            "Rosetta",
+            ""
+        ],
+        "495": [
+            "Lotte",
+            ""
+        ],
+        "496": [
+            "Loraine",
+            ""
+        ],
+        "497": [
+            "Loren",
+            ""
+        ],
+        "498": [
+            "Loretta",
+            ""
+        ],
+        "499": [
+            "Wanda",
+            ""
+        ],
+        "500": [
+            "Asalului",
+            ""
+        ],
+        "501": [
+            "Ashvin",
+            ""
+        ],
+        "502": [
+            "Asnan",
+            ""
+        ],
+        "503": [
+            "Astalte",
+            ""
+        ],
+        "504": [
+            "Atagra",
+            ""
+        ],
+        "505": [
+            "Atalcais",
+            ""
+        ],
+        "506": [
+            "Atena",
+            ""
+        ],
+        "507": [
+            "Adoloa",
+            ""
+        ],
+        "508": [
+            "Bencia",
+            ""
+        ],
+        "509": [
+            "Amotten",
+            ""
+        ],
+        "510": [
+            "Alaune",
+            ""
+        ],
+        "511": [
+            "Arigan",
+            ""
+        ],
+        "512": [
+            "Alurata",
+            ""
+        ],
+        "513": [
+            "Idigina",
+            ""
+        ],
+        "514": [
+            "Imana",
+            ""
+        ],
+        "515": [
+            "Iratik",
+            ""
+        ],
+        "516": [
+            "Ilcarna",
+            ""
+        ],
+        "517": [
+            "Viktranki",
+            ""
+        ],
+        "518": [
+            "Virr",
+            ""
+        ],
+        "519": [
+            "Vodan",
+            ""
+        ],
+        "520": [
+            "Wonimy",
+            ""
+        ],
+        "521": [
+            "Ulash",
+            ""
+        ],
+        "522": [
+            "Edbold",
+            ""
+        ],
+        "523": [
+            "Ehekart",
+            ""
+        ],
+        "524": [
+            "Elgarel",
+            ""
+        ],
+        "525": [
+            "Hoanes",
+            ""
+        ],
+        "526": [
+            "Ocylth",
+            ""
+        ],
+        "527": [
+            "Omittek",
+            ""
+        ],
+        "528": [
+            "Oro",
+            ""
+        ],
+        "529": [
+            "Olorun",
+            ""
+        ],
+        "530": [
+            "Gauda",
+            ""
+        ],
+        "531": [
+            "Kaikirith",
+            ""
+        ],
+        "532": [
+            "Kadesh",
+            ""
+        ],
+        "533": [
+            "Ganesh",
+            ""
+        ],
+        "534": [
+            "Kafra",
+            ""
+        ],
+        "535": [
+            "Kamsotz",
+            ""
+        ],
+        "536": [
+            "Camose",
+            ""
+        ],
+        "537": [
+            "Karus",
+            ""
+        ],
+        "538": [
+            "Cantazen",
+            ""
+        ],
+        "539": [
+            "Kiun",
+            ""
+        ],
+        "540": [
+            "Givil",
+            ""
+        ],
+        "541": [
+            "Kimereth",
+            ""
+        ],
+        "542": [
+            "Quintos",
+            ""
+        ],
+        "543": [
+            "Qusjil",
+            ""
+        ],
+        "544": [
+            "Cutred",
+            ""
+        ],
+        "545": [
+            "Kudhos",
+            ""
+        ],
+        "546": [
+            "Gunaith",
+            ""
+        ],
+        "547": [
+            "Kubela",
+            ""
+        ],
+        "548": [
+            "Kumulul",
+            ""
+        ],
+        "549": [
+            "Grussa",
+            ""
+        ],
+        "550": [
+            "Grude",
+            ""
+        ],
+        "551": [
+            "Kunwolf",
+            ""
+        ],
+        "552": [
+            "Geogioth",
+            ""
+        ],
+        "553": [
+            "Kemosh",
+            ""
+        ],
+        "554": [
+            "Kelnoth",
+            ""
+        ],
+        "555": [
+            "Koyashalk",
+            ""
+        ],
+        "556": [
+            "Corrigan",
+            ""
+        ],
+        "557": [
+            "Colkholm",
+            ""
+        ],
+        "558": [
+            "Gordianus",
+            ""
+        ],
+        "559": [
+            "Conz",
+            ""
+        ],
+        "560": [
+            "Satalan",
+            ""
+        ],
+        "561": [
+            "Sadanu",
+            ""
+        ],
+        "562": [
+            "Zanaharti",
+            ""
+        ],
+        "563": [
+            "Jedafler",
+            ""
+        ],
+        "564": [
+            "Sinagelus",
+            ""
+        ],
+        "565": [
+            "Gibalou",
+            ""
+        ],
+        "566": [
+            "Shapur",
+            ""
+        ],
+        "567": [
+            "Janowar",
+            ""
+        ],
+        "568": [
+            "Chafrian",
+            ""
+        ],
+        "569": [
+            "Jamasb",
+            ""
+        ],
+        "570": [
+            "Janjako",
+            ""
+        ],
+        "571": [
+            "Junaide",
+            ""
+        ],
+        "572": [
+            "Subranch",
+            ""
+        ],
+        "573": [
+            "Shumakyr",
+            ""
+        ],
+        "574": [
+            "Julrat",
+            ""
+        ],
+        "575": [
+            "Singfels",
+            ""
+        ],
+        "576": [
+            "Snevil",
+            ""
+        ],
+        "577": [
+            "Smeldith",
+            ""
+        ],
+        "578": [
+            "Sewels",
+            ""
+        ],
+        "579": [
+            "Ceurin",
+            ""
+        ],
+        "580": [
+            "Celured",
+            ""
+        ],
+        "581": [
+            "Sekmet",
+            ""
+        ],
+        "582": [
+            "Skondot",
+            ""
+        ],
+        "583": [
+            "Sekbuf",
+            ""
+        ],
+        "584": [
+            "Smagur",
+            ""
+        ],
+        "585": [
+            "Semiram",
+            ""
+        ],
+        "586": [
+            "Senwulf",
+            ""
+        ],
+        "587": [
+            "Soaemis",
+            ""
+        ],
+        "588": [
+            "Zorya",
+            ""
+        ],
+        "589": [
+            "Zogidanus",
+            ""
+        ],
+        "590": [
+            "Tauslet",
+            ""
+        ],
+        "591": [
+            "Tafmasib",
+            ""
+        ],
+        "592": [
+            "Tamiel",
+            ""
+        ],
+        "593": [
+            "Dammuna",
+            ""
+        ],
+        "594": [
+            "Demkina",
+            ""
+        ],
+        "595": [
+            "Tamus",
+            ""
+        ],
+        "596": [
+            "Taranis",
+            ""
+        ],
+        "597": [
+            "Tangarol",
+            ""
+        ],
+        "598": [
+            "Dandreen",
+            ""
+        ],
+        "599": [
+            "Tanmus",
+            ""
+        ],
+        "600": [
+            "Chimarma",
+            ""
+        ],
+        "601": [
+            "Chemfei",
+            ""
+        ],
+        "602": [
+            "Chantiko",
+            ""
+        ],
+        "603": [
+            "Chrakera",
+            ""
+        ],
+        "604": [
+            "Thalias",
+            ""
+        ],
+        "605": [
+            "Titos",
+            ""
+        ],
+        "606": [
+            "Tiridates",
+            ""
+        ],
+        "607": [
+            "Tiero",
+            ""
+        ],
+        "608": [
+            "Deumus",
+            ""
+        ],
+        "609": [
+            "Teshona",
+            ""
+        ],
+        "610": [
+            "Demenche",
+            ""
+        ],
+        "611": [
+            "Dwarti",
+            ""
+        ],
+        "612": [
+            "Dwegol",
+            ""
+        ],
+        "613": [
+            "Tothark",
+            ""
+        ],
+        "614": [
+            "Tontiuh",
+            ""
+        ],
+        "615": [
+            "Dometra",
+            ""
+        ],
+        "616": [
+            "Toraman",
+            ""
+        ],
+        "617": [
+            "Trulloch",
+            ""
+        ],
+        "618": [
+            "Dorguk",
+            ""
+        ],
+        "619": [
+            "Trezond",
+            ""
+        ],
+        "620": [
+            "Nageeta",
+            ""
+        ],
+        "621": [
+            "Natariel",
+            ""
+        ],
+        "622": [
+            "Nafhsa",
+            ""
+        ],
+        "623": [
+            "Namtar",
+            ""
+        ],
+        "624": [
+            "Nalaf",
+            ""
+        ],
+        "625": [
+            "Nechozim",
+            ""
+        ],
+        "626": [
+            "Nineri",
+            ""
+        ],
+        "627": [
+            "Ningilth",
+            ""
+        ],
+        "628": [
+            "Nuria",
+            ""
+        ],
+        "629": [
+            "Nudimt",
+            ""
+        ],
+        "630": [
+            "Numashda",
+            ""
+        ],
+        "631": [
+            "Nestor",
+            ""
+        ],
+        "632": [
+            "Nehbkha",
+            ""
+        ],
+        "633": [
+            "Nelgal",
+            ""
+        ],
+        "634": [
+            "Noran",
+            ""
+        ],
+        "635": [
+            "Baul",
+            ""
+        ],
+        "636": [
+            "Haidar",
+            ""
+        ],
+        "637": [
+            "Bacileus",
+            ""
+        ],
+        "638": [
+            "Batazes",
+            ""
+        ],
+        "639": [
+            "Hashepsto",
+            ""
+        ],
+        "640": [
+            "Hanish",
+            ""
+        ],
+        "641": [
+            "Bafram",
+            ""
+        ],
+        "642": [
+            "Balgrula",
+            ""
+        ],
+        "643": [
+            "Balmin",
+            ""
+        ],
+        "644": [
+            "Prole",
+            ""
+        ],
+        "645": [
+            "Helpsal",
+            ""
+        ],
+        "646": [
+            "Herbatius",
+            ""
+        ],
+        "647": [
+            "Fafira",
+            ""
+        ],
+        "648": [
+            "Farbazos",
+            ""
+        ],
+        "649": [
+            "Femakk",
+            ""
+        ],
+        "650": [
+            "Flautus",
+            ""
+        ],
+        "651": [
+            "Frakan",
+            ""
+        ],
+        "652": [
+            "Brigird",
+            ""
+        ],
+        "653": [
+            "Pripega",
+            ""
+        ],
+        "654": [
+            "Frella",
+            ""
+        ],
+        "655": [
+            "Prova",
+            ""
+        ],
+        "656": [
+            "Propus",
+            ""
+        ],
+        "657": [
+            "Petruka",
+            ""
+        ],
+        "658": [
+            "Pragera",
+            ""
+        ],
+        "659": [
+            "Helishev",
+            ""
+        ],
+        "660": [
+            "Belmuut",
+            ""
+        ],
+        "661": [
+            "Horemev",
+            ""
+        ],
+        "662": [
+            "Horks",
+            ""
+        ],
+        "663": [
+            "Hormezd",
+            ""
+        ],
+        "664": [
+            "Brontik",
+            ""
+        ],
+        "665": [
+            "Manjat",
+            ""
+        ],
+        "666": [
+            "Malegant",
+            ""
+        ],
+        "667": [
+            "Magreni",
+            ""
+        ],
+        "668": [
+            "Masyness",
+            ""
+        ],
+        "669": [
+            "Belarbree",
+            ""
+        ],
+        "670": [
+            "Charini",
+            ""
+        ],
+        "671": [
+            "Drisnil",
+            ""
+        ],
+        "672": [
+            "Faeryl",
+            ""
+        ],
+        "673": [
+            "Isotriv",
+            ""
+        ],
+        "674": [
+            "Hjalavar",
+            ""
+        ],
+        "675": [
+            "Luan",
+            ""
+        ],
+        "676": [
+            "Mlezzire",
+            ""
+        ],
+        "677": [
+            "Pharne",
+            ""
+        ],
+        "678": [
+            "Rostak",
+            ""
+        ],
+        "679": [
+            "Telenna",
+            ""
+        ],
+        "680": [
+            "Vrinn",
+            ""
+        ],
+        "681": [
+            "Xarann",
+            ""
+        ],
+        "682": [
+            "Selkar",
+            ""
+        ],
+        "683": [
+            "Elkantin",
+            ""
+        ],
+        "684": [
+            "Guldos",
+            ""
+        ],
+        "685": [
+            "Rilran",
+            ""
+        ],
+        "686": [
+            "Talin",
+            ""
+        ],
+        "687": [
+            "Laele",
+            ""
+        ],
+        "688": [
+            "Tebryn",
+            ""
+        ],
+        "689": [
+            "Molag",
+            ""
+        ],
+        "690": [
+            "Yarafac",
+            ""
+        ],
+        "691": [
+            "Yasdelg",
+            ""
+        ],
+        "692": [
+            "Yarvon",
+            ""
+        ],
+        "693": [
+            "Yalosraf",
+            ""
+        ],
+        "694": [
+            "Durdyna",
+            ""
+        ],
+        "695": [
+            "Yugurta",
+            ""
+        ],
+        "696": [
+            "Ranagarr",
+            ""
+        ],
+        "697": [
+            "Xulark",
+            ""
+        ],
+        "698": [
+            "Yodokus",
+            ""
+        ],
+        "699": [
+            "Jorquat",
+            ""
+        ],
+        "700": [
+            "Ravenchy",
+            ""
+        ],
+        "701": [
+            "Rakim",
+            ""
+        ],
+        "702": [
+            "Rasksas",
+            ""
+        ],
+        "703": [
+            "Ramuman",
+            ""
+        ],
+        "704": [
+            "Rakoner",
+            ""
+        ],
+        "705": [
+            "Rangi",
+            ""
+        ],
+        "706": [
+            "Liborus",
+            ""
+        ],
+        "707": [
+            "Leomel",
+            ""
+        ],
+        "708": [
+            "Ryudoma",
+            ""
+        ],
+        "709": [
+            "Fures",
+            ""
+        ],
+        "710": [
+            "Llybophi",
+            ""
+        ],
+        "711": [
+            "Lukalan",
+            ""
+        ],
+        "712": [
+            "Ruvet",
+            ""
+        ],
+        "713": [
+            "Rugapand",
+            ""
+        ],
+        "714": [
+            "Rutinde",
+            ""
+        ],
+        "715": [
+            "Ludora",
+            ""
+        ],
+        "716": [
+            "Laymon",
+            ""
+        ],
+        "717": [
+            "Rechef",
+            ""
+        ],
+        "718": [
+            "Lenatos",
+            ""
+        ],
+        "719": [
+            "Leneneut",
+            ""
+        ],
+        "720": [
+            "Romuel",
+            ""
+        ],
+        "721": [
+            "Loa",
+            ""
+        ],
+        "722": [
+            "Rokvin",
+            ""
+        ],
+        "723": [
+            "Roschefra",
+            ""
+        ],
+        "724": [
+            "Romark",
+            ""
+        ]
+    },
+    "words:title": {
+        "9": [
+            "Riskbreaker ",
+            "#リスクブレイカー"
+        ],
+        "10": [
+            "Jamagus ",
+            "#ジャ术士团"
+        ],
+        "21": [
+            "Gamagus ",
+            "#ガ术士团"
+        ],
+        "32": [
+            "Ramagus ",
+            "#ラ术士团"
+        ],
+        "43": [
+            "Amagus ",
+            "#ア术士团"
+        ],
+        "44": [
+            "Craftsman ",
+            "#アーリースミス"
+        ]
+    }
+}
