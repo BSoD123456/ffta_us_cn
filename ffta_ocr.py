@@ -529,6 +529,7 @@ class c_ffta_ocr_parser:
                 *'○△□■^;◎',
             ], 'gbk'),
             **self._chartab(0x118, [('０', '９')], 'gbk'),
+            # 0x122
             # Ambiguous
             **ocr_ambiguous,
         })
@@ -550,6 +551,8 @@ class c_ffta_ocr_parser:
         self.gsr_trim = [' ']
         self.txt_trim_rng = [(0, 0xa4), (0xe4, 0xea), (0xed, 0x118)]
         self.chst_norm = ocr_normalize
+        self.chst_first_ocr = 0x122
+        self.chst_size = self.font.sect.tsize
 
     @staticmethod
     def _chartab(base, seq, enc):
@@ -572,17 +575,17 @@ class c_ffta_ocr_parser:
                 rec(dec(v))
         return r
 
-    def draw_chars(self, chars, pad = 3):
+    def draw_chars(self, chars, pad = 3, smallchar = False):
         blks = [
             # supplement height to 10px, make OCR work.
             # OCR do not work on image whose height is less than 10px
-            self.font.draw_point(2),
+            self.font.draw_point(2, ln = 10 if smallchar else 1),
             self.font.draw_chars(chars, pad = pad, noshadow = False)
         ]
-        return self.font.make_img(self.font.draw_horiz(*blks, pad = 1))
+        return self.font.make_img(self.font.draw_horiz(*blks, pad = 20 if smallchar else 1))
 
-    def ocr_chars(self, chars, ret_img = False):
-        im = self.draw_chars(chars)
+    def ocr_chars(self, chars, ret_img = False, smallchar = False):
+        im = self.draw_chars(chars, smallchar = smallchar)
         rinfo = self.ocr.ocr(im)
         rchars = ''.join(i['text'] for i in rinfo)
         if ret_img:
@@ -777,6 +780,15 @@ class c_ffta_ocr_parser:
         if not blks:
             return None
         return self.font.make_img(self.font.draw_vert(*blks))
+
+    def find_char(self, ch):
+        r = []
+        for c in range(self.chst_first_ocr, self.chst_size):
+            ocs = self.ocr_chars([c], smallchar = True)
+            assert len(ocs) == 1
+            if ch == ocs[0]:
+                r.append(c)
+        return r
 
     def export_charset(self):
         cdet = self.gsr.det.copy()
