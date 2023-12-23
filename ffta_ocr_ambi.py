@@ -267,6 +267,8 @@ ocr_ambiguous = {
     0x504: '購', # 居然和购是一模一样的，只能繁体字替代
     0x7d6: '袖',
     0xb5f: '嗖',
+    # new chars
+    0x7c8: '侧',
 }
 
 ocr_normalize = {
