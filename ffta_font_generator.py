@@ -1,9 +1,6 @@
 #! python3
 # coding: utf-8
 
-# from https://github.com/SolidZORO/zpix-pixel-font/releases
-FONT_NAME = 'font/zpix.ttf'
-
 import os, os.path
 
 try:
@@ -95,31 +92,32 @@ class c_font_gen:
             self._deco_char(s, deco, d)
         return self._pack_char(d, self.pshape)
 
-ffta_font_gen = c_font_gen(
-    FONT_NAME, 12, [
-        # outline
-        {
-            (-1, -1): 1,
-            ( 0, -1): 1,
-            ( 1, -1): 1,
-            (-1,  0): 1,
-            ( 1,  0): 1,
-            (-1,  1): 1,
-            ( 0,  1): 1,
-            ( 1,  1): 1,
-        },
-        # shadow
-        {
-            ( 1,  1): 2,
-        },
-        # center
-        {
-            ( 0,  0): 3,
-        },
-    ],
-    (8, 16, 2),
-    (0, 2)
-)
+def make_ffta_font_gen(name, size):
+    return c_font_gen(
+        name, size, [
+            # outline
+            {
+                (-1, -1): 1,
+                ( 0, -1): 1,
+                ( 1, -1): 1,
+                (-1,  0): 1,
+                ( 1,  0): 1,
+                (-1,  1): 1,
+                ( 0,  1): 1,
+                ( 1,  1): 1,
+            },
+            # shadow
+            {
+                ( 1,  1): 2,
+            },
+            # center
+            {
+                ( 0,  0): 3,
+            },
+        ],
+        (8, 16, 2),
+        (0, 2)
+    )
 
 if __name__ == '__main__':
     pass

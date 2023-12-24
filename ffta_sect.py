@@ -1248,6 +1248,7 @@ class c_ffta_sect_text_buf_ya(c_ffta_sect_text_buf):
 class c_ffta_sect_font(c_ffta_sect_tab):
 
     def set_info(self, info):
+        self.init_info = info
         self.char_shape = info['shape']
         self.tsize = info['size']
         self.rvs_byte = info['rvsbyt']
@@ -1287,18 +1288,49 @@ class c_ffta_sect_font(c_ffta_sect_tab):
                         yield val
             yield _rowgen()
 
+    def _repack_char(self, fdat):
+        def _gen(d):
+            if not isinstance(d, list):
+                yield d
+                return
+            for s in d:
+                yield from _gen(s)
+        bs, cl, rl, bl = self.char_shape
+        rvs = self.rvs_byte
+        wd = 8 // bs
+        r = []
+        bch = []
+        for v in _gen(fdat):
+            bch.append(v)
+            if len(bch) < wd:
+                continue
+            rv = 0
+            for i in range(wd):
+                if rvs:
+                    rv += (v << (i * bs))
+                else:
+                    rv <<= bs
+                    rv += v
+            r.append(rv)
+            bch = []
+        return bytearray(r)
+
     def _repack_with(self, finfo):
-        sfnt, (rimin, rimax) = finfo
-        rmin = rimin * self._TAB_WIDTH
-        if rimax is None:
-            rmax = sfnt.sect_top
-        else:
-            rmax = rimax * self._TAB_WIDTH
-        if not rmax > rmin:
+        fdats, rmin = finfo
+        if not fdats:
             return self, False
         assert self.sect_top
         rmk = self.sub(0, self.sect_top, cls = type(self))
-        rmk.WBYTES(sfnt.BYTES(rmin, rmax - rmin), rmin)
+        for ci, fdat in enumerate(fdats):
+            ofs = (rmin + ci) * self._TAB_WIDTH
+            bd = self._repack_char(fdat)
+            rmk.WBYTES(bd, ofs)
+        rsize = ci + rmin + 1
+        if rsize > self.tsize:
+            report('warning', f'new font is bigger than old: 0x{rsize:x} <- 0x{self.tsize:x}')
+        rinfo = self.init_info.copy()
+        rinfo['size'] = max(self.tsize, rsize)
+        rmk.set_info(rinfo)
         return rmk, True
 
 # ===============

@@ -86,8 +86,10 @@ class c_ffta_charset_base(c_ffta_charset):
                 cs, csr = json.load(fd)
             self.chst = {int(k): v for k, v in cs.items()}
             self.chst_r = csr
+            return True
         except:
             self.reset()
+            return False
 
     def save(self):
         with open(self.path, 'w', encoding = 'utf-8') as fd:
@@ -113,6 +115,12 @@ class c_ffta_charset_base(c_ffta_charset):
             return self.chst[code]
         else:
             return f'@[U:{code:X}]'
+
+    def _encode_char(self, char):
+        if char in self.chst_r:
+            return self.chst_r[char]
+        else:
+            return None
 
     def _encode_tok(self, gc):
         try:
@@ -150,11 +158,12 @@ class c_ffta_charset_base(c_ffta_charset):
             return 'CTR_FUNC', cv
         elif c == ' ':
             return 'CTR_FUNC', 0x52
-        elif c in self.chst_r:
-            return 'CHR_FULL', self.chst_r[c]
-        else:
+        ch = self._encode_char(c)
+        if ch is None:
             report('warning', f'unknown char: {c}')
             return None, None
+        else:
+            return 'CHR_FULL', self.chst_r[c]
 
 class c_ffta_charset_ocr(c_ffta_charset_base):
 
@@ -178,6 +187,45 @@ class c_ffta_charset_ocr(c_ffta_charset_base):
             ocr.parse(noambi = True)
         self.chst, self.chst_r = ocr.final_charset()
         self.save()
+
+class c_ffta_charset_dynamic(c_ffta_charset_base):
+
+    def __init__(self, path):
+        super().__init__(path)
+        self.base_chst = {}
+        self.base_chst_r = {}
+        self.base_char = 0
+
+    def load(self, src, base):
+        self.base_char = base
+        if super().load():
+            mxc = 0
+            for c in src.chst:
+                if c > mxc:
+                    mxc = c
+            self.chst_dyidx = mxc + 1
+        else:
+            for c, ch in src.chst.items():
+                if c < base:
+                    self.chst[c] = ch
+            for ch, c in src.chst_r.items():
+                if c < base:
+                    self.chst_r[ch] = c
+            self.chst_dyidx = base
+
+    def iter_dychrs(self):
+        for c in range(self.base_char, self.chst_dyidx):
+            yield c, self.chst[c]
+
+    def _encode_char(self, char):
+        ch = super()._encode_char(char)
+        if ch is None:
+            ch = self.chst_dyidx
+            self.chst_dyidx += 1
+            #report('debug', f'record new char {char} to 0x{ch:x}')
+            self.chst_r[char] = ch
+            self.chst[ch] = char
+        return ch
             
 if __name__ == '__main__':
     import pdb

@@ -500,6 +500,7 @@ class c_ffta_ocr_parser:
         self.chrs = []
         self.chrs_idx = 0
         self.toks_done = False
+        self.do_shift = False
 
     def parse(self, noambi = False):
         self.ocr = CnOcr(det_model_name='naive_det')
@@ -552,7 +553,10 @@ class c_ffta_ocr_parser:
         self.txt_trim_rng = [(0, 0xa4), (0xe4, 0xea), (0xed, 0x118)]
         self.chst_norm = ocr_normalize
         self.chst_first_ocr = 0x122
-        self.chst_size = self.font.sect.tsize
+        if noambi:
+            self.chst_size = self.chst_first_ocr
+        else:
+            self.chst_size = self.font.sect.tsize
 
     @staticmethod
     def _chartab(base, seq, enc):
@@ -886,6 +890,8 @@ class c_ffta_ocr_parser:
             if s in self.chst_norm:
                 s = self.chst_norm[s]
             fcs[ch] = s
+        for s1, s2 in ({**self.gsr_norm, **self.chst_norm}).items():
+            dcsr[s1] = dcsr[s2]
         return fcs, dcsr
 
 def iter_toks(rom):

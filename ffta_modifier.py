@@ -15,12 +15,6 @@ CONF = {
                 'charset': 'charset_cn.json',
                 'charset_ocr': True,
             },
-            'font': {
-                'path': 'fftacns.gba',
-                'type': 'cn',
-                # only hanzi
-                'range': (0x122, None),
-            },
         },
         'dst': {
             'path': 'fftauscn.gba',
@@ -40,6 +34,14 @@ CONF = {
                 'trans': 'trans_txt.json',
             },
         },
+    },
+    'font': {
+        # 最像素 from https://github.com/SolidZORO/zpix-pixel-font/releases
+        'src': 'font/zpix.ttf',
+        'size': 12,
+        'charset': 'charset_uscn.json',
+        # only hanzi
+        'dybase': 0x122,
     },
     'text': {
         'skip': {
@@ -91,7 +93,8 @@ CONF['text']['skipf'].append(chk_has_japanese)
 import json, re
 
 from ffta_sect import load_rom
-from ffta_charset import c_ffta_charset_ocr
+from ffta_charset import c_ffta_charset_ocr, c_ffta_charset_dynamic
+from ffta_font_generator import make_ffta_font_gen
 
 def report(*args):
     r = ' '.join(a for a in args if a)
@@ -282,6 +285,7 @@ class c_ffta_modifier:
             rom, chst = self.load_rom(rconf)
             self.srom[nm] = rom
             self.chst[nm] = chst
+        self.fntgen, self.chst['font'] = self.load_font()
         self.txts = self.load_texts()
 
     def export(self):
@@ -304,6 +308,13 @@ class c_ffta_modifier:
         else:
             chst = None
         return rom, chst
+
+    def load_font(self):
+        conf = self.conf['font']
+        chst = c_ffta_charset_dynamic(conf['charset'])
+        chst.load(self.chst['base'], conf['dybase'])
+        fnt_gen = make_ffta_font_gen(conf['src'], conf['size'])
+        return fnt_gen, chst
 
     def load_texts(self):
         conf = self.conf['work']['text']
@@ -467,6 +478,7 @@ class c_ffta_modifier:
             return ut
 
     def _rplc_txt_tab(self, mtxt):
+        chst = self.chst['font']
         rtabs = {}
         for tname, tab in mtxt.items():
             if tname.startswith('#'):
@@ -477,7 +489,7 @@ class c_ffta_modifier:
                 if not dst or idxr.startswith('#'):
                     continue
                 #report('info', f'encode line {idxr}')
-                dst = self.chst['text'].encode(dst)
+                dst = chst.encode(dst)
                 if not dst:
                     continue
                 idxp = tuple(int(i) for i in idxr.split('/'))
@@ -501,13 +513,13 @@ class c_ffta_modifier:
         return rtabs
 
     def _rplc_fnt_tab(self):
-        conf = self.conf['roms']['src']['font']
-        rng = conf.get('range', None)
-        smk = self.srom['font'].tabs['font']
-        if rng:
-            return smk, rng
-        else:
-            return smk
+        fg = self.fntgen
+        chst = self.chst['font']
+        base_code = chst.base_char
+        r = []
+        for code, ch in chst.iter_dychrs():
+            r.append(fg.get_char(ch))
+        return r, chst.base_char
 
     def repack(self):
         tbs = []
