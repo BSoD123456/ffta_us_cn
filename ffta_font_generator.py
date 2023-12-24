@@ -95,7 +95,7 @@ class c_font_gen:
             self._deco_char(s, deco, d, dsz, (1, 1))
         return self._pack_char(d, dsz, self.pshape)
 
-def make_ffta_font_gen(name, size):
+def make_ffta_font_gen(name, size, offset):
     return c_font_gen(
         name, size, [
             # outline
@@ -111,6 +111,7 @@ def make_ffta_font_gen(name, size):
             },
             # shadow
             {
+                ( 1,  0): 2,
                 ( 1,  1): 2,
             },
             # center
@@ -119,7 +120,7 @@ def make_ffta_font_gen(name, size):
             },
         ],
         (8, 16, 2),
-        (0, 0)
+        offset,
     )
 
 if __name__ == '__main__':

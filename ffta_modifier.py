@@ -36,9 +36,11 @@ CONF = {
         },
     },
     'font': {
-        # 最像素 from https://github.com/SolidZORO/zpix-pixel-font/releases
-        'src': 'font/zpix.ttf',
-        'size': 12,
+        # 精品点阵体9×9 BoutiqueBitmap9x9
+        # from https://github.com/scott0107000/BoutiqueBitmap9x9
+        'src': 'font/BoutiqueBitmap9x9_1.7.ttf',
+        'size': 10,
+        'offset': (0, 1),
         'charset': 'charset_uscn.json',
         # only hanzi
         'dybase': 0x122,
@@ -313,7 +315,7 @@ class c_ffta_modifier:
         conf = self.conf['font']
         chst = c_ffta_charset_dynamic(conf['charset'])
         chst.load(self.chst['base'], conf['dybase'])
-        fnt_gen = make_ffta_font_gen(conf['src'], conf['size'])
+        fnt_gen = make_ffta_font_gen(conf['src'], conf['size'], conf['offset'])
         return fnt_gen, chst
 
     def load_texts(self):
