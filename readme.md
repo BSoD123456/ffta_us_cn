@@ -29,7 +29,7 @@
 
 ### 打包美版汉化ROM
 
-运行ffta_modifier.py脚本，没有报错的完整运行后（且没有警告），就会在工程根目录下出现fftauscn.gba文件，就是美版汉化ROM。
+运行ffta_modifier.py脚本，没有报错的完整运行后（且没有警告），就会在工程roms目录下出现fftauscn.gba文件，就是美版汉化ROM。
 
 ## 进一步汉化新文本
 
