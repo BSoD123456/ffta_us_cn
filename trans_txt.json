@@ -86,7 +86,7 @@
         ],
         "1/134": [
             "Once you’ve thrown,@[4D]you have to choose@[4D]a ”facing.”@[4F]@[42]Once you’ve chosen@[4D]a facing, your turn@[4D]ends.@[40]@[42]",
-            "一旦你投掷了,@[4D]你就必须选择一个“朝向”。@[4F]@[42]在你选择完朝向后,@[4D]你的回合就结束了@[40]@[42]"
+            "一旦你投掷了,@[4D]你就必须选择一个“面向”。@[4F]@[42]在你选择完面向后,@[4D]你的回合就结束了@[40]@[42]"
         ],
         "1/135": [
             "Understand?@[40]@[42]",
@@ -110,7 +110,7 @@
         ],
         "1/140": [
             "It’s easier to hit@[4D]someone from the side@[4D]or behind.@[4F]@[42]Think about which way@[4D]your opponent’s@[4D]facing when you move.@[40]@[42]",
-            "从侧面或后面更容易打中。@[4F]@[42]当你移动时@[4D]想想你对手的朝向。@[40]@[42]"
+            "从侧面或后面更容易打中。@[4F]@[42]当你移动时@[4D]想想你对手的面向。@[40]@[42]"
         ],
         "1/141": [
             "Hey, stop that! The@[4D]snowball fight’s@[4D]over!@[40]@[42]",
@@ -142,7 +142,7 @@
         ],
         "1/148": [
             "Uh-oh...@[40]@[42]",
-            "哦……@[40]@[42]"
+            "额……@[40]@[42]"
         ],
         "1/149": [
             "I’m really, really@[4D]sorry. Please accept@[4D]my apologies...@[40]@[42]",
