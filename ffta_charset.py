@@ -70,12 +70,15 @@ class c_ffta_charset_us_dummy(c_ffta_charset):
             d = '.'
         return d
 
-class c_ffta_charset_ocr(c_ffta_charset):
+class c_ffta_charset_base(c_ffta_charset):
 
-    def __init__(self, path, rom):
+    def __init__(self, path):
         super().__init__()
-        self.rom = rom
         self.path = path
+
+    def reset(self):
+        self.chst = {}
+        self.chst_r = {}
 
     def load(self):
         try:
@@ -84,26 +87,12 @@ class c_ffta_charset_ocr(c_ffta_charset):
             self.chst = {int(k): v for k, v in cs.items()}
             self.chst_r = csr
         except:
-            self.ocr()
+            self.reset()
 
     def save(self):
         with open(self.path, 'w', encoding = 'utf-8') as fd:
             json.dump((self.chst, self.chst_r), fd,
                 ensure_ascii=False, indent=4, sort_keys=True)
-
-    def ocr(self):
-        from ffta_font import c_ffta_font_drawer
-        from ffta_ocr import c_ffta_ocr_parser, iter_toks
-        if self.rom:
-            dr = c_ffta_font_drawer(self.rom.tabs['font'])
-            ocr = c_ffta_ocr_parser(iter_toks(self.rom), dr)
-            ocr.parse()
-            ocr.feed_all()
-        else:
-            ocr = c_ffta_ocr_parser(None, None)
-            ocr.parse(noambi = True)
-        self.chst, self.chst_r = ocr.final_charset()
-        self.save()
 
     def _decode_unknown(self, typ, code):
         if typ == 'CTR_FUNC':
@@ -166,6 +155,29 @@ class c_ffta_charset_ocr(c_ffta_charset):
         else:
             report('warning', f'unknown char: {c}')
             return None, None
+
+class c_ffta_charset_ocr(c_ffta_charset_base):
+
+    def __init__(self, path, rom):
+        super().__init__(path)
+        self.rom = rom
+
+    def reset(self):
+        self.ocr()
+
+    def ocr(self):
+        from ffta_font import c_ffta_font_drawer
+        from ffta_ocr import c_ffta_ocr_parser, iter_toks
+        if self.rom:
+            dr = c_ffta_font_drawer(self.rom.tabs['font'])
+            ocr = c_ffta_ocr_parser(iter_toks(self.rom), dr)
+            ocr.parse()
+            ocr.feed_all()
+        else:
+            ocr = c_ffta_ocr_parser(None, None)
+            ocr.parse(noambi = True)
+        self.chst, self.chst_r = ocr.final_charset()
+        self.save()
             
 if __name__ == '__main__':
     import pdb
