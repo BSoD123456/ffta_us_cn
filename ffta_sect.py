@@ -325,6 +325,9 @@ class c_ffta_sect(c_mark):
         else:
             raise ValueError('sect error: invalid real top')
 
+    def in_sect(self, offs):
+        return 0 <= offs and (self._sect_top is None or offs < self._sect_top)
+
     def _offs2addr(self, offs):
         return offs + self.real_offset + self.ADDR_BASE
 
@@ -713,6 +716,8 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         addr = super().get_entry(idx)
         if addr:
             ofs = self._tab_ref_host.aot(addr, 'ao')
+            if not self.in_sect(ofs):
+                ofs = 0
         else:
             ofs = 0
         return ofs
