@@ -103,7 +103,8 @@ def chk_has_japanese(txt):
     return False
 CONF['text']['skipf'].append(chk_has_japanese)
 
-import json, re, shutil
+import json, re
+import os, os.path, shutil
 
 from ffta_sect import load_rom
 from ffta_charset import c_ffta_charset_ocr, c_ffta_charset_dynamic
