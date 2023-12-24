@@ -6,13 +6,14 @@ import json
 
 class c_trans_fmt:
 
-    def __init__(self, src_fn, raw_fn, trans_fn, blk_sz = 10):
+    def __init__(self, src_fn, raw_fn, trans_fn, blk_sz = 10, rsv_cmt = True):
         self.src_fn = src_fn
         s1, s2 = os.path.splitext(src_fn)
         self.dst_fn = s1 + '_auto' + s2
         self.raw_fn = raw_fn
         self.trs_fn = trans_fn
         self.blk_sz = blk_sz
+        self.rsv_cmt = rsv_cmt
 
     def load(self):
         self.tab = self.load_json(self.src_fn)
@@ -37,7 +38,7 @@ class c_trans_fmt:
         for tname, tab in self.tab.items():
             for idxr, tpair in tab.items():
                 st, tt = tpair
-                if tt and not tt.startswith('#'):
+                if tt and (self.rsv_cmt or not tt.startswith('#')):
                     continue
                 r = yield st
                 if r and not r.startswith('#'):
