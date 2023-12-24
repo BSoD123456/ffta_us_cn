@@ -3395,6 +3395,16 @@
             "#空白卡片"
         ]
     },
+    "words:rumor": {
+        "60": [
+            "Blank Cards",
+            "! 空白卡片"
+        ],
+        "61": [
+            "!Abilities",
+            "! 技能"
+        ]
+    },
     "words:quest": {
         "377": [
             "Reconcilliation",

@@ -79,6 +79,10 @@ CONF = {
                 ((8, 62), (8, 62)),
                 ((25,), (24,)),
             ],
+            'words:rumor': [
+                ((62,), (61,)),
+                ((63,), (63,)),
+            ],
             'words:battle': [
                 ((179,), (176,)),
                 ((543,), (531,)),
@@ -94,14 +98,21 @@ CONF = {
     }
 }
 
-def chk_has_japanese(txt):
+def chk_has_japanese(txt, *_):
     for c in txt:
         oc = ord(c)
         if (0x3040 < oc < 0x3094 or
             0x30a0 < oc < 0x30fb):
             return True
     return False
-CONF['text']['skipf'].append(chk_has_japanese)
+def chk_invalid_words(txt, tname, *_):
+    if tname == 'words:rumor':
+        return txt.isdigit()
+    return False
+CONF['text']['skipf'].extend([
+    chk_has_japanese,
+    chk_invalid_words,
+])
 
 import json, re
 import os, os.path, shutil
@@ -439,7 +450,7 @@ class c_ffta_modifier:
                 if dec in txt_skip:
                     continue
                 for sf in txt_skip_fs:
-                    if sf(dec):
+                    if sf(dec, tname, path):
                         #report('warning', f'skip text {path}: {dec}')
                         dec = '#' + dec
                         break
