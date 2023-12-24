@@ -698,12 +698,13 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
     
     _TAB_WIDTH = 4
     
-    def set_info(self, host, tlen, hole_idxs = None):
+    def set_info(self, host, tlen, hole_idxs = None, ignore_invalid_ptr = False):
         self._tab_ref_host = host
         self.tsize = tlen
         if hole_idxs is None:
             hole_idxs = []
         self._tab_hole_idxs = hole_idxs
+        self._tab_ref_addr_ignore_invalid_ptr = ignore_invalid_ptr
         
     def _ref_top_nondeterm(self, idx):
         return True
@@ -716,7 +717,7 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         addr = super().get_entry(idx)
         if addr:
             ofs = self._tab_ref_host.aot(addr, 'ao')
-            if not self.in_sect(ofs):
+            if self._tab_ref_addr_ignore_invalid_ptr and not self.in_sect(ofs):
                 ofs = 0
         else:
             ofs = 0
@@ -1471,9 +1472,9 @@ class c_ffta_sect_rom(c_ffta_sect):
 def _words_sect_info(info):
     return {
         'words:'+k: (ofs, c_ffta_sect_words_text,
-            c_ffta_sect_rom.ARG_SELF, sz,
+            c_ffta_sect_rom.ARG_SELF, *args,
         )
-        for k, (ofs, sz) in info.items()}
+        for k, (ofs, *args) in info.items()}
 
 def _trim_raw_len(raw, st):
     for i in range(min(st, len(raw) - 1), -1, -1):
@@ -1541,7 +1542,7 @@ def load_rom_jp(fn):
                 'uitm': (0x5113c, 0x4),
                 'utitle': (0x558f8, 0x5),
                 'content': (0x18cb4, 0x2f2),
-                'name1': (0x9a58, 0x6e),
+                'name1': (0x9a58, 0x6e, None, True),
                 'battle': (0x9070, 0x2f5),
                 'rumor': (0x5c954, 0x5c),
                 'quest': (0x19100, 0x20f),
