@@ -341,6 +341,7 @@ class c_ffta_modifier:
             report('warning', f'something wrong while repacking')
             return
         self.save_rom(self.conf['roms']['dst']['path'], rmk)
+        return rmk
 
     def load_rom(self, rom_conf):
         lfunc = load_rom[rom_conf['type']]
@@ -653,7 +654,7 @@ if __name__ == '__main__':
     ppr = lambda *a, **ka: pprint(*a, **ka, sort_dicts = False)
 
     def main():
-        global md
+        global md, rmk
         md = c_ffta_modifier(CONF)
         md.load()
 ##        txts = md._parse_text('text')
@@ -665,5 +666,5 @@ if __name__ == '__main__':
 ##        md.save_json('out_ut_wk.json', utxts)
 ##        rmk = md.repack_rom_with_text(txts)
 ##        md.save_rom('ffta_tst_uscn.gba', rmk)
-        md.export()
+        rmk = md.export()
     main()
