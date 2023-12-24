@@ -1536,7 +1536,7 @@ def load_rom_jp(fn):
                 'uitm': (0x5113c, 0x4),
                 'utitle': (0x558f8, 0x5),
                 'content': (0x18cb4, 0x2f2),
-                'name1': (0x9a58, 0x68),
+                'name1': (0x9a58, 0x6e),
                 'battle': (0x9070, 0x2f5),
                 'rumor': (0x5c954, 0x5c),
                 'quest': (0x19100, 0x20f),
@@ -1633,4 +1633,4 @@ if __name__ == '__main__':
                 (61, 3, 5): t2,
             },
             'fx_text': {(1, 0): t2}})
-    rmk, rdrt = t01()
+    #rmk, rdrt = t01()
