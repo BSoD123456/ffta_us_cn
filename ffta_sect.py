@@ -1572,9 +1572,9 @@ load_rom = {
 
 def main():
     global rom_us, rom_cn, rom_jp
-    rom_us = load_rom_us('fftaus.gba')
-    rom_cn = load_rom_cn('fftacnb.gba')
-    rom_jp = load_rom_jp('fftajp.gba')
+    rom_us = load_rom_us(r'roms\fftaus.gba')
+    rom_cn = load_rom_cn(r'roms\fftacnb.gba')
+    rom_jp = load_rom_jp(r'roms\fftajp.gba')
 
 if __name__ == '__main__':
     import pdb

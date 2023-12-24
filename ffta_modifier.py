@@ -5,12 +5,12 @@ CONF = {
     'roms': {
         'src': {
             'base': {
-                'path': 'fftaus.gba',
+                'path': r'roms\fftaus.gba',
                 'type': 'us',
                 'charset': 'charset_us.json',
             },
             'text': {
-                'path': 'fftacnb.gba',
+                'path': r'roms\fftacnb.gba',
                 'type': 'cn',
                 'charset': 'charset_cn.json',
                 'charset_ocr': True,
