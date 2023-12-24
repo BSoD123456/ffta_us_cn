@@ -63,9 +63,7 @@ CONF = {
         },
         'skipf': [],
         'skipf_defer': [],
-        'var': {
-            'prefix': ['CRN_'],
-        },
+        'modf': [],
         'align': {
             's_text': [
                 ((36,), (35,)),
@@ -117,18 +115,25 @@ CONF['text']['skipf'].extend([
     chk_has_japanese,
     chk_invalid_words,
 ])
-def chkdf_invalid_refer(dec, tname, path, *_, txts = None, defered):
-    if not defered:
-        return '@[51' in dec
-    else:
-        rlen = len(txts['words:name1'])
-        for refc in re.findall(r'\@\[51([0-9a-fA-F]{2})\]', dec):
-            refv = int(refc, 16)
-            if refv >= rlen:
-                return True
-        return False
-CONF['text']['skipf_defer'].extend([
-    chkdf_invalid_refer,
+
+def mod_static_refer(bt, tt, tname, bidxp, tidxp, btxts, ttxts):
+    REF_TOP = 104
+    if not '@[51' in tt:
+        return tt
+    bwt = btxts['words:name1']
+    twt = ttxts['words:name1']
+    def _rplc(m):
+        refv = int(m.group(1), 16)
+        refi = (refv,)
+        if refv < REF_TOP:
+            sv = bwt[refi]
+            #if not sv.startswith('CRN_'):
+            return m.group(0)
+        assert refi in twt
+        return twt[refi]
+    return re.sub(r'\@\[51([0-9a-fA-F]{2})\]', _rplc, tt)
+CONF['text']['modf'].extend([
+    mod_static_refer,
 ])
 
 import json, re
@@ -516,7 +521,7 @@ class c_ffta_modifier:
     def _merge_texts(self, tbas, ttxt, minfo):
         trslt = {}
         utrslt = {}
-        var_prefix = self.conf['text']['var']['prefix']
+        txt_mod_fs = self.conf['text']['modf']
         amaps = self.conf['text']['align']
         trmpgs = self.conf['text']['trim']
         tnames = self._merge_keys(tbas, ttxt)
@@ -538,16 +543,14 @@ class c_ffta_modifier:
                     pkey = '#' + '/'.join(str(i) for i in tidxp)
                 else:
                     pkey = '/'.join(str(i) for i in bidxp)
-                    #if tval and re.match(r'^[0-9A-Z_]+$', bval):
-                    for vp in var_prefix:
-                        if bval.startswith(vp):
-                            #report('warning', f'varname: {bval} -> {tval}')
-                            if tval:
-                                tval = '#' + tval
+                has_bval = (bval and not bval.startswith('#'))
+                has_tval = (tval and not tval.startswith('#'))
+                if has_bval and has_tval:
+                    for sf in txt_mod_fs:
+                        tval = sf(bval, tval, tname, bidxp, tidxp, tbas, ttxt)
                 rtab[pkey] = [i if i else '' for i in [bval, tval]]
-                if not tval or tval.startswith('#'):
-                    if bval and not bval.startswith('#'):
-                        rutab[pkey] = [bval, tval if tval else '']
+                if not has_tval and has_bval:
+                    rutab[pkey] = [bval, tval if tval else '']
             if rutab:
                 utrslt[tname] = rutab
         return trslt, utrslt

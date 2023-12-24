@@ -3308,30 +3308,6 @@
         ]
     },
     "words:name1": {
-        "0": [
-            "CRN_NONE",
-            "#CRN_NONE"
-        ],
-        "1": [
-            "CRN_DEF",
-            "#CRN_DEF"
-        ],
-        "28": [
-            "CRN_RES6",
-            "#CRN_RES6"
-        ],
-        "29": [
-            "CRN_RES7",
-            "#CRN_RES7"
-        ],
-        "100": [
-            "CRN_NAME071",
-            "#CRN_NAME071"
-        ],
-        "101": [
-            "CRN_NAME072",
-            "#CRN_NAME072"
-        ],
         "104": [
             "Dredd",
             "#新特警判官"
