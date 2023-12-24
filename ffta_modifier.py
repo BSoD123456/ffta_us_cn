@@ -62,6 +62,7 @@ CONF = {
             'Dummy',
         },
         'skipf': [],
+        'skipf_defer': [],
         'var': {
             'prefix': ['CRN_'],
         },
@@ -94,7 +95,7 @@ CONF = {
             }, {
                 (61,),
             }],
-        }
+        },
     }
 }
 
@@ -112,6 +113,19 @@ def chk_invalid_words(txt, tname, *_):
 CONF['text']['skipf'].extend([
     chk_has_japanese,
     chk_invalid_words,
+])
+def chkdf_invalid_refer(dec, tname, path, txts = None, *, defered):
+    if not defered:
+        return '@[51' in dec
+    else:
+        rlen = len(txts['words:name1'])
+        for refc in re.findall(r'\@\[51([0-9a-fA-F]{2})\]', dec):
+            refv = int(refc, 16)
+            if refv >= rlen:
+                return True
+        return False
+CONF['text']['skipf_defer'].extend([
+    chkdf_invalid_refer,
 ])
 
 import json, re
@@ -430,7 +444,9 @@ class c_ffta_modifier:
         chst = self.chst[romkey]
         txt_skip = self.conf['text']['skip']
         txt_skip_fs = self.conf['text']['skipf']
+        txt_skip_fs_defer = self.conf['text']['skipf_defer']
         txts = {}
+        defer_idxps = []
         for tname, tab in self._iter_txttab(rom):
             ttxts = {}
             for path, line in tab.iter_item(skiprep = True):
@@ -451,11 +467,19 @@ class c_ffta_modifier:
                     continue
                 for sf in txt_skip_fs:
                     if sf(dec, tname, path):
-                        #report('warning', f'skip text {path}: {dec}')
+                        #report('warning', f'skip text {tname}:{pkey}: {dec}')
                         dec = '#' + dec
                         break
+                for sf in txt_skip_fs_defer:
+                    if sf(dec, tname, path, defered = False):
+                        defer_idxps.append((sf, tname, pkey, path))
                 ttxts[pkey] = dec
             txts[tname] = ttxts
+        for sf, tname, pkey, path in defer_idxps:
+            dec = txts[tname][pkey]
+            if sf(dec, tname, path, txts, defered = True):
+                #report('warning', f'defer skip text {tname}:{pkey}: {dec}')
+                txts[tname][pkey] = '#' + dec
         return txts
 
     def _merge_keys(self, t1, t2):
