@@ -103,7 +103,7 @@ def chk_has_japanese(txt):
     return False
 CONF['text']['skipf'].append(chk_has_japanese)
 
-import json, re
+import json, re, shutil
 
 from ffta_sect import load_rom
 from ffta_charset import c_ffta_charset_ocr, c_ffta_charset_dynamic
@@ -332,6 +332,7 @@ class c_ffta_modifier:
 
     def load_texts(self):
         conf = self.conf['work']['text']
+        dirty = False
         txts = {}
         if self._load_texts_json(conf['raw'], txts):
             ts = md.parse_texts(
@@ -355,9 +356,14 @@ class c_ffta_modifier:
                 stxts['text'] = reidx(ts.pop(0))
             if stxts:
                 self._save_texts_json(conf['src'], stxts)
+            dirty = True
         if self._load_texts_json(conf['mod'], txts):
             txts['trans'] = txts['uncv']
             self._save_texts_json(conf['mod'], txts)
+            dirty = False
+        if dirty:
+            txts['trans'] = self._merge_trans(txts['trans'], txts['uncv'])
+            self._save_texts_json(conf['mod'], txts, bak = True)
         return txts
 
     def _load_texts_json(self, conf, txts):
@@ -370,9 +376,17 @@ class c_ffta_modifier:
             txts[tname] = txt
         return dirty
 
-    def _save_texts_json(self, conf, txts):
+    def _save_texts_json(self, conf, txts, bak = False):
         for tname, tpath in conf.items():
+            if bak:
+                self.bak_file(tpath)
             self.save_json(tpath, txts[tname])
+
+    def bak_file(self, fn):
+        if not os.path.isfile(fn):
+            return
+        f1, f2 = os.path.splitext(fn)
+        shutil.copy2(fn, f1 + '.bak' + f2)
 
     def load_json(self, fn):
         try:
@@ -504,6 +518,31 @@ class c_ffta_modifier:
         tt = self._parse_text('text')
         t, ut = self._merge_texts(bt, tt, None)
         return [tx for v, tx in zip([atxt , utxt , btxt , ttxt], [t, ut, bt, tt]) if v]
+
+    def _merge_trans(self, otrans, nraw):
+        ntrans = {}
+        for tname, nraw_tab in nraw.items():
+            otrans_tab = otrans.get(tname, {})
+            ntrans_tab = {}
+            for idxr, (raw_txt, trans_txt) in nraw_tab.items():
+                if not idxr in otrans_tab:
+                    ntrans_tab[idxr] = (raw_txt, trans_txt)
+                    continue
+                oraw_txt, otrans_txt = otrans_tab[idxr]
+                if not oraw_txt == raw_txt:
+                    raise ValueError(f'trans {tname}:{idxr} not match: {oraw_txt} / {raw_txt}')
+                elif (otrans_txt and not otrans_txt.startswith('#')
+                        and trans_txt and not trans_txt.startswith('#')):
+                    if otrans_txt != trans_txt:
+                        report('warning', f'trans {tname}:{idxr} dumplicated: {otrans_txt} / {trans_txt}')
+                    ntrans_tab[idxr] = (raw_txt, otrans_txt)
+                elif trans_txt and not trans_txt.startswith('#'):
+                    ntrans_tab[idxr] = (raw_txt, trans_txt)
+                else:
+                    ntrans_tab[idxr] = (raw_txt, otrans_txt)
+            if ntrans_tab:
+                ntrans[tname] = ntrans_tab
+        return ntrans
 
     def _rplc_txt_tab(self, mtxt):
         chst = self.chst['font']
