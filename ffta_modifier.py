@@ -42,6 +42,7 @@ CONF = {
         'size': 10,
         'offset': (0, 1),
         'charset': 'charset_uscn_wk.json',
+        'charset_nosave': True,
         # only hanzi
         'dybase': 0x122,
     },
@@ -313,7 +314,8 @@ class c_ffta_modifier:
 
     def load_font(self):
         conf = self.conf['font']
-        chst = c_ffta_charset_dynamic(conf['charset'])
+        chst = c_ffta_charset_dynamic(
+            conf['charset'], conf.get('charset_nosave', False))
         chst.load(self.chst['base'], conf['dybase'])
         fnt_gen = make_ffta_font_gen(conf['src'], conf['size'], conf['offset'])
         return fnt_gen, chst

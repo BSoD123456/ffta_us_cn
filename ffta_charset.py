@@ -190,8 +190,9 @@ class c_ffta_charset_ocr(c_ffta_charset_base):
 
 class c_ffta_charset_dynamic(c_ffta_charset_base):
 
-    def __init__(self, path):
+    def __init__(self, path, nosave = False):
         super().__init__(path)
+        self.nosave = nosave
 
     def load(self, src, base):
         self.base_char = base
@@ -212,7 +213,7 @@ class c_ffta_charset_dynamic(c_ffta_charset_base):
         self.dirty = False
 
     def iter_dychrs(self):
-        if self.dirty:
+        if self.dirty and not self.nosave:
             self.save()
         for c in range(self.base_char, self.chst_dyidx):
             yield c, self.chst[c]
