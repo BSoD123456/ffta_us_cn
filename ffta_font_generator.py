@@ -39,8 +39,8 @@ class c_font_gen:
         self.idr.rectangle([(0, 0), self.img.size], fill=0xff)
         self.idr.text((0, 0), c, fill=0, font=self.font, spacing=0)
 
-    def _deco_char(self, src, dinfo, dst):
-        slen = len(src)
+    def _deco_char(self, src, dinfo, dst, dsz, dofs):
+        dlen = len(dst)
         for si, v in enumerate(src):
             if v:
                 # 0 is black, 1 is white
@@ -48,36 +48,36 @@ class c_font_gen:
             sx = si % self.size
             sy = si // self.size
             for (px, py), dv in dinfo.items():
-                pi = (sy + py) * self.size + (sx + px)
-                if 0 <= pi < slen:
+                pi = (sy + py + dofs[1]) * dsz + (sx + px + dofs[0])
+                if 0 <= pi < dlen:
                     dst[pi] = dv
 
-    def _peek_char_val(self, src, shp, pos):
+    def _peek_char_val(self, src, ssz, shp, pos):
         dim = 2
         dv = [1] * dim
         pr = [-i for i in self.offset[:dim]]
         for zi, (pv, sv) in enumerate(zip(pos, shp)):
             pr[zi % dim] += pv * dv[zi % dim]
             dv[zi % dim] *= sv
-        if not (0 <= pr[0] < self.size
-            and 0 <= pr[1] < self.size):
+        if not (0 <= pr[0] < ssz
+            and 0 <= pr[1] < ssz):
             return 0
-        pi = pr[1] * self.size + pr[0]
+        pi = pr[1] * ssz + pr[0]
         return src[pi]
 
-    def _pack_char(self, d, shp, pos = None, si = None):
+    def _pack_char(self, d, dsz, shp, pos = None, si = None):
         if si is None:
             si = len(shp) - 1
         if pos is None:
             pos = [0] * len(shp)
         if si < 0:
-            return self._peek_char_val(d, shp, pos)
+            return self._peek_char_val(d, dsz, shp, pos)
         rng = shp[si]
         r = []
         for i in range(rng):
             npos = pos.copy()
             npos[si] = i
-            r.append(self._pack_char(d, shp, npos, si - 1))
+            r.append(self._pack_char(d, dsz, shp, npos, si - 1))
         return r
 
     def get_char(self, c):
@@ -87,10 +87,13 @@ class c_font_gen:
             report('warning', f'invalid char in ttf: {c}')
             return self.char_blank
         s = self.img.getdata()
-        d = [0] * (self.size ** 2)
+        # 1px * 2 for deco padding
+        dsz = self.size + 2
+        d = [0] * (dsz ** 2)
         for deco in self.decos:
-            self._deco_char(s, deco, d)
-        return self._pack_char(d, self.pshape)
+            # 1px for deco padding
+            self._deco_char(s, deco, d, dsz, (1, 1))
+        return self._pack_char(d, dsz, self.pshape)
 
 def make_ffta_font_gen(name, size):
     return c_font_gen(
@@ -116,7 +119,7 @@ def make_ffta_font_gen(name, size):
             },
         ],
         (8, 16, 2),
-        (0, 2)
+        (0, 0)
     )
 
 if __name__ == '__main__':

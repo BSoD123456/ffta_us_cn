@@ -1307,10 +1307,10 @@ class c_ffta_sect_font(c_ffta_sect_tab):
             rv = 0
             for i in range(wd):
                 if rvs:
-                    rv += (v << (i * bs))
-                else:
                     rv <<= bs
-                    rv += v
+                    rv += bch[i]
+                else:
+                    rv += (bch[i] << (i * bs))
             r.append(rv)
             bch = []
         return bytearray(r)
