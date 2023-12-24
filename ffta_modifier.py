@@ -117,7 +117,7 @@ CONF['text']['skipf'].extend([
     chk_has_japanese,
     chk_invalid_words,
 ])
-def chkdf_invalid_refer(dec, tname, path, txts = None, *, defered):
+def chkdf_invalid_refer(dec, tname, path, *_, txts = None, defered):
     if not defered:
         return '@[51' in dec
     else:
@@ -469,18 +469,18 @@ class c_ffta_modifier:
                 if dec in txt_skip:
                     continue
                 for sf in txt_skip_fs:
-                    if sf(dec, tname, path):
+                    if sf(dec, tname, path, romkey):
                         #report('warning', f'skip text {tname}:{pkey}: {dec}')
                         dec = '#' + dec
                         break
                 for sf in txt_skip_fs_defer:
-                    if sf(dec, tname, path, defered = False):
+                    if sf(dec, tname, path, romkey, defered = False):
                         defer_idxps.append((sf, tname, pkey, path))
                 ttxts[pkey] = dec
             txts[tname] = ttxts
         for sf, tname, pkey, path in defer_idxps:
             dec = txts[tname][pkey]
-            if sf(dec, tname, path, txts, defered = True):
+            if sf(dec, tname, path, romkey, txts = txts, defered = True):
                 #report('warning', f'defer skip text {tname}:{pkey}: {dec}')
                 txts[tname][pkey] = '#' + dec
         return txts
