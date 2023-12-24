@@ -29,6 +29,12 @@ CONF = {
                 # uncovered
                 'uncv': 'raw_txt_uncv_wk.json',
             },
+            'src': {
+                # base rom
+                'base': 'src_txt_base_wk.json',
+                # text rom
+                'text': 'src_txt_text_wk.json',
+            },
             'mod': {
                 #translate
                 'trans': 'trans_txt.json',
@@ -72,6 +78,9 @@ CONF = {
                 ((8, 61), (8, 60)),
                 ((8, 62), (8, 62)),
                 ((25,), (24,)),
+            ],
+            'words:battle': [
+                ((180,), (176,)),
             ],
         },
         'trim': {
@@ -324,8 +333,27 @@ class c_ffta_modifier:
         conf = self.conf['work']['text']
         txts = {}
         if self._load_texts_json(conf['raw'], txts):
-            txts['comp'], txts['uncv'] = md.parse_texts(True, True)
+            ts = md.parse_texts(
+                conf['raw']['comp'],
+                conf['raw']['uncv'],
+                conf['src']['base'],
+                conf['src']['text'],
+            )
+            if conf['raw']['comp']:
+                txts['comp'] = ts.pop(0)
+            if conf['raw']['uncv']:
+                txts['uncv'] = ts.pop(0)
             self._save_texts_json(conf['raw'], txts)
+            reidx = lambda txts: {
+                k:{'/'.join(str(i) for i in k):v for k, v in tab.items()}
+                for k, tab in txts.items()}
+            stxts = {}
+            if conf['src']['base']:
+                stxts['base'] = reidx(ts.pop(0))
+            if conf['src']['text']:
+                stxts['text'] = reidx(ts.pop(0))
+            if stxts:
+                self._save_texts_json(conf['src'], stxts)
         if self._load_texts_json(conf['mod'], txts):
             txts['trans'] = txts['uncv']
             self._save_texts_json(conf['mod'], txts)
@@ -470,16 +498,11 @@ class c_ffta_modifier:
                 utrslt[tname] = rutab
         return trslt, utrslt
 
-    def parse_texts(self, atxt = True, utxt = False):
+    def parse_texts(self, atxt = True, utxt = False, btxt = False, ttxt = False):
         bt = self._parse_text('base')
         tt = self._parse_text('text')
         t, ut = self._merge_texts(bt, tt, None)
-        if atxt & utxt:
-            return t, ut
-        elif atxt:
-            return t
-        elif utxt:
-            return ut
+        return [tx for v, tx in zip([atxt , utxt , btxt , ttxt], [t, ut, bt, tt]) if v]
 
     def _rplc_txt_tab(self, mtxt):
         chst = self.chst['font']
