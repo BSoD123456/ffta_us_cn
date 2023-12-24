@@ -666,14 +666,29 @@ class c_ffta_ocr_parser:
         if detail:
             return rtxt, im
 
-    def feed_all(self, tlen_min = 200):
+    def feed_all(self, tlen_min = 200, do_shift = False):
+        self.do_shift = do_shift
         while self.chrs_idx >= 0:
             report('info', f'feed {self.chrs_idx}')
             self.feed_next(tlen_min)
+        if do_shift:
+            report('info', f'feed shift chars')
+            self.feed_shift()
 
     def refeed_all(self, tlen_min = 200):
         self.chrs_idx = 0
-        self.feed_all(tlen_min)
+        self.feed_all(tlen_min, do_shift = self.do_shift)
+
+    def feed_shift(self, win = 4, sep = 'A'):
+        sep_c = self.gsr.det_r[sep]
+        for c in range(self.chst_first_ocr, self.chst_size - win + 1):
+            if c % 0x80 == 0:
+                report('info', f'feed char 0x{c:x}')
+            ch = list(range(c, c + win))
+            och = self.ocr_chars(ch, smallchar = True)
+            ch = [sep_c, *ch, sep_c]
+            och = sep + och + sep
+            self.gsr.feed(ch, och, (c, c+win), self.gsr_norm, self.gsr_trim)
 
     def get_conflict(self):
         r = {}
@@ -751,7 +766,7 @@ class c_ffta_ocr_parser:
                 ))
         return self.font.make_img(self.font.draw_vert(*blks))
 
-    def uncovered_chrs(self):
+    def _uncovered_chrs_txts(self, detail = False):
         cs = {}
         cs_ex, _ = self.export_charset()
         cs.update(cs_ex[1])
@@ -764,12 +779,32 @@ class c_ffta_ocr_parser:
                 if not c in cs:
                     fnd = True
                     rc.add(c)
-            if fnd:
+            if detail and fnd:
                 rs.append(i)
-        return sorted(rc), rs
+        if detail:
+            return sorted(rc), rs
+        else:
+            return sorted(rc)
+
+    def _uncovered_chrs_all(self):
+        cs = {}
+        cs_ex, _ = self.export_charset()
+        cs.update(cs_ex[1])
+        cs.update(cs_ex[0])
+        rc = []
+        for c in range(self.chst_size):
+            if not c in cs:
+                rc.append(c)
+        return rc
+
+    def uncovered_chrs(self):
+        if self.do_shift:
+            return self._uncovered_chrs_all()
+        else:
+            return self._uncovered_chrs_txts()
 
     def draw_uncovered(self):
-        ch, _ = self.uncovered_chrs()
+        ch = self.uncovered_chrs()
         blks = []
         for c in ch:
             blks.append(self.font.draw_horiz(
@@ -780,15 +815,6 @@ class c_ffta_ocr_parser:
         if not blks:
             return None
         return self.font.make_img(self.font.draw_vert(*blks))
-
-    def find_char(self, ch):
-        r = []
-        for c in range(self.chst_first_ocr, self.chst_size):
-            ocs = self.ocr_chars([c], smallchar = True)
-            assert len(ocs) == 1
-            if ch == ocs[0]:
-                r.append(c)
-        return r
 
     def export_charset(self):
         cdet = self.gsr.det.copy()
@@ -847,7 +873,7 @@ class c_ffta_ocr_parser:
         cs, csr = self.export_charset()
         assert len(cs[2]) == len(csr[2]) == 0
         assert len(self.get_conflict()) == 0
-        assert len(self.uncovered_chrs()[0]) == 0
+        assert len(self.uncovered_chrs()) == 0
         dcs = {}
         dcsr = {}
         for i in range(2):
