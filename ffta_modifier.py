@@ -17,7 +17,7 @@ CONF = {
             },
         },
         'dst': {
-            'path': 'fftauscn.gba',
+            'path': r'roms\fftauscn.gba',
             'type': 'us',
         },
     },
