@@ -192,9 +192,6 @@ class c_ffta_charset_dynamic(c_ffta_charset_base):
 
     def __init__(self, path):
         super().__init__(path)
-        self.base_chst = {}
-        self.base_chst_r = {}
-        self.base_char = 0
 
     def load(self, src, base):
         self.base_char = base
@@ -212,8 +209,11 @@ class c_ffta_charset_dynamic(c_ffta_charset_base):
                 if c < base:
                     self.chst_r[ch] = c
             self.chst_dyidx = base
+        self.dirty = False
 
     def iter_dychrs(self):
+        if self.dirty:
+            self.save()
         for c in range(self.base_char, self.chst_dyidx):
             yield c, self.chst[c]
 
@@ -225,6 +225,7 @@ class c_ffta_charset_dynamic(c_ffta_charset_base):
             #report('debug', f'record new char {char} to 0x{ch:x}')
             self.chst_r[char] = ch
             self.chst[ch] = char
+            self.dirty = True
         return ch
             
 if __name__ == '__main__':

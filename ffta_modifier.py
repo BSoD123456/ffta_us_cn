@@ -41,7 +41,7 @@ CONF = {
         'src': 'font/BoutiqueBitmap9x9_1.7.ttf',
         'size': 10,
         'offset': (0, 1),
-        'charset': 'charset_uscn.json',
+        'charset': 'charset_uscn_wk.json',
         # only hanzi
         'dybase': 0x122,
     },
