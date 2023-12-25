@@ -1503,6 +1503,11 @@ def load_rom_us(fn):
             'b_scrpt': (0x00a148, c_ffta_sect_battle_script),
             'b_cmds': (0x00a19c, c_ffta_sect_script_cmds),
             'b_text': (0x237f4, c_ffta_sect_text_page),
+            'u1_text': (0x13cd8, c_ffta_sect_text_page),
+            'u2_text': (0x13cc0, c_ffta_sect_text_page),
+            'u3_text': (0x3f6b8, c_ffta_sect_text_page),
+            'u4_text': (0x13d98, c_ffta_sect_text_page),
+            'u5_text': (0x94b8, c_ffta_sect_text_page),
             #'ico_text': (0x13c84, c_ffta_sect_text_page),
             'font': (0x013474, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
@@ -1538,6 +1543,9 @@ def load_rom_jp(fn):
             'b_scrpt': (0x00a0dc, c_ffta_sect_battle_script),
             'b_cmds': (0x00a130, c_ffta_sect_script_cmds),
             'b_text': (0x23698, c_ffta_sect_text_page),
+            'u3_text': (0x3dc24, c_ffta_sect_text_page),
+            'u4_text': (0x13d00, c_ffta_sect_text_page),
+            'u5_text': (0x9500, c_ffta_sect_text_page),
             #'ico_text': (0x13bfc, c_ffta_sect_text_page),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
