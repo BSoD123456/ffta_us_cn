@@ -2609,7 +2609,7 @@
             "#告诉我是谁给了你@[4D]那张空白卡@[4D]你会坦白的@[40]@[42]"
         ]
     },
-    "b_text": {
+    "pages:battle": {
         "13": [
             "@[441] broken!@[42]",
             "「@[441]」破坏!@[42]"
@@ -2661,6 +2661,94 @@
         "400": [
             "Random law change!@[42]",
             "#随机定律变化@[42]"
+        ]
+    },
+    "pages:quest/": {
+        "1/176": [
+            "The palace and the@[4D]resistance are holding@[4D]talks...and there’re some@[4D]objectors out there. Come@[4D]help keep the peace!@[4D]@[1D10]@[510A]@[42]",
+            "#ダミー377@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/177": [
+            "The prince left something@[4D]in this Ivalice when he@[4D]left...but I’ve no idea@[4D]where to find it. Please@[4D]help look for clues!@[4D]@[1D10]@[5109]@[42]",
+            "#ダミー378@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/178": [
+            "Thank you for the report!@[4D]I think you’re right: it@[4D]must be in the Ambervale.@[4D]I’m heading out there now.@[4D]You come, too, @[400].@[4D]@[1D10]@[5109]@[42]",
+            "#ダミー379@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/179": [
+            "Did you hear about those@[4D]people that died in the@[4D]snowstorms on Lutia Pass?@[4D]They’re back, and they’re@[4D]freezing travelers!@[4D]@[1D10]Basso, Streetear@[42]",
+            "#ダミー380@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/180": [
+            "I was walking in Tubola@[4D]just now, when I heard a@[4D]woman scream ”aah, bugs!”@[4D]I’m a little worried...@[4D]Please check it out!@[4D]@[1D10]Darelka, Traveler@[42]",
+            "#ダミー381@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/181": [
+            "Rumors are flying about@[4D]strange law changes in@[4D]Cadoan. Help us expose the@[4D]corrupt officials and@[4D]judges behind this!@[4D]@[1D10]Mau, @[5117]Watch@[42]",
+            "#ダミー382@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/182": [
+            "”This world is illusion.”@[4D]When @[5103] went home, he@[4D]left the memory of his@[4D]departure behind. If you@[4D]wish it strongly enough,@[4D]@[1D10]you may find it again.@[42]",
+            "#ダミー383@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/183": [
+            "I’ve had nothing to do@[4D]since the treaty was@[4D]signed. Hey @[400]!@[4D]I’m joining your clan,@[4D]so come and get me!@[4D]@[1D10]@[510A]@[42]",
+            "#ダミー384@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/184": [
+            "@[5109] was a little@[4D]hesitant before, but I bet@[4D]he’d join the clan if you@[4D]asked him now. Word is@[4D]he’s bored at the palace.@[4D]@[1D10]@[5107], Streetear (kind of)@[42]",
+            "#ダミー385@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/185": [
+            "How are things going with@[4D]the clan? I’m free right@[4D]now if you need any help.@[4D]Let me know, OK?@[4D]@[1D10]@[5104]@[42]",
+            "#ダミー386@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/186": [
+            "Word is Judgemaster @[5106] is@[4D]touring Ivalice, looking@[4D]for corrupt judges. He@[4D]was asking for clan@[4D]assistance so go help!@[4D]@[1D10]Bubin, Streetear@[42]",
+            "#ダミー387@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/187": [
+            "Some official came to my@[4D]barracks in Giza Plains@[4D]and took away my weapon,@[4D]saying something about@[4D]a ”no arms rule”! What!?@[4D]@[1D10]Zelbeth, New Recruit@[42]",
+            "#ダミー388@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/188": [
+            "This ”free kissing rule”@[4D]is ruining my life! I have@[4D]to spend all day turning@[4D]down date offers, now!@[4D]@[1D10]Rolana, The Chocobo’s Kweh@[42]",
+            "#ダミー389@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/189": [
+            "I hear that you can buy@[4D]red card immunity on the@[4D]street in Cyril! How about@[4D]buying one? They’re only@[4D]100,000 gil a pop!@[4D]@[1D10]Untrustworthy Gent@[42]",
+            "#ダミー390@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/190": [
+            "I was walking along the@[4D]plains the other day, and@[4D]this guy came up and hit@[4D]me! He said ”No Full HP@[4D]allowed!” Is that a law?@[4D]@[1D10]Alran, Merchant@[42]",
+            "#ダミー391@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/191": [
+            "Help! Some official in@[4D]Uladon made a new law:@[4D]no reading or writing@[4D]allowed! How am I supposed@[4D]to keep my ship’s log?@[4D]@[1D10]Ienda, Captain@[42]",
+            "#ダミー392@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/192": [
+            "I was ’gaging with the son@[4D]of a Baguba official, and@[4D]the judge was totally@[4D]playing favorites! I’m@[4D]off to the jagds, man.@[4D]@[1D10]Blik, Clan Marble@[42]",
+            "#ダミー393@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/193": [
+            "I went to Elen’s place@[4D]and she didn’t say@[4D]anything! Now I hear@[4D]there’s a ”no answering”@[4D]law? What’s that about?@[4D]@[1D10]Mel, Clan @[5104] Member@[42]",
+            "#ダミー394@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/194": [
+            "What are those officials@[4D]in Roda thinking? They’ve@[4D]banned jumping! We can’t@[4D]even climb up stairs,@[4D]now!@[4D]@[1D10]Hulick, Swordsman@[42]",
+            "#ダミー395@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ],
+        "1/195": [
+            "The judge you caught has@[4D]given us important@[4D]evidence. Apparently, the@[4D]person behind all this is@[4D]in Sprohm! Come quickly!@[4D]@[1D10]Mau, @[5117]Watch@[42]",
+            "#ダミー396@[4D]@[4D]@[4D]@[4D]@[4D]@[42]"
+        ]
+    },
+    "pages:choice": {
+        "39": [
+            "Deal@[42]Just take it@[42]",
+            "#りきる@[42]ばペ"
         ]
     },
     "fx_text": {
@@ -3307,7 +3395,7 @@
             "#-△△○○◎"
         ]
     },
-    "words:name1": {
+    "words:refer": {
         "104": [
             "Dredd",
             "德雷德"
@@ -3509,7 +3597,7 @@
             "受到攻击!"
         ]
     },
-    "words:name2": {
+    "words:name": {
         "128": [
             "Chelney",
             "#切尔尼"

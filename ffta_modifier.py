@@ -400,7 +400,11 @@ class c_ffta_modifier:
             self._save_texts_json(conf['mod'], txts)
             dirty = False
         if dirty:
-            txts['trans'] = self._merge_trans(txts['trans'], txts['uncv'])
+            txts['trans'] = self._merge_trans(txts['trans'], txts['uncv'],{
+                'pages:battle': 'b_text',
+                'words:refer': 'words:name1',
+                'words:name': 'words:name2',
+            })
             self._save_texts_json(conf['mod'], txts, bak = True)
         return txts
 
@@ -599,10 +603,13 @@ class c_ffta_modifier:
         t, ut = self._merge_texts(bt, tt, None)
         return [tx for v, tx in zip([atxt , utxt , btxt , ttxt], [t, ut, bt, tt]) if v]
 
-    def _merge_trans(self, otrans, nraw):
+    def _merge_trans(self, otrans, nraw, renames = None):
         ntrans = {}
         for tname, nraw_tab in nraw.items():
-            otrans_tab = otrans.get(tname, {})
+            if renames and tname in renames:
+                otrans_tab = otrans.get(renames[tname], {})
+            else:
+                otrans_tab = otrans.get(tname, {})
             ntrans_tab = {}
             for idxr, (raw_txt, trans_txt) in nraw_tab.items():
                 if not idxr in otrans_tab:
