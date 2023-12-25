@@ -400,11 +400,7 @@ class c_ffta_modifier:
             self._save_texts_json(conf['mod'], txts)
             dirty = False
         if dirty:
-            txts['trans'] = self._merge_trans(txts['trans'], txts['uncv'],{
-                'pages:battle': 'b_text',
-                'words:refer': 'words:name1',
-                'words:name': 'words:name2',
-            })
+            txts['trans'] = self._merge_trans(txts['trans'], txts['uncv'])
             self._save_texts_json(conf['mod'], txts, bak = True)
         return txts
 
