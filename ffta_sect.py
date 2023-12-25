@@ -1543,6 +1543,7 @@ def load_rom_jp(fn):
             'b_scrpt': (0x00a0dc, c_ffta_sect_battle_script),
             'b_cmds': (0x00a130, c_ffta_sect_script_cmds),
             'b_text': (0x23698, c_ffta_sect_text_page),
+            'u1_text': (0x13c2c, c_ffta_sect_text_page),
             'u3_text': (0x3dc24, c_ffta_sect_text_page),
             'u4_text': (0x13d00, c_ffta_sect_text_page),
             'u5_text': (0x9500, c_ffta_sect_text_page),
