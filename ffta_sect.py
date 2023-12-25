@@ -1478,6 +1478,11 @@ class c_ffta_sect_rom(c_ffta_sect):
 #      main
 # ===============
 
+def _pages_sect_info(info):
+    return {
+        'pages:'+k: (ofs, c_ffta_sect_text_page)
+        for k, ofs in info.items()}
+
 def _words_sect_info(info):
     return {
         'words:'+k: (ofs, c_ffta_sect_words_text,
@@ -1502,13 +1507,15 @@ def load_rom_us(fn):
             's_text': (0x009a88, c_ffta_sect_text),
             'b_scrpt': (0x00a148, c_ffta_sect_battle_script),
             'b_cmds': (0x00a19c, c_ffta_sect_script_cmds),
-            'b_text': (0x237f4, c_ffta_sect_text_page),
-            'u1_text': (0x13cd8, c_ffta_sect_text_page),
-            'u2_text': (0x13cc0, c_ffta_sect_text_page),
-            'u3_text': (0x3f6b8, c_ffta_sect_text_page),
-            'u4_text': (0x13d98, c_ffta_sect_text_page),
-            'u5_text': (0x94b8, c_ffta_sect_text_page),
-            #'ico_text': (0x13c84, c_ffta_sect_text_page),
+            **_pages_sect_info({
+                'battle': 0x237f4,
+                'quest/0': 0x13cd8,
+                'quest/1': 0x13cc0,
+                'choice': 0x3f6b8,
+                'condi': 0x13d98,
+                'config': 0x94b8,
+                #'ico': 0x13c84,
+            }),
             'font': (0x013474, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'size': 0xc67,
@@ -1521,13 +1528,13 @@ def load_rom_us(fn):
                 'ico': (0x198d0, 0xa),
                 'uitm': (0x538b8, 0x4),
                 'content': (0x18da4, 0x2f2),
-                'name1': (0x9a08, 0x6b),
+                'refer': (0x9a08, 0x6b),
                 'battle': (0x9028, 0x301),
                 'rumor': (0x5fd9c, 0x5c),
                 'quest': (0x191f0, 0x20f),
                 'clan': (0x9a10, 0x80),
                 'system': (0x39f54, 0x54),
-                'name2': (0xc9ed0, 0x2d5),
+                'name': (0xc9ed0, 0x2d5),
                 'title': (0x192bc, 0x34),
             }),
         }, _trim_raw_len(raw, 0xf00000))
@@ -1542,12 +1549,14 @@ def load_rom_jp(fn):
             's_text': (0x009ad8, c_ffta_sect_text),
             'b_scrpt': (0x00a0dc, c_ffta_sect_battle_script),
             'b_cmds': (0x00a130, c_ffta_sect_script_cmds),
-            'b_text': (0x23698, c_ffta_sect_text_page),
-            'u1_text': (0x13c2c, c_ffta_sect_text_page),
-            'u3_text': (0x3dc24, c_ffta_sect_text_page),
-            'u4_text': (0x13d00, c_ffta_sect_text_page),
-            'u5_text': (0x9500, c_ffta_sect_text_page),
-            #'ico_text': (0x13bfc, c_ffta_sect_text_page),
+            **_pages_sect_info({
+                'battle': 0x23698,
+                'quest/0': 0x13c2c,
+                'choice': 0x3dc24,
+                'condi': 0x13d00,
+                'config': 0x9500,
+                #'ico': 0x13bfc,
+            }),
             'font': (0x0133f4, c_ffta_sect_font, {
                 'shape': (4, 8, 16, 2),
                 'size': 0xc66,
@@ -1560,13 +1569,13 @@ def load_rom_jp(fn):
                 'uitm': (0x5113c, 0x4),
                 'utitle': (0x558f8, 0x5),
                 'content': (0x18cb4, 0x2f2),
-                'name1': (0x9a58, 0x6e, None, True),
+                'refer': (0x9a58, 0x6e, None, True),
                 'battle': (0x9070, 0x2f5),
                 'rumor': (0x5c954, 0x5c),
                 'quest': (0x19100, 0x20f),
                 'clan': (0x9a60, 0x80),
                 'system': (0x3a560, 0x49),
-                'name2': (0xc10c0, 0x80),
+                'name': (0xc10c0, 0x80),
                 'title': (0x191cc, 0x34),
             }),
         }, _trim_raw_len(raw, 0xf00000))

@@ -69,8 +69,11 @@ CONF = {
                 ((36,), (35,)),
                 ((60,), (60,)),
             ],
-            'b_text': [
+            'pages:battle': [
                 ((54,), (51,)),
+            ],
+            'pages:quest/': [
+                ((1, 0), (0, 200)),
             ],
             'fx_text': [
                 ((8, 60), (8, 58)),
@@ -78,7 +81,7 @@ CONF = {
                 ((8, 62), (8, 62)),
                 ((25,), (24,)),
             ],
-            'words:name1': [
+            'words:refer': [
                 ((107,), (104,)),
             ],
             'words:rumor': [
@@ -120,8 +123,8 @@ def mod_static_refer(bt, tt, tname, bidxp, tidxp, btxts, ttxts):
     REF_TOP = 104
     if not '@[51' in tt:
         return tt
-    bwt = btxts['words:name1']
-    twt = ttxts['words:name1']
+    bwt = btxts['words:refer']
+    twt = ttxts['words:refer']
     def _rplc(m):
         refv = int(m.group(1), 16)
         refi = (refv,)
@@ -444,9 +447,43 @@ class c_ffta_modifier:
         for tname, tab in rom.tabs.items():
             if tname.endswith('text'):
                 yield tname, tab
-            elif tname == 'words':
+            elif tname in ['words', 'pages']:
                 for stname, stab in tab.items():
                     yield ':'.join((tname, stname)), stab
+
+    @staticmethod
+    def _iter_txttab_items_with_merge(merged, tabs):
+        assert merged or len(tabs) == 1
+        for i, tab in enumerate(tabs):
+            for path, line in tab.iter_item(skiprep = True):
+                if merged:
+                    path = (i, *path)
+                yield path, line
+
+    def _iter_txttab_with_merge(self, rom):
+        mtabs = []
+        lst_merged = False
+        lst_mtname = None
+        for tname, tab in self._iter_txttab(rom):
+            mtnames = tname.split('/')
+            mtname = mtnames[0]
+            if len(mtnames) > 1:
+                mtname = mtname + '/'
+                mi = int(mtnames[1])
+                merged = True
+            else:
+                mi = 0
+                merged = False
+            if lst_mtname and mtname != lst_mtname:
+                yield lst_mtname, self._iter_txttab_items_with_merge(lst_merged, mtabs)
+                mtabs = []
+            lst_merged = merged
+            lst_mtname = mtname
+            while mi >= len(mtabs):
+                mtabs.append(None)
+            mtabs[mi] = tab
+        if mtabs:
+            yield lst_mtname, self._iter_txttab_items_with_merge(lst_merged, mtabs)
 
     def _parse_text(self, romkey):
         rom = self.srom[romkey]
@@ -456,9 +493,9 @@ class c_ffta_modifier:
         txt_skip_fs_defer = self.conf['text']['skipf_defer']
         txts = {}
         defer_idxps = []
-        for tname, tab in self._iter_txttab(rom):
+        for tname, tabitr in self._iter_txttab_with_merge(rom):
             ttxts = {}
-            for path, line in tab.iter_item(skiprep = True):
+            for path, line in tabitr:
                 if line is None:
                     continue
                 #pkey = '/'.join(str(i) for i in path)
@@ -594,7 +631,12 @@ class c_ffta_modifier:
             if tname.startswith('#'):
                 continue
             report('info', f'encode tab: {tname}')
-            rtab = {}
+            if tname.endswith('/'):
+                rtab = []
+                merged_tab = True
+            else:
+                rtab = {}
+                merged_tab = False
             for idxr, (src, dst) in tab.items():
                 if not dst or idxr.startswith('#'):
                     continue
@@ -603,8 +645,20 @@ class c_ffta_modifier:
                 if not dst:
                     continue
                 idxp = tuple(int(i) for i in idxr.split('/'))
-                rtab[idxp] = dst
-            if rtab:
+                if merged_tab:
+                    mi = idxp[0]
+                    while mi >= len(rtab):
+                        rtab.append({})
+                    rtab[mi][idxp[1:]] = dst
+                else:
+                    rtab[idxp] = dst
+            if merged_tab:
+                for i, mrtab in enumerate(rtab):
+                    if not mrtab:
+                        continue
+                    mtname = tname + str(i)
+                    rtabs[mtname] = mrtab
+            elif rtab:
                 rtabs[tname] = rtab
         return rtabs
 
@@ -666,5 +720,5 @@ if __name__ == '__main__':
 ##        md.save_json('out_ut_wk.json', utxts)
 ##        rmk = md.repack_rom_with_text(txts)
 ##        md.save_rom('ffta_tst_uscn.gba', rmk)
-        rmk = md.export()
+        #rmk = md.export()
     main()
