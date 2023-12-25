@@ -906,8 +906,9 @@ def iter_toks(rom):
             yield line.tokens
     report('info', 'iter s_text')
     yield from iter_sect(rom.tabs['s_text'])
-    report('info', 'iter b_text')
-    yield from iter_sect(rom.tabs['b_text'])
+    for nm, tab in rom.tabs['pages'].items():
+        report('info', f'iter pages:{nm}')
+        yield from iter_sect(tab)
     report('info', 'iter fx_text')
     yield from iter_sect(rom.tabs['fx_text'])
     for nm, tab in rom.tabs['words'].items():
