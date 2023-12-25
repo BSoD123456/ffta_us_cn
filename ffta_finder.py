@@ -636,23 +636,28 @@ if __name__ == '__main__':
 
     def draw_tabs(rom, tabs, typ, rng):
         dr = c_ffta_font_drawer(rom.tabs['font'])
-        if not (typ & 0x20):
-            raise NotImplementedError
         dtabs = tabs[typ]
         blks = []
         for ti in range(max(rng[0], 0), min(rng[1], len(dtabs))):
             t = dtabs[ti]
             blks.append(dr.draw_comment(
                 f'tab{typ}[{ti}]: 0x{t.real_offset:x}(0x{t.tsize:x}))'))
-            for xi, x in enumerate(t):
+            if typ & 0xf0 == 0:
+                itr = t.iter_item()
+            elif typ & 0xf == 0:
+                itr = enumerate(t)
+            for xi, x in itr:
                 if not x:
                     continue
-                if typ & 0x20:
-                    blks.append(dr.draw_vert(
-                        dr.draw_comment(
-                            f'{ti}/{xi} ofs 0x{x.real_offset:x}'),
-                        dr.draw_tokens(x.tokens),
-                    ))
+                try:
+                    x = x.text
+                except:
+                    pass
+                blks.append(dr.draw_vert(
+                    dr.draw_comment(
+                        f'{ti}/{xi} ofs 0x{x.real_offset:x}'),
+                    dr.draw_tokens(x.tokens),
+                ))
         return dr.make_img(dr.draw_vert(*blks))
     
     def main(rom = rom_jp, rom_d = rom_cn):
