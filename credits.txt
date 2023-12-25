@@ -1,3 +1,7 @@
+项目主页：
+
+https://github.com/BSoD123456/ffta_us_cn
+
 原汉化版人员名单：
 
 熊组
@@ -8,3 +12,4 @@
 美版汉化人员名单：
 
 程序：Tring
+翻译：Tring
