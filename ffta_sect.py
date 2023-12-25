@@ -497,6 +497,13 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         self.set_real_top(real_top)
         return self._sect_top
 
+    def refresh_sect_top(self):
+        otop = self._sect_top
+        self._sect_top = None
+        ntop = self.sect_top
+        if ntop is None:
+            self._sect_top = otop
+
     @property
     def sect_top_least(self):
         sect_top = self.sect_top
@@ -587,7 +594,7 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         super().parse_size(top_ofs, top_align_width)
         self._tab_ref_size = self._guess_size(top_ofs, True)
 
-    def _iter_item(self, path, skiprep):
+    def _iter_item(self, path, skiprep, refresh):
         wkofs = {}
         for i, sub in enumerate(self):
             npath = path + [i]
@@ -598,12 +605,14 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
                     continue
                 wkofs[sofs] = npath
             if isinstance(sub, c_ffta_sect_tab_ref):
-                yield from sub._iter_item(npath, skiprep)
+                yield from sub._iter_item(npath, skiprep, refresh)
             else:
                 yield npath, sub
+        if refresh:
+            self.refresh_sect_top()
 
-    def iter_item(self, skiprep = False):
-        yield from self._iter_item([], skiprep)
+    def iter_item(self, skiprep = False, refresh = False):
+        yield from self._iter_item([], skiprep, refresh)
 
     def _repack_content(self, tab, base):
         mtab = {}

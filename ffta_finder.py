@@ -419,7 +419,7 @@ class c_text_checker:
     def _chk_tab(self, ofs, cls):
         try:
             dst = self.sect.subsect(ofs, cls)
-            for i in dst.iter_item():
+            for i in dst.iter_item(refresh = True):
                 pass
         except:
             return False, None, None, None
@@ -471,6 +471,9 @@ class c_text_checker:
             for sub in sct:
                 if sub is None:
                     continue
+                if isinstance(sub, c_ffta_sect_tab_ref):
+                    for i in sub.iter_item(refresh = True):
+                        pass
                 subrngs.append((sub.real_offset, sub.sect_top))
         except:
             return False, None, None, None, None
