@@ -4,3 +4,4 @@
 __pycache__/*
 *_wk.json
 *_wk.txt
+build/*
