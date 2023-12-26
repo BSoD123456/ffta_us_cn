@@ -239,6 +239,17 @@ if __name__ == '__main__':
     sect_main()
     from ffta_sect import rom_cn
 
+    def diff_chs(ofn, nfn):
+        ochs = c_ffta_charset_ocr(ofn, None)
+        ochs.load()
+        nchs = c_ffta_charset_ocr(nfn, None)
+        nchs.load()
+        for code, ch in nchs.chst.items():
+            if code in ochs.chst:
+                och = ochs.chst[code]
+                if och != ch:
+                    print(f"0x{code:x}: '{och}', # {ch}")
+
     chs_us = c_ffta_charset_ocr('charset_us.json', None)
     chs_us.load()
     chs_cn = c_ffta_charset_ocr('charset_cn.json', rom_cn)

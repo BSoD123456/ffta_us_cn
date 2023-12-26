@@ -256,10 +256,6 @@
             "Yes...yes, that was@[4D]me. I remember now.@[4F]@[42]Nothing seemed to go@[4D]right, ever since she@[4D]died...@[40]@[42]",
             "#对是的,那是@[4D]我。我现在记得了@[4F]@[42]自从她@[4D]死后,一切似乎都没有进展@[40]@[42]"
         ],
-        "23/37": [
-            "@[5105].@[4D]Queen @[5105].@[40]@[42]",
-            "@[5105],@[4D]女王@[5105]。@[4D]@[40]@[42]"
-        ],
         "26/71": [
             "If I go back everyone@[4D]will pick on me!@[4F]@[42]And Papa will go@[4D]back to the way he@[4D]was before... No!@[4F]@[42]I won’t go back!@[4D]I need magic to make@[4D]things better!@[40]@[42]",
             "#如果我回去,所有@[4D]的人都会挑我的毛病@[4F]@[42]爸爸会回到他@[4D]以前的样子。。。不@[4F]@[42]我不会回去了@[4D]我需要魔法让@[4D]的事情变得更好@[40]@[42]"
@@ -2610,10 +2606,6 @@
         ]
     },
     "pages:battle": {
-        "13": [
-            "@[441] broken!@[42]",
-            "「@[441]」破坏!@[42]"
-        ],
         "51": [
             "@[441] received JP!@[42]",
             "#@[441]收到JP@[42]"
@@ -3075,14 +3067,6 @@
         "18/72": [
             "Blank law card.@[4D]Allows law making.@[40]@[42]",
             "#空白法律卡@[4D]允许制定法律@[40]@[42]"
-        ],
-        "21/101": [
-            "Shining rapier. Swordsmith@[4D]Pemier’s 26th piece.@[4F]@[42]Rapier/1-hand@[40]@[42]",
-            "闪耀白色光芒的西洋剑。@[4D]铸刀匠佩米尔的第26号作品。@[4F]@[42]属性:无@[1D1E]分类:西洋剑/单手@[4D]效果:无@[4F]@[42]@[497]@[40]@[42]"
-        ],
-        "21/321": [
-            "Uniform of a long-gone@[4D]order of knights.@[4F]@[42]Clothing@[40]@[42]",
-            "得到神之守护的神圣外套。@[4D]现在是骑士团的正装。@[4F]@[42]属性:无@[1D2E]分类:衣服@[4D]效果:无@[4F]@[42]@[4A8]@[40]@[42]"
         ],
         "22/121": [
             "Officials responsible for@[4D]administrating Ivalice on@[4F]@[42]behalf of the palace.@[40]@[42]",
