@@ -16,6 +16,8 @@ python -m pip install cnocr
 ''')
     raise
 
+import json
+
 def report(*args):
     r = ' '.join(a for a in args if a)
     print(r)
@@ -502,7 +504,7 @@ class c_ffta_ocr_parser:
         self.toks_done = False
         self.do_shift = False
 
-    def parse(self, noambi = False):
+    def parse(self, noambi = False, cch_fn = None):
         self.ocr = CnOcr(det_model_name='naive_det')
         self.gsr = c_map_guesser()
         if noambi:
@@ -557,6 +559,12 @@ class c_ffta_ocr_parser:
             self.chst_size = self.chst_first_ocr
         else:
             self.chst_size = self.font.sect.tsize
+        self.ocr_cache_dirty = False
+        self.ocr_cache_fn = cch_fn
+        if cch_fn:
+            self.ocr_cache = self.load_json(cch_fn, {})
+        else:
+            self.ocr_cache = {}
 
     @staticmethod
     def _chartab(base, seq, enc):
@@ -588,14 +596,33 @@ class c_ffta_ocr_parser:
         ]
         return self.font.make_img(self.font.draw_horiz(*blks, pad = 20 if smallchar else 1))
 
-    def ocr_chars(self, chars, ret_img = False, smallchar = False):
+    def ocr_chars(self, chars, smallchar = False):
+        okey = tuple(chars)
+        if self.ocr_cache and okey in self.ocr_cache:
+            return self.ocr_cache[okey]
         im = self.draw_chars(chars, smallchar = smallchar)
         rinfo = self.ocr.ocr(im)
         rchars = ''.join(i['text'] for i in rinfo)
-        if ret_img:
-            return rchars, im
-        else:
-            return rchars
+        self.ocr_cache[okey] = rchars
+        self.ocr_cache_dirty = True
+        return rchars
+
+    def load_json(self, fn, default = None):
+        try:
+            with open(fn, 'r', encoding = 'utf-8') as fd:
+                return {
+                    tuple(int(i) for i in k.split(',')): v
+                    for k, v in json.load(fd).items()}
+        except:
+            return default
+
+    def save_json(self, fn, obj):
+        with open(fn, 'w', encoding = 'utf-8') as fd:
+            json.dump({
+                    ','.join(str(i) for i in k): v
+                    for k, v in obj.items()
+                }, fd,
+                ensure_ascii=False, indent=4, sort_keys=False)
 
     def _next_toks(self):
         if self.toks_done:
@@ -658,17 +685,12 @@ class c_ffta_ocr_parser:
         stxt = self.pick_next(tlen_min)
         return self.draw_chars(stxt)
 
-    def feed_next(self, tlen_min, detail = False):
+    def feed_next(self, tlen_min):
         tidx = self.chrs_idx
         stxt = self.pick_next(tlen_min)
         ntidx = self.chrs_idx
-        if detail:
-            rtxt, im = self.ocr_chars(stxt, True)
-        else:
-            rtxt = self.ocr_chars(stxt)
+        rtxt = self.ocr_chars(stxt)
         self.gsr.feed(stxt, rtxt, (tidx, ntidx), self.gsr_norm, self.gsr_trim)
-        if detail:
-            return rtxt, im
 
     def feed_all(self, tlen_min = 200, do_shift = False):
         self.do_shift = do_shift
@@ -678,6 +700,8 @@ class c_ffta_ocr_parser:
         if do_shift:
             report('info', f'feed shift chars')
             self.feed_shift()
+        if self.ocr_cache_fn and self.ocr_cache_dirty:
+            self.save_json(self.ocr_cache_fn, self.ocr_cache)
 
     def refeed_all(self, tlen_min = 200):
         self.chrs_idx = 0
@@ -930,6 +954,6 @@ if __name__ == '__main__':
     def main(rom):
         dr = c_ffta_font_drawer(rom.tabs['font'])
         ocr = c_ffta_ocr_parser(iter_toks(rom), dr)
-        ocr.parse()
+        ocr.parse(cch_fn = 'ocr_cache_wk.json')
         return ocr
     ocr = main(rom_cn)
