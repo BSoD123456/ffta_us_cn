@@ -23,7 +23,7 @@
 ### 环境
 
 - 克隆本项目。
-- 找到FFTA熊组汉化原版ROM（如果要使用ocr自行分析字库则必须大字版），FFTA美版ROM。
+- 找到FFTA熊组yggdra修正小字版汉化ROM，FFTA美版ROM。
 - 如果你需要用更多分析功能，则还需要找到FFTA日版ROM。
 - 在工程根目录下新建roms文件夹，将上述ROM文件放到工程roms目录下，并分别改名为fftaus.gba（美版），fftacnb.gba（汉化原版），fftajp.gba（日版）。
 - 或者修改ffta_modifier.py脚本中CONF配置里的文件名到对应ROM文件。
