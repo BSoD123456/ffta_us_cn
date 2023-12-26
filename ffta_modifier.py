@@ -723,5 +723,5 @@ if __name__ == '__main__':
 ##        md.save_json('out_ut_wk.json', utxts)
 ##        rmk = md.repack_rom_with_text(txts)
 ##        md.save_rom('ffta_tst_uscn.gba', rmk)
-        #rmk = md.export()
+        rmk = md.export()
     main()
