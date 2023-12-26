@@ -509,7 +509,7 @@ class c_ffta_ocr_parser:
             ocr_ambiguous = {}
             ocr_normalize = {}
         else:
-            from ffta_ocr_ambi import ocr_ambiguous, ocr_normalize
+            from ffta_ocr_ambi import ocr_ambiguous_s as ocr_ambiguous, ocr_normalize
         self.gsr.innate({
             # unused, only for charset
             **self._chartab(0, [

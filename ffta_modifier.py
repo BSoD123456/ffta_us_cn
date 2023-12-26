@@ -10,7 +10,7 @@ CONF = {
                 'charset': 'charset_us.json',
             },
             'text': {
-                'path': r'roms\fftacnb.gba',
+                'path': r'roms\fftacnfx.gba',
                 'type': 'cn',
                 'charset': 'charset_cn.json',
                 'charset_ocr': True,

@@ -1601,7 +1601,7 @@ load_rom = {
 def main():
     global rom_us, rom_cn, rom_jp
     rom_us = load_rom_us(r'roms\fftaus.gba')
-    rom_cn = load_rom_cn(r'roms\fftacnb.gba')
+    rom_cn = load_rom_cn(r'roms\fftacnfx.gba')
     rom_jp = load_rom_jp(r'roms\fftajp.gba')
 
 if __name__ == '__main__':
@@ -1611,11 +1611,12 @@ if __name__ == '__main__':
 
     main()
 
-    from ffta_charset import c_ffta_charset_ocr
-    chs_us = chs_jp = c_ffta_charset_ocr('charset_us.json', None)
-    chs_us.load()
-    chs_cn = c_ffta_charset_ocr('charset_cn.json', rom_cn)
-    chs_cn.load()
+    if False:
+        from ffta_charset import c_ffta_charset_ocr
+        chs_us = chs_jp = c_ffta_charset_ocr('charset_us.json', None)
+        chs_us.load()
+        chs_cn = c_ffta_charset_ocr('charset_cn.json', rom_cn)
+        chs_cn.load()
     
     fat = rom_us.tabs['s_fat']
     scr = rom_us.tabs['s_scrpt']
