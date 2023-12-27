@@ -1,0 +1,18 @@
+{
+    "fx_text": {
+        "21/325": [
+            "Good-luck robe dyed with@[4D]mistletoe juice.@[4F]@[42]Holy Robe@[4D][absb]Holy [null]KO@[40]@[42]",
+            "用槲寄生的叶子染色的幸运长袍。@[4F]@[42]属性:圣@[1D2E]分类:长袍@[4D]效果:[吸收]圣 [无效]战斗不能@[4F]@[42]@[4A9]@[40]@[42]"
+        ],
+        "25/99": [
+            "Loaded dice. Remember:@[4D]it’s not nice to cheat.@[4F]@[42]Weapon Atk@[1D03]:○ Def:-@[4D]Magic@[1D0F]Pow:-@[1D08]Res:-@[40]@[42]",
+            "欺诈师用的骰子。@[4D]骰子中秘藏着铅。@[4F]@[42]@[1D0C]武器攻击力:○@[1D0C]魔法攻击力:-@[4D]@[1D22]防御力:-@[1D23]防御力:-@[40]@[42]"
+        ]
+    },
+    "words:content": {
+        "598": [
+            "Loaded Dice",
+            "欺诈师的骰子"
+        ]
+    }
+}
