@@ -36,8 +36,12 @@ CONF = {
                 'text': 'src_txt_text_wk.json',
             },
             'mod': {
-                #translate
+                # translate
                 'trans': 'trans_txt.json',
+            },
+            'fix': {
+                # fix cn text
+                'fcomp': 'trans_fix_txt.json',
             },
         },
     },
@@ -402,6 +406,14 @@ class c_ffta_modifier:
         if dirty:
             txts['trans'] = self._merge_trans(txts['trans'], txts['uncv'])
             self._save_texts_json(conf['mod'], txts, bak = True)
+        dirty = False
+        if self._load_texts_json(conf['fix'], txts):
+            txts['fcomp'] = {}
+            dirty = True
+        if self._refresh_fix_texts(txts):
+            dirty = True
+        if dirty:
+            self._save_texts_json(conf['fix'], txts, bak = True)
         return txts
 
     def _load_texts_json(self, conf, txts):
@@ -441,6 +453,47 @@ class c_ffta_modifier:
     def save_rom(self, fn, rmk):
         with open(fn, 'wb') as fd:
             fd.write(rmk.raw)
+
+    def _refresh_fix_texts(self, txts):
+        fxtabs = txts['fcomp']
+        otabs = txts['comp']
+        rtabs = txts['trans']
+        dirty = False
+        for tname, tab in fxtabs.items():
+            del_idxr = []
+            for idxr, fpair in tab.items():
+                if idxr in rtabs.get(tname, {}):
+                    report('warning', f'duplicated fix path: {tname} {idxr}, deleted')
+                    del_idxr.append(idxr)
+                    continue
+                opair = otabs.get(tname, {}).get(idxr, None)
+                if not opair:
+                    report('warning', f'invalid fix path: {tname} {idxr}, deleted')
+                    del_idxr.append(idxr)
+                    continue
+                osrc, odst = opair
+                if (not osrc or osrc.startswith('#') or
+                    not odst or odst.startswith('#') ):
+                    report('warning', f'unchanged fix path: {tname} {idxr}, deleted')
+                    del_idxr.append(idxr)
+                    continue
+                if isinstance(fpair, list) and len(fpair) == 2:
+                    fsrc, fdst = fpair
+                    if fsrc != osrc:
+                        report('warning', f'unmatched fix path: {tname} {idxr}, refreshed: {fsrc} -> {osrc}')
+                        fpair[0] = osrc
+                        dirty = True
+                    if fdst == odst:
+                        report('warning', f'unfixed fix path: {tname} {idxr}, deleted')
+                        del_idxr.append(idxr)
+                        continue
+                else:
+                    tab[idxr] = [osrc, '#' + odst]
+                    dirty = True
+            for idxr in del_idxr:
+                del tab[idxr]
+                dirty = True
+        return dirty
 
     @staticmethod
     def _iter_txttab(rom):
@@ -617,7 +670,7 @@ class c_ffta_modifier:
                 elif (otrans_txt and not otrans_txt.startswith('#')
                         and trans_txt and not trans_txt.startswith('#')):
                     if otrans_txt != trans_txt:
-                        report('warning', f'trans {tname}:{idxr} dumplicated: {otrans_txt} / {trans_txt}')
+                        report('warning', f'trans {tname}:{idxr} duplicated: {otrans_txt} / {trans_txt}')
                     ntrans_tab[idxr] = (raw_txt, otrans_txt)
                 elif trans_txt and not trans_txt.startswith('#'):
                     ntrans_tab[idxr] = (raw_txt, trans_txt)
@@ -690,7 +743,7 @@ class c_ffta_modifier:
 
     def repack(self):
         tbs = []
-        for tn in ['comp', 'trans']:
+        for tn in ['comp', 'fcomp', 'trans']:
             report('info', f'encode txt: {tn}')
             rt = self._rplc_txt_tab(self.txts[tn])
             if rt:
