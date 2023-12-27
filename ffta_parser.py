@@ -64,8 +64,7 @@ class c_ffta_cmd:
         return rslt
 
     def __repr__(self):
-        #prms_rpr = bytearray.hex(self.prms)
-        prms_rpr = bytearray.hex(self.prms)
+        prms_rpr = type(self.prms).hex(self.prms)
         prms_rpr = ' '.join(prms_rpr[i:i+2] for i in range(0, len(prms_rpr), 2))
         return f'<{self.op:X}: {prms_rpr.upper()}>'
 
@@ -381,13 +380,21 @@ if __name__ == '__main__':
 
     from ffta_sect import main as sect_main
     sect_main()
-    from ffta_sect import rom_cn as rom
+    from ffta_sect import rom_us, rom_jp, rom_cn
+    rom = rom_us
 
-    from ffta_charset import c_ffta_charset_us_dummy as c_charset
+    if False:
+        from ffta_charset import c_ffta_charset_us_dummy as c_charset
+        chs = c_charset()
+    elif True:
+        from ffta_charset import c_ffta_charset_ocr
+        chs_cn = c_ffta_charset_ocr('charset_cn.json', rom_cn)
+        chs_cn.load()
+        chs = chs_cn
 
     def enum_text(page_idx, ln = 0x100, tkey = 'text'):
         t_page = spsr_s.sects[tkey][page_idx]
-        charset = c_charset()
+        charset = chs
         for i in range(ln):
             try:
                 toks = t_page[i].text.tokens
@@ -399,7 +406,7 @@ if __name__ == '__main__':
 
     def enum_all_text(tkey):
         t_sect = spsr_s.sects[tkey]
-        charset = c_charset()
+        charset = chs
         for path, t_line in t_sect.iter_item():
             if t_line is None:
                 continue
@@ -422,5 +429,5 @@ if __name__ == '__main__':
             'cmds':     rom.tabs['b_cmds'],
         })
         global slog_s
-        slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), c_charset())
+        slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), chs)
     main(6)

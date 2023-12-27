@@ -349,10 +349,12 @@ class c_ffta_sect(c_mark):
             ptr = self._addr2offs(ptr)
         return self.aot(self.U32(ptr), typ[1:])
 
-    def repack_copy(self):
-        if self.sect_top is None:
+    def repack_copy(self, sect_top = None):
+        if sect_top is None:
+            sect_top = self.sect_top
+        if sect_top is None:
             raise ValueError('can not copy non-top sect')
-        return self.sub(0, self.sect_top, cls = type(self))
+        return self.sub(0, sect_top, cls = type(self))
 
     def realign(self, align, base):
         ac_top = self.accessable_top + base
@@ -367,6 +369,25 @@ class c_ffta_sect(c_mark):
         align_top = rmk.realign(align, 0)
         rmk.parse_size(align_top, align)
         rmk.parse()
+
+    def _repack_with(self, tab):
+        if 'top' in tab and isinstance(tab['top'], int):
+            dtop = tab['top']
+        else:
+            dtop = None
+        rmk = self.repack_copy(dtop)
+        dirty = False
+        for ofs, bs in tab.items():
+            if not isinstance(ofs, int):
+                continue
+            if not 0 <= ofs < rmk.accessable_top - len(bs) + 1:
+                raise ValueError('dest offset not in sect: 0x{ofs:x}')
+            rmk.WBYTES(bs, ofs)
+            dirty = True
+        if dirty:
+            return rmk, True
+        else:
+            return self, False
 
     def repack_with(self, tab, *args, **kargs):
         rmk, dirty = self._repack_with(tab, *args, **kargs)

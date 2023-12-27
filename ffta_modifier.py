@@ -752,6 +752,10 @@ class c_ffta_modifier:
         if not artabs:
             return None
         artabs['font'] = self._rplc_fnt_tab()
+        artabs['s_fat'] = {
+            'top': 0x3a8,
+            4: bytearray([2, 0, 2, 0])
+        }
         rmk, dirty = self.srom['base'].repack_with(artabs)
         if not dirty:
             return None
