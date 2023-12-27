@@ -413,8 +413,11 @@ class c_ffta_sect_tab(c_ffta_sect):
         else:
             a = 1
         return max(self._SECT_ALIGN, a)
+    @property
+    def has_tsize(self):
+        return hasattr(self, 'tsize') and self.tsize < INF
     def parse_size(self, top_ofs, top_align_width):
-        has_tsize = (hasattr(self, 'tsize') and self.tsize < INF)
+        has_tsize = self.has_tsize
         if top_ofs is None and has_tsize:
             top_ofs = self.tsize * self._TAB_WIDTH
         super().parse_size(top_ofs, top_align_width)
@@ -812,6 +815,50 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
                 break
             yield sp, si, tp
             idx += 1
+
+    def _guess_size(self):
+        if self.has_tsize:
+            return
+        lst_idxs = (0, 0, 0)
+        ci = 1
+        while True:
+            idxs = self.get_entry(ci)
+            if not (idxs[2] >= lst_idxs[2] and (
+                idxs[0] > lst_idxs[0] or (
+                    idxs[0] == lst_idxs[0] and
+                    idxs[1] >= lst_idxs[1]) ) ):
+                break
+            lst_idxs = idxs
+            ci += 1
+        self.tsize = ci
+
+    def parse_size(self, top_ofs, top_align_width):
+        if top_ofs is None:
+            self._guess_size()
+        super().parse_size(top_ofs, top_align_width)
+
+    def _repack_with(self, tab):
+        rmk = self.repack_copy()
+        # end of tab, to avoid scan overflow
+        rmk.W32(0, rmk.accessable_top)
+        dirty = False
+        for didx, dval in tab.items():
+            if didx >= self.tsize:
+                report('warning', f'invalid s_fat index {didx}/{self.tsize}')
+                continue
+            if isinstance(dval, int):
+                si1, si2, ti = self.get_entry(dval)
+            else:
+                si1, si2, ti = dval
+            dofs = self.tbase(didx)
+            rmk.W8(si1 + 1, dofs)
+            rmk.W8(si2, dofs + 1)
+            rmk.W8(ti, dofs + 2)
+            dirty = True
+        if dirty:
+            return rmk, True
+        else:
+            return self, False
 
 # ===============
 #     script
@@ -1461,6 +1508,8 @@ class c_ffta_sect_rom(c_ffta_sect):
         ntabs = []
         rplc_ptrs = {}
         for tname, tab in tabs.items():
+            if tab is None:
+                continue
             tgrps = tname.split(':')
             ctabs = self.tabs
             try:

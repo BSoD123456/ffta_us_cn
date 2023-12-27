@@ -72,6 +72,9 @@ class c_ffta_scene_cmd(c_ffta_cmd):
 
     _CMDC_TOP = 0x72
 
+    #tips:
+    #<44: ?? idx ?? ??> path move, path idxed from the tabref after s_fat
+
     #cmd: text window
     #params: p1(u8) p2(u8) p3(u8)
     #p1: index of text on this page

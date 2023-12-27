@@ -17,8 +17,12 @@ CONF = {
             },
         },
         'dst': {
-            'path': r'roms\fftauscn.gba',
-            'type': 'us',
+            'rels': {
+                'path': r'roms\fftauscn.gba',
+            },
+            'sndbx': {
+                'path': r'roms\fftauscn_sndbx.gba',
+            },
         },
     },
     'work': {
@@ -104,7 +108,13 @@ CONF = {
                 (61,),
             }],
         },
-    }
+    },
+    'sandbox': {
+        'enable': True,
+        'scene': {
+            'boot': 9,
+        },
+    },
 }
 
 def chk_has_japanese(txt, *_):
@@ -343,11 +353,17 @@ class c_ffta_modifier:
         self.txts = self.load_texts()
 
     def export(self):
-        rmk = self.repack()
+        rmk = self.export_rom(self.conf['roms']['dst']['rels'])
+        if self.conf['sandbox']['enable']:
+            self.export_rom(self.conf['roms']['dst']['sndbx'], as_sndbx = True)
+        return rmk
+
+    def export_rom(self, rom_conf, *args, **kargs):
+        rmk = self.repack(*args, **kargs)
         if not rmk:
             report('warning', f'something wrong while repacking')
             return
-        self.save_rom(self.conf['roms']['dst']['path'], rmk)
+        self.save_rom(rom_conf['path'], rmk)
         return rmk
 
     def load_rom(self, rom_conf):
@@ -741,7 +757,14 @@ class c_ffta_modifier:
             r.append(fg.get_char(ch))
         return r, chst.base_char
 
-    def repack(self):
+    def _rplc_sfat_tab(self):
+        conf = self.conf.get('sandbox', {}).get('scene', {})
+        boot_idx = conf.get('boot', None)
+        if not boot_idx:
+            return None
+        return {1: boot_idx}
+
+    def repack(self, as_sndbx = False):
         tbs = []
         for tn in ['comp', 'fcomp', 'trans']:
             report('info', f'encode txt: {tn}')
@@ -752,10 +775,8 @@ class c_ffta_modifier:
         if not artabs:
             return None
         artabs['font'] = self._rplc_fnt_tab()
-        artabs['s_fat'] = {
-            'top': 0x3a8,
-            4: bytearray([2, 0, 2, 0])
-        }
+        if as_sndbx:
+            artabs['s_fat'] = self._rplc_sfat_tab()
         rmk, dirty = self.srom['base'].repack_with(artabs)
         if not dirty:
             return None
