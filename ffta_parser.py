@@ -382,7 +382,7 @@ class c_ffta_script_log:
             if cmd.op == 0x19:
                 # jump
                 dst = rslt['output'] + rslt['offset']
-                rs = f'jump {dst}'
+                rs = f'jump {dst:0>4x}'
             else:
                 rs = str(cmd)
         elif typ == 'error':
