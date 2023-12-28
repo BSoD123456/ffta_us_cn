@@ -980,6 +980,10 @@ class c_ffta_sect_script_page(c_ffta_sect):
             if not _done:
                 break
 
+    def _repack_with(self, tab):
+        cmds, prog = tab
+        return super()._repack_with(cmds)
+
 # ===============
 #    commands
 # ===============
