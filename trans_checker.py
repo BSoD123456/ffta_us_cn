@@ -95,14 +95,18 @@ class c_trans_checker:
 
     def check(self, nowarn = False):
         self.nowarn = nowarn
+        cnts = [0, 0]
         for tname, tab in self.txts.items():
             for idxr, (src, dst) in tab.items():
+                cnts[0] += 1
                 if not dst or dst.startswith('#'):
                     continue
+                cnts[1] += 1
                 self.cpos = (tname, idxr)
                 if dst.startswith('*'):
                     dst = dst[1:]
                 self._check_valid_trans(src, dst)
+        return cnts
 
     def _merge_txt(self, src, force_merge = False):
         for tname, tab in src.items():
@@ -197,5 +201,6 @@ if __name__ == '__main__':
             if tc.errors > 0:
                 return
         print(f'check {fn}')
-        tc.check()
+        cnts = tc.check()
+        print(f'translated: {cnts[1]}/{cnts[0]}')
     main(FN_TRANS)
