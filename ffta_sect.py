@@ -486,8 +486,26 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
         self._last_idx = _last_idx
         return _last_idx
 
+    @property
+    def last_idxs(self):
+        try:
+            return self._last_idxs
+        except:
+            pass
+        _last_idxs = []
+        _last_ofs = 0
+        for i in range(self.tsize):
+            sofs = self.get_entry(i)
+            if sofs == _last_ofs:
+                _last_idxs.append(i)
+            elif sofs > _last_ofs:
+                _last_ofs = sofs
+                _last_idxs = [i]
+        self._last_idxs = _last_idxs
+        return _last_idxs
+
     def _is_last(self, idx):
-        return idx == self.last_idx
+        return idx in self.last_idxs
 
     def _ref_top_nondeterm(self, idx):
         return self._sect_top_nondeterm and self._is_last(idx)
