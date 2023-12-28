@@ -197,6 +197,16 @@ class c_ffta_script_parser:
             progs[pi] = prog
         return prog
 
+    def _dummy_program(self, pi1, pi2):
+        return self.get_program(pi1, pi2)
+
+    def refresh_sect_top(self):
+        sect = self.sects['script']
+        for pi1 in sect.last_idxs:
+            sub = sect[pi1]
+            for pi2 in sub.last_idxs:
+                self._dummy_program(pi1, pi2)
+
 class c_ffta_script_program:
 
     def __init__(self, sects):
@@ -331,6 +341,9 @@ class c_ffta_scene_script_parser(c_ffta_script_parser):
         prog.parse(c_ffta_scene_cmd)
         return prog
 
+    def _dummy_program(self, pi1, pi2):
+        return super().get_program(pi1, pi2, sect_text = None)
+
 # ===============
 #     battle
 # ===============
@@ -382,6 +395,23 @@ class c_ffta_script_log:
 #      main
 # ===============
 
+def make_script_parser(rom, typ):
+    if typ == 'scene':
+        return c_ffta_scene_script_parser({
+            'fat':      rom.tabs['s_fat'],
+            'script':   rom.tabs['s_scrpt'],
+            'cmds':     rom.tabs['s_cmds'],
+            'text':     rom.tabs['s_text'],
+            'fx_text':  rom.tabs['fx_text'],
+        })
+    elif typ == 'battle':
+        return c_ffta_battle_script_parser({
+            'script':   rom.tabs['b_scrpt'],
+            'cmds':     rom.tabs['b_cmds'],
+        })
+    else:
+        raise ValueError(f'invalid script type {typ}')
+
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
@@ -426,17 +456,8 @@ if __name__ == '__main__':
 
     def main(page_idx = 1):
         global spsr_s, spsr_b
-        spsr_s = c_ffta_scene_script_parser({
-            'fat':      rom.tabs['s_fat'],
-            'script':   rom.tabs['s_scrpt'],
-            'cmds':     rom.tabs['s_cmds'],
-            'text':     rom.tabs['s_text'],
-            'fx_text':  rom.tabs['fx_text'],
-        })
-        spsr_b = c_ffta_battle_script_parser({
-            'script':   rom.tabs['b_scrpt'],
-            'cmds':     rom.tabs['b_cmds'],
-        })
+        spsr_s = make_script_parser(rom, 'scene')
+        spsr_b = make_script_parser(rom, 'battle')
         global slog_s
         slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), chs)
     main(6)
