@@ -133,6 +133,12 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     def cmd_load_scene(self, prms, psr, rslt):
         pass
 
+    #cmd: return scene
+    #params: ?
+    @cmdc(0x17, 'flow')
+    def cmd_return_scene(self, prms, psr, rslt):
+        pass
+
 class c_ffta_battle_cmd(c_ffta_cmd):
 
     _CMDC_TOP = 0x12

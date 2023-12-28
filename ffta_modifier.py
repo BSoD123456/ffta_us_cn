@@ -110,9 +110,17 @@ CONF = {
         },
     },
     'sandbox': {
-        'enable': False,
+        'enable': True,
         'scene': {
-            'boot': 9,
+            'boot': None,
+        },
+        'direct': {
+            's_scrpt': {
+                (0, 5): {
+                    'top': 0x213,
+                    0x20d: [0x12, 0x0d],
+                },
+            },
         },
     },
 }
@@ -757,12 +765,23 @@ class c_ffta_modifier:
             r.append(fg.get_char(ch))
         return r, chst.base_char
 
-    def _rplc_sfat_tab(self):
+    def _rplc_sfat_tab(self, as_sndbx):
+        if not as_sndbx:
+            return None
         conf = self.conf.get('sandbox', {}).get('scene', {})
         boot_idx = conf.get('boot', None)
         if not boot_idx:
             return None
         return {1: boot_idx}
+
+    def _rplc_oth_tabs(self, rtabs, as_sndbx):
+        if not as_sndbx:
+            return None
+        conf = self.conf.get('sandbox', {}).get('direct', {})
+        for tname, tab in conf.items():
+            if tname in rtabs:
+                raise ValueError('should not write tab {tname} directly')
+            rtabs[tname] = tab
 
     def repack(self, as_sndbx = False):
         tbs = []
@@ -775,8 +794,8 @@ class c_ffta_modifier:
         if not artabs:
             return None
         artabs['font'] = self._rplc_fnt_tab()
-        if as_sndbx:
-            artabs['s_fat'] = self._rplc_sfat_tab()
+        artabs['s_fat'] = self._rplc_sfat_tab(as_sndbx)
+        self._rplc_oth_tabs(artabs, as_sndbx)
         rmk, dirty = self.srom['base'].repack_with(artabs)
         if not dirty:
             return None
