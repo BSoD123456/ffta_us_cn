@@ -111,6 +111,7 @@ CONF = {
     },
     'sandbox': {
         'enable': True,
+        'only': True,
         'scene': {
             'boot': None,
         },
@@ -361,9 +362,13 @@ class c_ffta_modifier:
         self.txts = self.load_texts()
 
     def export(self):
-        rmk = self.export_rom(self.conf['roms']['dst']['rels'])
+        rmk = None
+        if not self.conf['sandbox'].get('only', False):
+            rmk = self.export_rom(self.conf['roms']['dst']['rels'])
         if self.conf['sandbox']['enable']:
-            self.export_rom(self.conf['roms']['dst']['sndbx'], as_sndbx = True)
+            sbrmk = self.export_rom(self.conf['roms']['dst']['sndbx'], as_sndbx = True)
+            if rmk is None:
+                rmk = sbrmk
         return rmk
 
     def export_rom(self, rom_conf, *args, **kargs):
