@@ -21,17 +21,20 @@ class c_trans_checker:
 
     def _pick_txt_ctrls(self, txt):
         def _rplc(m):
-            return m.group(1)
+            return '-'
         dtxt = txt
-        pt_c = r'\@\[([0-9a-fA-F ]+)\]'
+        pt_c = r'\@\[([0-9 ][0-9a-fA-F]*)\]'
+        pt_ci = r'^[0-9 ][0-9a-fA-F]*$'
         ctrls = re.findall(pt_c, dtxt)
-        dtxt = re.sub(pt_c, _rplc, dtxt)
+        if ctrls:
+            dtxt = re.sub(pt_c, _rplc, dtxt)
         pt_o = r'\@\[([A-Z]+\:[^\[\]]+)\]'
         oth_ctrls = re.findall(pt_o, dtxt)
-        dtxt = re.sub(pt_o, _rplc, dtxt)
+        if oth_ctrls:
+            dtxt = re.sub(pt_o, _rplc, dtxt)
         non_ctrls = re.findall(r'(?:^|[^\@])\[([^\[\]]+)\]', dtxt)
         for nc in non_ctrls:
-            if re.match(r'^[0-9a-fA-F ]+$', nc):
+            if re.match(pt_ci, nc):
                 self.report('error', f'invalid ctrl symbol in text: {nc}')
         if not (
             txt.count('@') == len(ctrls) + len(oth_ctrls) and
