@@ -20,9 +20,23 @@ class c_trans_checker:
                 ensure_ascii=False, indent=4, sort_keys=False)
 
     def _pick_txt_ctrls(self, txt):
-        ctrls = re.findall(r'\@\[([0-9a-fA-F ]+)\]', txt)
-        if not txt.count('@') == txt.count('[') == txt.count(']') == len(ctrls):
-            self.report('error', 'invalid ctrl symbol in text')
+        def _rplc(m):
+            return m.group(1)
+        dtxt = txt
+        pt_c = r'\@\[([0-9a-fA-F ]+)\]'
+        ctrls = re.findall(pt_c, dtxt)
+        dtxt = re.sub(pt_c, _rplc, dtxt)
+        pt_o = r'\@\[([A-Z]+\:[^\[\]]+)\]'
+        oth_ctrls = re.findall(pt_o, dtxt)
+        dtxt = re.sub(pt_o, _rplc, dtxt)
+        non_ctrls = re.findall(r'(?:^|[^\@])\[([^\[\]]+)\]', dtxt)
+        for nc in non_ctrls:
+            if re.match(r'^[0-9a-fA-F ]+$', nc):
+                self.report('error', f'invalid ctrl symbol in text: {nc}')
+        if not (
+            txt.count('@') == len(ctrls) + len(oth_ctrls) and
+            txt.count('[') == txt.count(']') == len(ctrls) + len(oth_ctrls) + len(non_ctrls) ):
+            self.report('error', f'invalid ctrl symbol in text: {txt}')
             return None
         for ignb in self.ignore_ctrls:
             for ign in [ignb.upper(), ignb.lower()]:
@@ -59,13 +73,14 @@ class c_trans_checker:
                 return False
         if not ov is None:
             if ov:
-                self.report('warning', f'unmatched ctrl symbol: (clen) / -> {dc}')
+                self.report('warning', f'unmatched ctrl symbol: (clen) / -> {dctr[clen]}')
             else:
-                self.report('warning', f'unmatched ctrl symbol: (clen) {sc} -> /')
+                self.report('warning', f'unmatched ctrl symbol: (clen) {sctr[clen]} -> /')
             return False
         return True
 
-    def check(self):
+    def check(self, nowarn = False):
+        self.nowarn = nowarn
         for tname, tab in self.txts.items():
             for idxr, (src, dst) in tab.items():
                 if not dst or dst.startswith('#'):
@@ -76,6 +91,8 @@ class c_trans_checker:
                 self._check_valid_trans(src, dst)
 
     def report(self, lvl, msg):
+        if self.nowarn and lvl == 'warning':
+            return
         tname, idxr = self.cpos
         print(f'[{tname} {idxr}: {lvl}]: ', msg)
     
