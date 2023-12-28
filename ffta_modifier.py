@@ -110,7 +110,7 @@ CONF = {
         },
     },
     'sandbox': {
-        'enable': True,
+        'enable': False,
         'only': True,
         'scene': {
             'boot': None,
@@ -373,9 +373,11 @@ class c_ffta_modifier:
 
     def export(self):
         rmk = None
-        if not self.conf.get('sandbox', {}).get('only', False):
+        sben = self.conf.get('sandbox', {}).get('enable', False)
+        sbon = self.conf.get('sandbox', {}).get('only', False)
+        if not sben or not sbon:
             rmk = self.export_rom(self.conf['roms']['dst']['rels'])
-        if self.conf.get('sandbox', {}).get('enable', False):
+        if sben:
             sbrmk = self.export_rom(self.conf['roms']['dst']['sndbx'], as_sndbx = True)
             if rmk is None:
                 rmk = sbrmk
