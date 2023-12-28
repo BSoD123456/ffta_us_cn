@@ -371,12 +371,13 @@ class c_ffta_sect(c_mark):
         rmk.parse()
 
     def _repack_with(self, tab):
+        dirty = False
         if 'top' in tab and isinstance(tab['top'], int):
             dtop = tab['top']
+            dirty = True
         else:
             dtop = None
         rmk = self.repack_copy(dtop)
-        dirty = False
         for ofs, bs in tab.items():
             if not isinstance(ofs, int):
                 continue

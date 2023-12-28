@@ -118,8 +118,11 @@ CONF = {
         'direct': {
             's_scrpt': {
                 (0, 5): {
-                    'top': 0x213,
                     0x20d: [0x12, 0x0d],
+                },
+                #(61, 55): {
+                (61, 49): { # 49 is the same as 55, but in front of 55
+                    'top': 0x1c0,
                 },
             },
         },
