@@ -113,7 +113,10 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p1: cur cmd offset increment
     @cmdc(0x19, 'flow')
     def cmd_jump(self, prms, psr, rslt):
-        pass
+        v = prms[0] + (prms[1] << 8)
+        if 0x8000 & v:
+            v = 0x10000 - v
+        return v
 
     #cmd: new thread
     #params: ?
@@ -374,6 +377,14 @@ class c_ffta_script_log:
         if typ == 'text':
             toks = rslt['output']
             rs = self.charset.decode(toks)
+        elif typ == 'flow':
+            cmd = rslt['cmd']
+            if cmd.op == 0x19:
+                # jump
+                dst = rslt['output'] + rslt['offset']
+                rs = f'jump {dst}'
+            else:
+                rs = str(cmd)
         elif typ == 'error':
             rs = rslt['output']
         else:
@@ -455,10 +466,18 @@ if __name__ == '__main__':
             rpath = '/'.join(str(i) for i in path)
             print(f'{rpath}: {dec}')
 
-    def main(page_idx = 1):
-        global spsr_s, spsr_b
+    def sc_show(page_idx = 1):
+        global spsr_s
         spsr_s = make_script_parser(rom, 'scene')
-        spsr_b = make_script_parser(rom, 'battle')
         global slog_s
         slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), chs)
-    main(6)
+        for i, v in enumerate(slog_s.logs):
+            print(f'{i}-{v}')
+    def bt_show(pi2 = 0, pi1 = 3):
+        global spsr_b
+        spsr_b = make_script_parser(rom, 'battle')
+        global slog_b
+        slog_b = c_ffta_script_log(spsr_b.get_program(pi1, pi2), chs)
+        for i, v in enumerate(slog_b.logs):
+            print(f'{i}-{v}')
+

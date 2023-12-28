@@ -116,14 +116,19 @@ CONF = {
             'boot': None,
         },
         'script': {
-            'scene': {
+            'scene': (lambda lds: {
                 1: {
-                    0x367: [
-                        0x1c, 0x9, 0x0,
-                        0x17, 0x2,
-                    ],
+                    0x367: lds(9),
+                    #0x3cb: lds(6),
                 },
-            },
+            })(lambda sc: [
+                # black screen
+                0x6, 0x3, 0x46, 0x0,
+                # load scene
+                0x1c, sc, 0x0,
+                # safe return after load
+                0x17, 0x2,
+            ]),
         },
         'direct': {
         },
