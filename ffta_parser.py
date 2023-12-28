@@ -183,7 +183,7 @@ class c_ffta_script_parser:
         return c_ffta_script_program({
             'script': spage,
             'cmds': sects['cmds'],
-        })
+        }, (pi1, pi2))
 
     def get_program(self, pi1, pi2, **kargs):
         pi = (pi1, pi2)
@@ -209,8 +209,9 @@ class c_ffta_script_parser:
 
 class c_ffta_script_program:
 
-    def __init__(self, sects):
+    def __init__(self, sects, page_idxs):
         self.sects = sects
+        self.page_idxs = page_idxs
 
     def parse(self, cls_cmd):
         self._parse_cmds_page(cls_cmd)

@@ -115,28 +115,17 @@ CONF = {
         'scene': {
             'boot': None,
         },
-        'direct': {
-            's_scrpt': {
-                (0, 0): {
+        'script': {
+            'scene': {
+                1: {
                     0x367: [
-                        #0x57,
-                        #0x5a, 0x33,
-                        #0x5b,
-                        #0x4,
-                        #0xd,
                         0x1c, 0x9, 0x0,
                         0x17, 0x2,
                     ],
                 },
-##                (0, 5): {
-##                    #0x20d: [0x12, 0x0d],
-##                    0x20d: [0x1c, 0x04, 0x00, 0x17, 0x08, 0x00],
-##                },
-                #(61, 55): {
-                (61, 49): { # 49 is the same as 55, but in front of 55
-                    'top': 0x1c0,
-                },
             },
+        },
+        'direct': {
         },
     },
 }
@@ -183,6 +172,7 @@ import os, os.path, shutil
 from ffta_sect import load_rom
 from ffta_charset import c_ffta_charset_ocr, c_ffta_charset_dynamic
 from ffta_font_generator import make_ffta_font_gen
+from ffta_parser import make_script_parser
 
 def report(*args):
     r = ' '.join(a for a in args if a)
@@ -378,9 +368,9 @@ class c_ffta_modifier:
 
     def export(self):
         rmk = None
-        if not self.conf['sandbox'].get('only', False):
+        if not self.conf.get('sandbox', {}).get('only', False):
             rmk = self.export_rom(self.conf['roms']['dst']['rels'])
-        if self.conf['sandbox']['enable']:
+        if self.conf.get('sandbox', {}).get('enable', False):
             sbrmk = self.export_rom(self.conf['roms']['dst']['sndbx'], as_sndbx = True)
             if rmk is None:
                 rmk = sbrmk
@@ -794,6 +784,28 @@ class c_ffta_modifier:
             return None
         return {1: boot_idx}
 
+    def _rplc_scrpt_tab(self, as_sndbx):
+        if not as_sndbx:
+            return None, None
+        srom = self.srom['base']
+        conf = self.conf.get('sandbox', {}).get('script', {})
+        rtabs = {}
+        for typ, tab in conf.items():
+            if not tab:
+                continue
+            rtab = {}
+            psr = make_script_parser(srom, typ)
+            psr.refresh_sect_top()
+            for idxp, cmds in tab.items():
+                if isinstance(idxp, int):
+                    idxp = (idxp,)
+                prog = psr.get_program(*idxp)
+                didxp = prog.page_idxs
+                rtab[didxp] = (cmds, prog)
+            if rtab:
+                rtabs[typ] = rtab
+        return rtabs.get('scene', None), rtabs.get('battle', None)
+
     def _rplc_oth_tabs(self, rtabs, as_sndbx):
         if not as_sndbx:
             return None
@@ -815,6 +827,7 @@ class c_ffta_modifier:
             return None
         artabs['font'] = self._rplc_fnt_tab()
         artabs['s_fat'] = self._rplc_sfat_tab(as_sndbx)
+        artabs['s_scrpt'], artabs['b_scrpt'] = self._rplc_scrpt_tab(as_sndbx)
         self._rplc_oth_tabs(artabs, as_sndbx)
         rmk, dirty = self.srom['base'].repack_with(artabs)
         if not dirty:
