@@ -825,7 +825,8 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
         ci = 1
         while True:
             idxs = self.get_entry(ci)
-            if not (idxs[2] >= lst_idxs[2] and (
+            if not (
+                idxs[2] > 0 and (
                 idxs[0] > lst_idxs[0] or (
                     idxs[0] == lst_idxs[0] and
                     idxs[1] >= lst_idxs[1]) ) ):
