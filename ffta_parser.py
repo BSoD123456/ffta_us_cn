@@ -315,6 +315,8 @@ class c_ffta_script_parser:
 
 class c_ffta_script_program:
 
+    EOSCRPT = 0xff
+
     def __init__(self, sects, page_idxs):
         self.sects = sects
         self.page_idxs = page_idxs
@@ -340,6 +342,7 @@ class c_ffta_script_program:
             max_ofs -= 1
         cmds_tab = {}
         all_size = 0
+        inv_cofs = None
         for rdy, cofs, cop, cprms_or_cb in sect_spage.iter_lines_to(max_ofs):
             if rdy:
                 cprms = cprms_or_cb
@@ -348,11 +351,21 @@ class c_ffta_script_program:
                 cprms = cprms_or_cb(clen)
             cmd = self._new_cmd(cop, cprms, cls_cmd)
             if cmd is None:
-                assert(callable(cprms_or_cb))
+                assert callable(cprms_or_cb)
                 cprms_or_cb(None)
+                # end of script padding
+                assert cop == self.EOSCRPT
+                inv_cofs = cofs
             else:
                 cmds_tab[cofs] = cmd
                 all_size = cofs + len(cmd)
+        if inv_cofs:
+            assert inv_cofs == all_size
+            while True:
+                if sect_spage.U8(inv_cofs) != self.EOSCRPT:
+                    break
+                inv_cofs += 1
+            all_size = inv_cofs
         self.cmds = cmds_tab
         sect_spage.set_real_top(all_size)
         self.page_size = all_size
