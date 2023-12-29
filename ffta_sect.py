@@ -370,7 +370,7 @@ class c_ffta_sect(c_mark):
         rmk.parse_size(align_top, align)
         rmk.parse()
 
-    def _repack_with(self, tab):
+    def _repack_with(self, tab, can_extend = False):
         dirty = False
         if 'top' in tab and isinstance(tab['top'], int):
             dtop = tab['top']
@@ -381,8 +381,9 @@ class c_ffta_sect(c_mark):
         for ofs, bs in tab.items():
             if not isinstance(ofs, int):
                 continue
-            if not 0 <= ofs < rmk.accessable_top - len(bs) + 1:
-                raise ValueError('dest offset not in sect: 0x{ofs:x}')
+            if not ( 0 <= ofs and
+                (can_extend or ofs < rmk.accessable_top - len(bs) + 1) ):
+                raise ValueError(f'dest offset not in sect: 0x{ofs:x}')
             rmk.WBYTES(bs, ofs)
             dirty = True
         if dirty:
@@ -982,7 +983,7 @@ class c_ffta_sect_script_page(c_ffta_sect):
 
     def _repack_with(self, tab):
         cmds, prog = tab
-        return super()._repack_with(cmds)
+        return super()._repack_with(cmds, can_extend = True)
 
 # ===============
 #    commands

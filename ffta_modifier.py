@@ -110,7 +110,7 @@ CONF = {
         },
     },
     'sandbox': {
-        'enable': False,
+        'enable': True,
         'only': True,
         'scene': {
             'boot': None,
@@ -118,25 +118,37 @@ CONF = {
         'script': {
             'scene': (lambda f: {
                 1: {
-                    0x367: [
-                        *f['fade'](True, 60),
-                        *f['load'](9),
+                    #0x367: [
+                    #0x4d4: [
+                        #*f['fade'](True, 60),
+                        #*f['load'](6),
+                    #],
+                    0x501: [
+                        *f['wait'](60),
+                        *f['wait'](60),
+                        *f['wait'](60),
+                        *f['wait'](60),
+                        *f['wait'](60),
+                        *f['load'](2, 4),
                     ],
                 },
+                2: {
+                    0x4: f['wait'](255),
+                }
             })({
                 'wait': lambda frms: [
                     0x15, frms,
                 ],
-                'fade': lambda is_out, frms: [
+                'fade': lambda is_out, frms=60: [
                     0x6, 0x31, frms, 0x0,
                 ] if is_out else [
                     0x6, 0x13, frms, 0x64,
                 ],
-                'load': lambda sc: [
+                'load': lambda sc, typ=2: [
                     # load scene
                     0x1c, sc, 0x0,
                     # safe return after load
-                    0x17, 0x2,
+                    0x17, typ,
                 ],
             }),
         },
