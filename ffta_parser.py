@@ -93,8 +93,12 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         rslt['win_type'] = 'normal'
         rslt['win_portrait'] = prms[1]
         t_page = psr.sects['text']
-        t_line = t_page[tidx]
-        toks = t_page[tidx].text.tokens
+        try:
+            t_line = t_page[tidx]
+            toks = t_page[tidx].text.tokens
+        except:
+            rslt['txt_invalid'] = True
+            toks = f'text with invalid tidx {tidx}'
         return toks
 
     #cmd: text window with ask(yes or no) / notice
@@ -455,7 +459,7 @@ class c_ffta_script_log:
 
     def _pck_rslt(self, rslt):
         typ = rslt['type']
-        if typ == 'text':
+        if typ == 'text' and not rslt.get('txt_invalid', False):
             toks = rslt['output']
             rslt['output'] = self.charset.decode(toks)
         rrpr = rslt.get('repr', None)
