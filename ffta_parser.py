@@ -26,14 +26,14 @@ def clsdec(hndl, *args, **kargs):
 #    scripts
 # ===============
 
-def cmdc(code, typ = 'unknown'):
+def cmdc(code, typ = 'unknown', rpr = None):
     def _hndl(cls, mname, mth):
         #if not hasattr(cls, '_cmd_tab'):
         # in __dict__ is the same as js hasOwnProperty
         # but hasattr check parents
         if not '_cmd_tab' in cls.__dict__:
             cls._cmd_tab = {}
-        cls._cmd_tab[code] = (mth, typ)
+        cls._cmd_tab[code] = (mth, typ, rpr)
     return clsdec(_hndl)
 
 class c_ffta_cmd:
@@ -51,15 +51,18 @@ class c_ffta_cmd:
     def __len__(self):
         return 1 + len(self.prms)
 
-    def exec(self, psr):
-        rslt = {
+    def exec(self, psr, rslt = None):
+        if rslt is None:
+            rslt = {}
+        rslt.update({
             'step': [len(self)],
             'type': 'unknown',
-        }
+        })
         if self.op in self._cmd_tab:
             # self._cmd_tab[op][0].__get__(self, type(self)) to bind cmdfunc
-            cmdfunc, cmdtyp = self._cmd_tab[self.op]
+            cmdfunc, cmdtyp, cmdrpr = self._cmd_tab[self.op]
             rslt['type'] = cmdtyp
+            rslt['repr'] = cmdrpr
             rslt['output'] = cmdfunc(self, self.prms, psr, rslt)
         return rslt
 
@@ -111,22 +114,28 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #cmd: jump
     #params: p1(u16)
     #p1: cur cmd offset increment
-    @cmdc(0x19, 'flow')
+    @cmdc(0x19, 'flow', 'jump {out:0>4x}')
     def cmd_jump(self, prms, psr, rslt):
         v = prms[0] + (prms[1] << 8)
         if 0x8000 & v:
             v -= 0x10000
-        return v + 3
+        v += 3
+        rslt['flow_offset'] = v
+        return v + rslt['offset']
 
     #cmd: call ?
     #params: p1(u16)
     #p1: cur cmd offset increment
-    @cmdc(0x1, 'flow')
+    @cmdc(0x1, 'flow', 'call {out:0>4x}')
     def cmd_call(self, prms, psr, rslt):
-        v = prms[0] + (prms[1] << 8)
-        if 0x8000 & v:
-            v -= 0x10000
-        return v + 3
+        return self.cmd_jump(prms, psr, rslt)
+
+    #cmd: wait
+    #params: p1(u8)
+    #p1: waited frames, 1/60 sec
+    @cmdc(0x15, 'time', 'wait {out:d} frms')
+    def cmd_wait(self, prms, psr, rslt):
+        return prms[0]
 
     #cmd: new thread
     #params: ?
@@ -146,10 +155,10 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     def cmd_load_scene(self, prms, psr, rslt):
         pass
 
-    #cmd: return scene
+    #cmd: done scene
     #params: ?
     @cmdc(0x17, 'flow')
-    def cmd_return_scene(self, prms, psr, rslt):
+    def cmd_done_scene(self, prms, psr, rslt):
         pass
 
 class c_ffta_battle_cmd(c_ffta_cmd):
@@ -314,9 +323,11 @@ class c_ffta_script_program:
                 if not ro is None:
                     yield ro
                 break
-            rslt = cmd.exec(self)
-            rslt['offset'] = cur_ofs
-            rslt['cmd'] = cmd
+            rslt = {
+                'offset': cur_ofs,
+                'cmd': cmd,
+            }
+            rslt = cmd.exec(self, rslt)
             wk.add(cur_ofs)
             ro = self._hndl_rslt(rslt, flt, flt_out, cb_pck)
             if not ro is None:
@@ -386,20 +397,16 @@ class c_ffta_script_log:
         typ = rslt['type']
         if typ == 'text':
             toks = rslt['output']
-            rs = self.charset.decode(toks)
-        elif typ == 'flow':
-            cmd = rslt['cmd']
-            if cmd.op in [0x19, 0x1]:
-                # jump
-                dst = rslt['output'] + rslt['offset']
-                ops = ({
-                    0x01: 'call',
-                    0x19: 'jump',
-                })[cmd.op]
-                rs = f'{ops} {dst:0>4x}'
+            rslt['output'] = self.charset.decode(toks)
+        rrpr = rslt.get('repr', None)
+        if not rrpr is None:
+            if callable(rrpr):
+                rs = rrpr(rslt['output'], rslt['cmd'])
+            elif isinstance(rrpr, str):
+                rs = rslt['repr'].format(out = rslt['output'], cmd = rslt['cmd'])
             else:
-                rs = str(cmd)
-        elif typ == 'error':
+                raise ValueError('invalid cmd repr')
+        elif 'output' in rslt:
             rs = rslt['output']
         else:
             rs = str(rslt['cmd'])
