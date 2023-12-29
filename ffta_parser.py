@@ -77,7 +77,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
 
     #tips:
     #<44: ?? idx ?? ??> path move, path idxed from the tabref after s_fat
-    #<06: ab idx ??> maybe some scene load, idx is scene fat idx, a-b is something unknown
+    #<06: ab ?? ??> maybe some scene load, a-b is something unknown
 
     #cmd: text window
     #params: p1(u8) p2(u8) p3(u8)
@@ -144,15 +144,17 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     def cmd_end_thread(self, prms, psr, rslt):
         pass
 
-    #cmd: ??? thread
-    #params: ?
-    @cmdc(0x03, 'thread')
+    #cmd: switch thread
+    #params: p1(u8)
+    #p1: thread idx
+    @cmdc(0x03, 'thread', 'sw_thread {out}')
     def cmd_uk1_thread(self, prms, psr, rslt):
-        pass
+        return prms[0]
 
     #cmd: new thread
     #params: -
-    @cmdc(0x04, 'thread', 'new thread')
+    #eq to <03: ff>
+    @cmdc(0x04, 'thread', 'new_thread')
     def cmd_new_thread(self, prms, psr, rslt):
         pass
 
