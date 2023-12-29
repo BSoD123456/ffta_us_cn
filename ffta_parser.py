@@ -464,29 +464,6 @@ if __name__ == '__main__':
         chs_cn.load()
         chs = chs_cn
 
-    def enum_text(page_idx, ln = 0x100, tkey = 'text'):
-        t_page = spsr_s.sects[tkey][page_idx]
-        charset = chs
-        for i in range(ln):
-            try:
-                toks = t_page[i].text.tokens
-            except:
-                print(hex(i), '--failed--')
-                break
-            dec = charset.decode(toks)
-            print(hex(i), dec)
-
-    def enum_all_text(tkey):
-        t_sect = spsr_s.sects[tkey]
-        charset = chs
-        for path, t_line in t_sect.iter_item():
-            if t_line is None:
-                continue
-            toks = t_line.text.tokens
-            dec = charset.decode(toks)
-            rpath = '/'.join(str(i) for i in path)
-            print(f'{rpath}: {dec}')
-
     def sc_show(page_idx = 1):
         global spsr_s
         spsr_s = make_script_parser(rom, 'scene')
@@ -494,6 +471,7 @@ if __name__ == '__main__':
         slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), chs)
         for i, v in enumerate(slog_s.logs):
             print(f'{i}-{v}')
+
     def bt_show(pi2 = 0, pi1 = 3):
         global spsr_b
         spsr_b = make_script_parser(rom, 'battle')
