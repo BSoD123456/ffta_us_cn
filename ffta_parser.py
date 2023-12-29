@@ -33,7 +33,10 @@ def cmdc(code, typ = 'unknown', rpr = None):
         # but hasattr check parents
         if not '_cmd_tab' in cls.__dict__:
             cls._cmd_tab = {}
-        cls._cmd_tab[code] = (mth, typ, rpr)
+        nm = mth.__name__
+        assert nm.startswith('cmd_')
+        nm = nm[:4]
+        cls._cmd_tab[code] = (mth, typ, nm, rpr)
     return clsdec(_hndl)
 
 class c_ffta_cmd:
@@ -60,8 +63,9 @@ class c_ffta_cmd:
         })
         if self.op in self._cmd_tab:
             # self._cmd_tab[op][0].__get__(self, type(self)) to bind cmdfunc
-            cmdfunc, cmdtyp, cmdrpr = self._cmd_tab[self.op]
+            cmdfunc, cmdtyp, cmdnm, cmdrpr = self._cmd_tab[self.op]
             rslt['type'] = cmdtyp
+            rslt['name'] = cmdnm
             rslt['repr'] = cmdrpr
             rslt['output'] = cmdfunc(self, self.prms, psr, rslt)
         return rslt
@@ -119,7 +123,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         v = prms[0] + (prms[1] << 8)
         if 0x8000 & v:
             v -= 0x10000
-        v += 3
+        v += len(prms) + 1
         rslt['flow_offset'] = v
         return v + rslt['offset']
 
@@ -202,21 +206,30 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #cmd: jump
     #params: p1(u16)
     #p1: cur cmd offset increment
-    @cmdc(0x01, 'flow')
+    @cmdc(0x01, 'flow', 'jump {out:0>4x}')
     def cmd_jump(self, prms, psr, rslt):
-        pass
+        v = prms[-2] + (prms[-1] << 8)
+        if 0x8000 & v:
+            v -= 0x10000
+        v += len(prms) + 1
+        rslt['flow_offset'] = v
+        return v + rslt['offset']
 
     #cmd: test jump
-    #params: ?
-    @cmdc(0x04, 'flow')
+    #params: p1(u8) p2(u8) p3(u16)
+    #p1: ?
+    #p2: ?
+    #p3: cur cmd offset increment
+    @cmdc(0x04, 'flow', 'if {out[1]:x}:{out[2]:x} jump {out[0]:0>4x}')
     def cmd_test_jump(self, prms, psr, rslt):
-        pass
+        return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
 
     #cmd: load scene
     #params: ?
-    @cmdc(0x05, 'load')
+    @cmdc(0x05, 'load', 'load scene {out}')
     def cmd_load_scene(self, prms, psr, rslt):
-        pass
+        v = prms[0] + (prms[1] << 8)
+        return v
 
 class c_ffta_script_parser:
 
@@ -257,11 +270,19 @@ class c_ffta_script_parser:
             for pi2 in sub.last_idxs:
                 self._dummy_program(pi1, pi2)
 
+    def iter_program(self):
+        sect = self.sects['script']
+        for idxp, _ in sect.iter_items():
+            prog = self.get_program(*idxp)
+            if prog:
+                yield prog
+
 class c_ffta_script_program:
 
     def __init__(self, sects, page_idxs):
         self.sects = sects
         self.page_idxs = page_idxs
+        self.page_idx = page_idxs
 
     def parse(self, cls_cmd):
         self._parse_cmds_page(cls_cmd)
@@ -383,7 +404,11 @@ class c_ffta_scene_script_parser(c_ffta_script_parser):
     def get_program(self, idx, **kargs):
         s_pi1, s_pi2, t_pi = self._get_fat_entry(idx)
         stext = self.sects['text'][t_pi]
-        return super().get_program(s_pi1, s_pi2, sect_text = stext, **kargs)
+        prog = super().get_program(s_pi1, s_pi2, sect_text = stext, **kargs)
+        if prog:
+            prog.page_idx = idx
+            prog.text_idx = t_pi
+        return prog
 
     def _new_program(self, pi1, pi2, *, sect_text):
         prog = super()._new_program(pi1, pi2)
@@ -396,6 +421,13 @@ class c_ffta_scene_script_parser(c_ffta_script_parser):
 
     def _dummy_program(self, pi1, pi2):
         return super().get_program(pi1, pi2, sect_text = None)
+
+    def iter_program(self):
+        sect = self.sects['fat']
+        for i in range(1, sect.tsize):
+            prog = self.get_program(i)
+            if prog:
+                yield prog
 
 # ===============
 #     battle
@@ -454,6 +486,34 @@ class c_ffta_script_log:
             log.append(line)
 
 # ===============
+#    relation
+# ===============
+
+class c_ffta_script_relation:
+
+    def __init__(self, psr_s, psr_b):
+        self.psr_s = psr_s,
+        self.psr_b = psr_b
+
+    def _pck_rslt(self, rslt):
+        nm = rslt['name']
+        if not nm == 'load_scene':
+            return None
+        return rslt['output']
+
+    def _scan(self, psr):
+        rtab = {}
+        for prog in psr.iter_program():
+            refs = set()
+            for ref in prog.exec(
+                    cb_pck = self._pck_rslt,
+                    flt = ['load']):
+                assert ref
+                refs.add(ref)
+            rtab[prog.page_idx] = sorted(refs)
+        return rtab
+
+# ===============
 #      main
 # ===============
 
@@ -493,6 +553,9 @@ if __name__ == '__main__':
         chs_cn.load()
         chs = chs_cn
 
+    spsr_s = make_script_parser(rom, 'scene')
+    spsr_b = make_script_parser(rom, 'battle')
+
     def find_scene_by_txts(rom, tidxs):
         sfat = rom.tabs['s_fat']
         for i in range(sfat.tsize):
@@ -500,17 +563,18 @@ if __name__ == '__main__':
             if ti in tidxs:
                 print(f'scene {i}: txt {ti}')
 
+    def scan_rels():
+        global srels
+        srels = c_ffta_script_relation(spsr_s, spsr_b)
+        ppr(srels._scan(spsr_s))
+
     def sc_show(page_idx = 1):
-        global spsr_s
-        spsr_s = make_script_parser(rom, 'scene')
         global slog_s
         slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), chs)
         for i, v in enumerate(slog_s.logs):
             print(f'{i}-{v}')
 
     def bt_show(pi2 = 0, pi1 = 3):
-        global spsr_b
-        spsr_b = make_script_parser(rom, 'battle')
         global slog_b
         slog_b = c_ffta_script_log(spsr_b.get_program(pi1, pi2), chs)
         for i, v in enumerate(slog_b.logs):
