@@ -203,7 +203,7 @@ class c_ffta_battle_cmd(c_ffta_cmd):
 
     #cmd: nop
     #params:
-    @cmdc(0x00, 'none')
+    @cmdc(0x00, 'none', 'nop')
     def cmd_nop(self, prms, psr, rslt):
         return None
 
@@ -250,6 +250,14 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     @cmdc(0x07, 'flow', 'if v:{out[1]:x}={out[2]} jump {out[0]:0>4x}')
     def cmd_test_bval_jump(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
+
+    #cmd: test bcondi jump
+    #params: p1(u8) p2(u16)
+    #p1: bcondi idx
+    #p2: cur cmd offset increment
+    @cmdc(0x06, 'flow', 'if c:{out[1]:x} jump {out[0]:0>4x}')
+    def cmd_test_bcnd_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), prms[0]
 
     #cmd: test sum jump
     #params: p1(u8) p2(u16)
