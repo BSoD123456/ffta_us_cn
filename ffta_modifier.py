@@ -116,20 +116,29 @@ CONF = {
             'boot': None,
         },
         'script': {
-            'scene': (lambda lds: {
+            'scene': (lambda f: {
                 1: {
-                    0x367: lds(9),
-                    #0x3cb: lds(6),
+                    0x367: [
+                        *f['fade'](True, 60),
+                        *f['load'](9),
+                    ],
                 },
-            })(lambda sc: [
-                # black screen
-                0x15, 0x7f,
-                0x6, 0x3, 0x46, 0x0,
-                # load scene
-                0x1c, sc, 0x0,
-                # safe return after load
-                0x17, 0x2,
-            ]),
+            })({
+                'wait': lambda frms: [
+                    0x15, frms,
+                ],
+                'fade': lambda is_out, frms: [
+                    0x6, 0x31, frms, 0x0,
+                ] if is_out else [
+                    0x6, 0x13, frms, 0x64,
+                ],
+                'load': lambda sc: [
+                    # load scene
+                    0x1c, sc, 0x0,
+                    # safe return after load
+                    0x17, 0x2,
+                ],
+            }),
         },
         'direct': {
         },

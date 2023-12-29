@@ -77,7 +77,6 @@ class c_ffta_scene_cmd(c_ffta_cmd):
 
     #tips:
     #<44: ?? idx ?? ??> path move, path idxed from the tabref after s_fat
-    #<06: ab ?? ??> maybe some scene load, a-b is something unknown
 
     #cmd: text window
     #params: p1(u8) p2(u8) p3(u8)
@@ -137,6 +136,24 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     @cmdc(0x15, 'time', 'wait {out:d} frms')
     def cmd_wait(self, prms, psr, rslt):
         return prms[0]
+
+    #cmd: fade
+    #params: p1(u8) p2(u8) p3(u8)
+    #p1: 0x31 fade out / 0x13 fade in
+    #p2: duration frames, 1/60 sec
+    #p3: end brightness 0~0x64(100)
+    @cmdc(0x6, 'effect',
+        lambda o, c: (
+            lambda io, dur, br:
+                f'fade {io} with {dur} frms to {br}%'
+        )('out' if o[0] else 'in', o[1], o[2])
+    )
+    def cmd_fade(self, prms, psr, rslt):
+        io = prms[0]
+        is_out = ((io >> 4) > (io & 0xf))
+        dur = prms[1]
+        br = prms[2]
+        return is_out, dur, br
 
     #cmd: end thread
     #params: -
