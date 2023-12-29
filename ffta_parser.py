@@ -219,14 +219,21 @@ class c_ffta_battle_cmd(c_ffta_cmd):
         rslt['flow_offset'] = v
         return v + rslt['offset']
 
-    #cmd: test jump
-    #params: p1(u8) p2(u8) p3(u16)
-    #p1: ?
-    #p2: ?
-    #p3: cur cmd offset increment
-    @cmdc(0x04, 'flow', 'if {out[1]:x}:{out[2]:x} jump {out[0]:0>4x}')
-    def cmd_test_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
+    #cmd: set flag
+    #params: p1(u16) p2(u8)
+    #p1: flag idx
+    #p2: dest value
+    @cmdc(0x02, 'stat', 'set flg:{out[0]:x} = {out[1]}')
+    def cmd_set_flg(self, prms, psr, rslt):
+        return prms[0] + (prms[1] << 8), prms[2]
+
+    #cmd: test flag jump
+    #params: p1(u16) p2(u16)
+    #p1: flag idx
+    #p2: cur cmd offset increment
+    @cmdc(0x04, 'flow', 'if flg:{out[1]:x} jump {out[0]:0>4x}')
+    def cmd_test_flg_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), prms[0] + (prms[1] << 8)
 
     #cmd: load scene
     #params: ?
@@ -234,6 +241,23 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     def cmd_load_scene(self, prms, psr, rslt):
         v = prms[0] + (prms[1] << 8)
         return v
+
+    #cmd: test bval jump
+    #params: p1(u8) p2(u8) p3(u16)
+    #p1: bval idx
+    #p2: dest bval(?) value
+    #p3: cur cmd offset increment
+    @cmdc(0x07, 'flow', 'if v:{out[1]:x}={out[2]} jump {out[0]:0>4x}')
+    def cmd_test_bval_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
+
+    #cmd: test sum jump
+    #params: p1(u8) p2(u16)
+    #p1: dest sum(?all bvals) value
+    #p2: cur cmd offset increment
+    @cmdc(0x0b, 'flow', 'if sum={out[1]:x} jump {out[0]:0>4x}')
+    def cmd_test_sum_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), prms[0]
 
 class c_ffta_script_parser:
 
