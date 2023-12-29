@@ -35,7 +35,7 @@ def cmdc(code, typ = 'unknown', rpr = None):
             cls._cmd_tab = {}
         nm = mth.__name__
         assert nm.startswith('cmd_')
-        nm = nm[:4]
+        nm = nm[4:]
         cls._cmd_tab[code] = (mth, typ, nm, rpr)
     return clsdec(_hndl)
 
@@ -546,7 +546,8 @@ class c_ffta_script_relation:
                     flt = ['load']):
                 assert ref
                 refs.add(ref)
-            rtab[prog.page_idx] = sorted(refs)
+            if refs:
+                rtab[prog.page_idx] = sorted(refs)
         return rtab
 
 # ===============
