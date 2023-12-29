@@ -113,27 +113,29 @@ CONF = {
         'enable': True,
         'only': True,
         'scene': {
-            'boot': 123,
+            'boot': None,
         },
         'script': {
             'scene': (lambda f: {
                 1: {
-                    #0x367: [
+                    0x367: [
+                        0x17, 0x5,
+                    ],
                     #0x4d4: [
                         #*f['fade'](True, 60),
                         #*f['load'](6),
                     #],
-                    0x501: [
-                        *f['wait'](60),
-                        *f['wait'](60),
-                        *f['wait'](60),
-                        *f['wait'](60),
-                        *f['wait'](60),
-                        *f['load'](2, 4),
-                    ],
+                    #0x501: [
+                    #    *f['wait'](60),
+                    #    *f['wait'](60),
+                    #    *f['wait'](60),
+                    #    *f['wait'](60),
+                    #    *f['wait'](60),
+                    #    *f['load'](2, 4),
+                    #],
                 },
                 2: {
-                    0x4: f['wait'](255),
+                    #0x4: f['wait'](255),
                 }
             })({
                 'wait': lambda frms: [
