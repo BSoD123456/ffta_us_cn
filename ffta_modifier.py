@@ -110,7 +110,7 @@ CONF = {
         },
     },
     'sandbox': {
-        'enable': False,
+        'enable': True,
         'only': True,
         'scene': {
             'boot': None,
@@ -123,6 +123,7 @@ CONF = {
                 },
             })(lambda sc: [
                 # black screen
+                0x15, 0x7f,
                 0x6, 0x3, 0x46, 0x0,
                 # load scene
                 0x1c, sc, 0x0,
