@@ -115,8 +115,18 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     def cmd_jump(self, prms, psr, rslt):
         v = prms[0] + (prms[1] << 8)
         if 0x8000 & v:
-            v = 0x10000 - v
-        return v
+            v -= 0x10000
+        return v + 3
+
+    #cmd: call ?
+    #params: p1(u16)
+    #p1: cur cmd offset increment
+    @cmdc(0x1, 'flow')
+    def cmd_call(self, prms, psr, rslt):
+        v = prms[0] + (prms[1] << 8)
+        if 0x8000 & v:
+            v -= 0x10000
+        return v + 3
 
     #cmd: new thread
     #params: ?
@@ -379,10 +389,14 @@ class c_ffta_script_log:
             rs = self.charset.decode(toks)
         elif typ == 'flow':
             cmd = rslt['cmd']
-            if cmd.op == 0x19:
+            if cmd.op in [0x19, 0x1]:
                 # jump
                 dst = rslt['output'] + rslt['offset']
-                rs = f'jump {dst:0>4x}'
+                ops = ({
+                    0x01: 'call',
+                    0x19: 'jump',
+                })[cmd.op]
+                rs = f'{ops} {dst:0>4x}'
             else:
                 rs = str(cmd)
         elif typ == 'error':
