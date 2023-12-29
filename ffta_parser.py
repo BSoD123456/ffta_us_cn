@@ -493,6 +493,13 @@ if __name__ == '__main__':
         chs_cn.load()
         chs = chs_cn
 
+    def find_scene_by_txts(rom, tidxs):
+        sfat = rom.tabs['s_fat']
+        for i in range(sfat.tsize):
+            pi1, pi2, ti = sfat.get_entry(i)
+            if ti in tidxs:
+                print(f'scene {i}: txt {ti}')
+
     def sc_show(page_idx = 1):
         global spsr_s
         spsr_s = make_script_parser(rom, 'scene')

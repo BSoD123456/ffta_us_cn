@@ -113,7 +113,7 @@ CONF = {
         'enable': True,
         'only': True,
         'scene': {
-            'boot': None,
+            'boot': 123,
         },
         'script': {
             'scene': (lambda f: {
