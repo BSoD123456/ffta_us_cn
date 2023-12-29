@@ -550,14 +550,16 @@ class c_ffta_script_relation:
             return None
         return rslt['output']
 
-    def _scan(self, pname, psr, rtab, rtab_r):
+    def _scan(self, pname, psr, rtab, rtab_r, rchain, allidxs):
         for prog in psr.iter_program():
             src = (pname, prog.page_idx)
+            allidxs.add(src)
             refs = set()
             for ref in prog.exec(
                     cb_pck = self._pck_rslt,
                     flt = ['load']):
                 assert ref
+                ref = ('sc', ref)
                 refs.add(ref)
                 if ref in rtab_r:
                     rr = rtab_r[ref]
@@ -566,17 +568,29 @@ class c_ffta_script_relation:
                     rtab_r[ref] = rr
                 if not src in rr:
                     rr.append(src)
+                if ref in rchain[0]:
+                    rchain[0].remove(ref)
+                    rchain[1].add(ref)
+                if not (src in rchain[0] or src in rchain[1]):
+                    rchain[0].add(src)
             if refs:
                 rtab[src] = sorted(refs)
-        return rtab
 
     def scan(self):
         rtab = {}
         rtab_r = {}
-        self._scan('sc', self.psr_s, rtab, rtab_r)
-        self._scan('bt', self.psr_b, rtab, rtab_r)
+        rchain = (set(), set())
+        allidxs = set()
+        self._scan('sc', self.psr_s, rtab, rtab_r, rchain, allidxs)
+        self._scan('bt', self.psr_b, rtab, rtab_r, rchain, allidxs)
         self.refer = rtab
         self.refer_rvs = rtab_r
+        self.refer_heads = sorted(rchain[0])
+        unref = []
+        for i in allidxs:
+            if not i in rtab_r and not i in rtab:
+                unref.append(i)
+        self.unrefer = sorted(unref)
 
 # ===============
 #      main
@@ -632,7 +646,7 @@ if __name__ == '__main__':
         global srels
         srels = c_ffta_script_relation(spsr_s, spsr_b)
         srels.scan()
-        ppr(srels.refer)
+        ppr(srels.refer_heads)
 
     def sc_show(page_idx = 1):
         global slog_s
