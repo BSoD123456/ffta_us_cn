@@ -110,7 +110,7 @@ CONF = {
         },
     },
     'sandbox': {
-        'enable': True,
+        'enable': False,
         'only': True,
         'scene': {
             'boot': None,
