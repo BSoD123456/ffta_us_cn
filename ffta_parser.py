@@ -308,7 +308,7 @@ class c_ffta_script_parser:
 
     def iter_program(self):
         sect = self.sects['script']
-        for idxp, _ in sect.iter_items():
+        for idxp, _ in sect.iter_item():
             prog = self.get_program(*idxp)
             if prog:
                 yield prog
@@ -528,7 +528,7 @@ class c_ffta_script_log:
 class c_ffta_script_relation:
 
     def __init__(self, psr_s, psr_b):
-        self.psr_s = psr_s,
+        self.psr_s = psr_s
         self.psr_b = psr_b
 
     def _pck_rslt(self, rslt):
@@ -537,18 +537,33 @@ class c_ffta_script_relation:
             return None
         return rslt['output']
 
-    def _scan(self, psr):
-        rtab = {}
+    def _scan(self, pname, psr, rtab, rtab_r):
         for prog in psr.iter_program():
+            src = (pname, prog.page_idx)
             refs = set()
             for ref in prog.exec(
                     cb_pck = self._pck_rslt,
                     flt = ['load']):
                 assert ref
                 refs.add(ref)
+                if ref in rtab_r:
+                    rr = rtab_r[ref]
+                else:
+                    rr = []
+                    rtab_r[ref] = rr
+                if not src in rr:
+                    rr.append(src)
             if refs:
-                rtab[prog.page_idx] = sorted(refs)
+                rtab[src] = sorted(refs)
         return rtab
+
+    def scan(self):
+        rtab = {}
+        rtab_r = {}
+        self._scan('sc', self.psr_s, rtab, rtab_r)
+        self._scan('bt', self.psr_b, rtab, rtab_r)
+        self.refer = rtab
+        self.refer_rvs = rtab_r
 
 # ===============
 #      main
@@ -603,7 +618,8 @@ if __name__ == '__main__':
     def scan_rels():
         global srels
         srels = c_ffta_script_relation(spsr_s, spsr_b)
-        ppr(srels._scan(spsr_s))
+        srels.scan()
+        ppr(srels.refer)
 
     def sc_show(page_idx = 1):
         global slog_s
