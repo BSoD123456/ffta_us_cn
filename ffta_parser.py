@@ -77,6 +77,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
 
     #tips:
     #<44: ?? idx ?? ??> path move, path idxed from the tabref after s_fat
+    #<06: ab idx ??> maybe some scene load, idx is scene fat idx, a-b is something unknown
 
     #cmd: text window
     #params: p1(u8) p2(u8) p3(u8)
@@ -137,23 +138,31 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     def cmd_wait(self, prms, psr, rslt):
         return prms[0]
 
-    #cmd: new thread
-    #params: ?
-    @cmdc(0x04, 'thread')
-    def cmd_new_thread(self, prms, psr, rslt):
-        pass
-
     #cmd: end thread
-    #params: ?
-    @cmdc(0x02, 'thread')
+    #params: -
+    @cmdc(0x02, 'thread', 'ret')
     def cmd_end_thread(self, prms, psr, rslt):
         pass
 
-    #cmd: load scene
+    #cmd: ??? thread
     #params: ?
-    @cmdc(0x1c, 'load')
-    def cmd_load_scene(self, prms, psr, rslt):
+    @cmdc(0x03, 'thread')
+    def cmd_uk1_thread(self, prms, psr, rslt):
         pass
+
+    #cmd: new thread
+    #params: -
+    @cmdc(0x04, 'thread', 'new thread')
+    def cmd_new_thread(self, prms, psr, rslt):
+        pass
+
+    #cmd: load scene
+    #params: p1(u16)
+    #p1: scene idx in s_fat
+    @cmdc(0x1c, 'load', 'load scene {out}')
+    def cmd_load_scene(self, prms, psr, rslt):
+        v = prms[0] + (prms[1] << 8)
+        return v
 
     #cmd: done scene
     #params: ?
@@ -399,14 +408,15 @@ class c_ffta_script_log:
             toks = rslt['output']
             rslt['output'] = self.charset.decode(toks)
         rrpr = rslt.get('repr', None)
+        rout = rslt.get('output', None)
         if not rrpr is None:
             if callable(rrpr):
-                rs = rrpr(rslt['output'], rslt['cmd'])
+                rs = rrpr(rout, rslt['cmd'])
             elif isinstance(rrpr, str):
-                rs = rslt['repr'].format(out = rslt['output'], cmd = rslt['cmd'])
+                rs = rslt['repr'].format(out = rout, cmd = rslt['cmd'])
             else:
                 raise ValueError('invalid cmd repr')
-        elif 'output' in rslt:
+        elif not rout is None:
             rs = rslt['output']
         else:
             rs = str(rslt['cmd'])
