@@ -245,9 +245,12 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: dest value
     @cmdc(0x02, 'stat', 'set flg:{out[0]:x} = {out[1]}')
     def cmd_set_flg(self, prms, psr, rslt):
+        fid = self._p16(prms, 0)
         dval = prms[2]
         assert dval in (0, 1)
-        return self._p16(prms, 0), dval
+        rslt['var'] = ('flg', fid)
+        rslt['val'] = dval
+        return fid, dval
 
     #cmd: test flag jump
     #params: p1(u16) p2(u16)
@@ -495,11 +498,13 @@ class c_ffta_script_program:
             ro = rslt['output']
         return ro
 
-    def exec(self, st_ofs = 0, flt = None, flt_out = ['unknown'], cb_pck = None, ctx = None, wk = None, tid = None):
+    def exec(self, st_ofs = 0, flt = None, flt_out = ['unknown'], cb_pck = None, ctx = None, tid = None, wk = None):
         if wk is None:
             wk = set()
         if tid is None:
             tid = [0]
+        elif not isinstance(tid, list):
+            tid = list(tid)
         cur_ofs = st_ofs
         page_size = self.page_size
         while True:
@@ -547,7 +552,7 @@ class c_ffta_script_program:
                 nxt_ofs = cur_ofs + stp
                 yield from self.exec(
                     nxt_ofs, flt, flt_out, cb_pck, th['ctx'],
-                    wk.copy(), [*tid, i])
+                    [*tid, i], wk.copy())
             if thlen > 1:
                 tid.append(thlen - 1)
             cur_ofs += thrds[-1]['step']
@@ -715,12 +720,14 @@ class c_steam_stats:
         self.cur = 0
         self.det = {}
         self.ndet = {}
+        self.dirty = False
 
     def copy(self):
         r = c_steam_stats()
         r.cur = self.cur
         r.det = self.det.copy()
         r.ndet = self.ndet.copy()
+        r.dirty = self.dirty
         return r
 
     def __eq__(self, dst):
@@ -730,7 +737,7 @@ class c_steam_stats:
             self.ndet == dst.ndet)
 
     def step(self):
-        r.cur += 1
+        self.cur += 1
 
     def _cvar(self, var):
         if var[0] == '__cur__':
@@ -762,12 +769,25 @@ class c_steam_stats:
         br_true.ndet[var] = val
         yield True, br_true
 
-    def check(self, var, val):
+    def check(self, var, val, det = None):
         var = self._cvar(var)
-        if var in self.det:
-            yield self.det[var] == val, self
+        if det != False and (det == True or var in self.det):
+            yield self.det.get(var, None) == val, self
+        else:
+            yield from self._branch(var, val)
+
+    def setvar(self, var, val):
+        var = self._cvar(var)
+        assert not var in self.ndet
+        if self.det.get(var, None) == val:
             return
-        yield from self._branch(var, val)
+        self.det[var] = val
+        self.dirty = True
+
+    def undirty(self):
+        d = self.dirty
+        self.dirty = False
+        return d
 
 class c_ffta_battle_stream:
 
@@ -776,15 +796,16 @@ class c_ffta_battle_stream:
         self.pidx = pidx
 
     @staticmethod
-    def _add_sts(sts, nst):
-        for st in sts:
+    def _add_sts(sts, ntid, nst):
+        for tid, st in sts:
             if st == nst:
-                return
-        sts.append(nst)
+                return False
+        sts.append((ntid, nst))
+        return True
 
     @staticmethod
-    def _step_sts(self, sts):
-        for st in sts:
+    def _step_sts(sts):
+        for tid, st in sts:
             st.step()
 
     def _exec_cmd(self, rslt):
@@ -794,7 +815,7 @@ class c_ffta_battle_stream:
         if typ == 'error':
             rsts = []
             for thrd in thrds:
-                rsts.append(thrd['ctx']['stat'])
+                rsts.append((tid, thrd['ctx']['stat']))
             return False, rsts
         ret = []
         del_ti = []
@@ -804,6 +825,11 @@ class c_ffta_battle_stream:
             if typ == 'load':
                 ret.append((tid, rslt['scene']))
                 del_ti.append(ti)
+            elif typ == 'stat':
+                dvar = rslt['var']
+                dval = rslt['val']
+                st = ctx['stat']
+                st.setvar(dvar, dval)
             elif typ == 'flow':
                 cvar, cval = rslt.get('condi', (None, None))
                 step = rslt['flow_offset']
@@ -811,7 +837,7 @@ class c_ffta_battle_stream:
                     thrd['step'] = step
                     continue
                 st = ctx['stat']
-                for rcondi, nst in st.check(cvar, cval):
+                for rcondi, nst in st.check(cvar, cval, cvar[0] == 'flg'):
                     if rcondi:
                         nctx = ctx.copy()
                         nctx['stat'] = nst
@@ -831,23 +857,34 @@ class c_ffta_battle_stream:
         rlds = {}
         for prog in self.psr.iter_program(self.pidx):
             nsts = []
-            for st in sts:
+            for tid, st in sts:
                 for pdone, lds in prog.exec(
                     cb_pck = self._exec_cmd, ctx = {
                         'stat': st,
-                    }):
-                    if not pdone:
-                        nsts.extend(lds)
-                        continue
+                    }, tid = tid):
                     for ldtid, ldsc in lds:
-                        assert not ldtid in rlds
-                        rlds[ldtid] = ldsc
+                        if pdone:
+                            ldtid = ''.join(str(i) for i in ldtid)
+                            assert not ldtid in rlds
+                            rlds[ldtid] = ldsc
+                        else:
+                            self._add_sts(nsts, ldtid, ldsc)
             sts = nsts
-        return rlds
+        self._step_sts(sts)
+        return sts, rlds
 
     def exec(self):
-        sts = [c_steam_stats()]
-        return self._exec(sts)
+        sts = [(None, c_steam_stats())]
+        while sts:
+            sts, lds = self._exec(sts)
+            print('===')
+            for k, v in lds.items():
+                print(k, v)
+            for tid, st in sts:
+                if st.undirty():
+                    break
+            else:
+                break
 
 # ===============
 #      main
