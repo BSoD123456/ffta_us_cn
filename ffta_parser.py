@@ -720,14 +720,12 @@ class c_steam_stats:
         self.cur = 0
         self.det = {}
         self.ndet = {}
-        self.dirty = False
 
     def copy(self):
         r = c_steam_stats()
         r.cur = self.cur
         r.det = self.det.copy()
         r.ndet = self.ndet.copy()
-        r.dirty = self.dirty
         return r
 
     def __eq__(self, dst):
@@ -735,6 +733,9 @@ class c_steam_stats:
             self.cur == dst.cur and
             self.det == dst.det and
             self.ndet == dst.ndet)
+
+    def det_eq(self, dst):
+        return self.det == dst.det
 
     def step(self):
         self.cur += 1
@@ -782,12 +783,6 @@ class c_steam_stats:
         if self.det.get(var, None) == val:
             return
         self.det[var] = val
-        self.dirty = True
-
-    def undirty(self):
-        d = self.dirty
-        self.dirty = False
-        return d
 
 class c_ffta_battle_stream:
 
@@ -802,6 +797,17 @@ class c_ffta_battle_stream:
                 return False
         sts.append((ntid, nst))
         return True
+
+    @staticmethod
+    def _diff_sts(osts, nsts):
+        dsts = []
+        for ntid, nst in nsts:
+            for otid, ost in osts:
+                if nst.det_eq(ost):
+                    break
+            else:
+                dsts.append((ntid, nst))
+        return dsts
 
     @staticmethod
     def _step_sts(sts):
@@ -876,15 +882,11 @@ class c_ffta_battle_stream:
     def exec(self):
         sts = [(None, c_steam_stats())]
         while sts:
-            sts, lds = self._exec(sts)
+            nsts, lds = self._exec(sts)
             print('===')
             for k, v in lds.items():
                 print(k, v)
-            for tid, st in sts:
-                if st.undirty():
-                    break
-            else:
-                break
+            sts = self._diff_sts(sts, nsts)
 
 # ===============
 #      main
