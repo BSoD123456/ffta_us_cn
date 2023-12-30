@@ -318,14 +318,14 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #params: p1(u16)
     #p1: cur cmd offset increment
     @cmdc(0x0f, 'flow', 'if ch.a4=0xd found and gv3=0x140 jump {out:0>4x}')
-    def cmd_test_cha_s1_st2_jump(self, prms, psr, rslt):
+    def cmd_test_cha_f_a4_d_gv3_140_jump(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt)
 
     #cmd: test gcondi1 jump
     #params: p1(u16)
     #p1: cur cmd offset increment
     @cmdc(0x10, 'flow', 'if gc1 jump {out:0>4x}')
-    def cmd_test_cha_s1_st2_jump(self, prms, psr, rslt):
+    def cmd_test_cha_gc1_jump(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt)
 
 class c_ffta_script_parser:
