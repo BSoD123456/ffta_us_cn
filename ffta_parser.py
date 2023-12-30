@@ -197,7 +197,9 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p1: scene idx in s_fat
     @cmdc(0x1c, 'load', 'load scene {out}')
     def cmd_load_scene(self, prms, psr, rslt):
-        return self._p16(prms, 0)
+        sc = self._p16(prms, 0)
+        rslt['scene'] = sc
+        return sc
 
     #cmd: done scene
     #params: ?
@@ -225,7 +227,9 @@ class c_ffta_battle_cmd(c_ffta_cmd):
             v -= 0x10000
         v += len(prms) + 1
         rslt['flow_offset'] = v
-        return v + rslt['offset']
+        v += rslt['offset']
+        rslt['dst_offset'] = v
+        return v
 
     #cmd: set flag
     #params: p1(u16) p2(u8)
@@ -233,7 +237,9 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: dest value
     @cmdc(0x02, 'stat', 'set flg:{out[0]:x} = {out[1]}')
     def cmd_set_flg(self, prms, psr, rslt):
-        return self._p16(prms, 0), prms[2]
+        dval = prms[2]
+        assert dval in (0, 1)
+        return self._p16(prms, 0), dval
 
     #cmd: test flag jump
     #params: p1(u16) p2(u16)
@@ -241,13 +247,17 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: cur cmd offset increment
     @cmdc(0x04, 'flow', 'if flg:{out[1]:x} jump {out[0]:0>4x}')
     def cmd_test_flg_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), self._p16(prms, 0)
+        fidx = self._p16(prms, 0)
+        rslt['condi'] = (('flg', fidx), 1)
+        return self.cmd_jump(prms, psr, rslt), fidx
 
     #cmd: load scene
     #params: ?
     @cmdc(0x05, 'load', 'load scene {out}')
     def cmd_load_scene(self, prms, psr, rslt):
-        return self._p16(prms, 0)
+        sc = self._p16(prms, 0)
+        rslt['scene'] = sc
+        return sc
 
     #cmd: test chara stat1 jump
     #params: p1(u8) p2(u16)
@@ -255,7 +265,9 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: cur cmd offset increment
     @cmdc(0x06, 'flow', 'if ch:{out[1]:x} is st1 jump {out[0]:0>4x}')
     def cmd_test_cha_st1_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0]
+        cidx = prms[0]
+        rslt['condi'] = (('__cur__', 'cha', cidx, 'st1'), 1)
+        return self.cmd_jump(prms, psr, rslt), cidx
 
     #cmd: test cur chara attr101 jump
     #params: p1(u8) p2(u8) p3(u16)
@@ -264,7 +276,10 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p3: cur cmd offset increment
     @cmdc(0x07, 'flow', 'if cur_ch:{out[1]:x}.a101={out[2]} jump {out[0]:0>4x}')
     def cmd_test_cha_c_a101_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
+        cidx = prms[0]
+        dval = prms[1]
+        rslt['condi'] = (('__cur__', 'cha', cidx, 'a101'), dval)
+        return self.cmd_jump(prms, psr, rslt), cidx, dval
 
     #cmd: test gv1 jump
     #params: p1(u16) p2(u16)
@@ -272,7 +287,9 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: cur cmd offset increment
     @cmdc(0x08, 'flow', 'if gv1={out[1]} jump {out[0]:0>4x}')
     def cmd_test_gv1_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), self._p16(prms, 0)
+        dval = self._p16(prms, 0)
+        rslt['condi'] = (('__cur__', 'gv1'), dval)
+        return self.cmd_jump(prms, psr, rslt), dval
 
     #cmd: test chara attr18 jump
     #params: p1(u8) p2(u8) p3(u16)
@@ -281,7 +298,10 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p3: cur cmd offset increment
     @cmdc(0x09, 'flow', 'if ch:{out[1]:x}.a18>={out[2]} jump {out[0]:0>4x}')
     def cmd_test_cha_a18_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
+        cidx = prms[0]
+        dval = prms[1]
+        rslt['condi'] = (('__cur__', 'cha', cidx, 'a18'), dval)
+        return self.cmd_jump(prms, psr, rslt), cidx, dval
 
     #cmd: test find chara by a4 jump
     #params: p1(u8) p2(u16)
@@ -289,7 +309,9 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: cur cmd offset increment
     @cmdc(0x0a, 'flow', 'if ch.a4={out[1]} found jump {out[0]:0>4x}')
     def cmd_test_cha_f_a4_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0]
+        dval = prms[0]
+        rslt['condi'] = (('__cur__', 'cha', 'a4', dval), 1)
+        return self.cmd_jump(prms, psr, rslt), dval
 
     #cmd: test sum cha a101 jump
     #params: p1(u8) p2(u16)
@@ -297,7 +319,9 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: cur cmd offset increment
     @cmdc(0x0b, 'flow', 'if sum(ch.a101)={out[1]} jump {out[0]:0>4x}')
     def cmd_test_sum_cha_a101_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0]
+        dval = prms[0]
+        rslt['condi'] = (('__cur__', 'sum', 'cha', 'a101'), dval)
+        return self.cmd_jump(prms, psr, rslt), dval
 
     #cmd: test gv2 jump
     #params: p1(u8) p2(u16)
@@ -305,13 +329,16 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: cur cmd offset increment
     @cmdc((0x0c, 0xd), 'flow', 'if gv2={out[1]} jump {out[0]:0>4x}')
     def cmd_test_gv2_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0]
+        dval = prms[0]
+        rslt['condi'] = (('__cur__', 'gv2'), dval)
+        return self.cmd_jump(prms, psr, rslt), dval
 
     #cmd: test some chara1 st2 jump
     #params: p1(u16)
     #p1: cur cmd offset increment
     @cmdc(0x0e, 'flow', 'if ch:s1 is st2 jump {out:0>4x}')
     def cmd_test_cha_s1_st2_jump(self, prms, psr, rslt):
+        rslt['condi'] = (('__cur__', 'cha', 's1', 'st2'), 1)
         return self.cmd_jump(prms, psr, rslt)
 
     #cmd: test find chara a4=0x0d and gv3=0x140 jump
@@ -319,6 +346,7 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p1: cur cmd offset increment
     @cmdc(0x0f, 'flow', 'if ch.a4=0xd found and gv3=0x140 jump {out:0>4x}')
     def cmd_test_cha_f_a4_d_gv3_140_jump(self, prms, psr, rslt):
+        rslt['condi'] = (('__cur__', 'cha', 'a4', 'd', 'gv3', '140'), 1)
         return self.cmd_jump(prms, psr, rslt)
 
     #cmd: test gcondi1 jump
@@ -326,6 +354,7 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p1: cur cmd offset increment
     @cmdc(0x10, 'flow', 'if gc1 jump {out:0>4x}')
     def cmd_test_cha_gc1_jump(self, prms, psr, rslt):
+        rslt['condi'] = (('__cur__', 'gc1'), 1)
         return self.cmd_jump(prms, psr, rslt)
 
 class c_ffta_script_parser:
@@ -614,7 +643,7 @@ class c_ffta_script_relation:
         nm = rslt['name']
         if not nm == 'load_scene':
             return None
-        return rslt['output']
+        return rslt['scene']
 
     def _scan(self, pname, psr, rtab, rtab_r, rchain, allidxs):
         for prog in psr.iter_program():
@@ -657,6 +686,110 @@ class c_ffta_script_relation:
             if not i in rtab_r and not i in rtab:
                 unref.append(i)
         self.unrefer = sorted(unref)
+
+# ===============
+#     stream
+# ===============
+
+class c_steam_stats:
+
+    def __init__(self):
+        self.cur = 0
+        self.det = {}
+        self.ndet = {}
+
+    def copy(self):
+        r = c_steam_stats()
+        r.cur = self.cur
+        r.det = self.det.copy()
+        r.ndet = self.ndet.copy()
+        return r
+
+    def __eq__(self, dst):
+        return (
+            self.cur == dst.cur and
+            self.det == dst.det and
+            self.ndet == dst.ndet)
+
+    def step(self):
+        r.cur += 1
+
+    def _cvar(self, var):
+        if var[0] == '__cur__':
+            return (self.cur,) + var[1:]
+        else:
+            return var
+
+    def _branch(self, var, val):
+        var = self._cvar(var)
+        if var in self.ndet:
+            ov = self.ndet[var].copy()
+            if isinstance(ov, set):
+                if val in ov:
+                    yield False, self
+                    return
+            else:
+                if val == ov:
+                    yield True, self
+                else:
+                    yield False, self
+                return
+        else:
+            ov = set()
+        ov.add(val)
+        br_false = self.copy()
+        br_false.ndet[var] = ov
+        yield False, br_false
+        br_true = self.copy()
+        br_true.ndet[var] = val
+        yield True, br_true
+
+    def check(self, var, val):
+        var = self._cvar(var)
+        if var in self.det:
+            yield self.det[var] == val, self
+            return
+        yield from self._branch(var, val)
+
+class c_ffta_battle_stream:
+
+    def __init__(self, psr, pidx):
+        self.psr = psr
+        self.pidx = pidx
+
+    @staticmethod
+    def _add_sts(sts, nst):
+        for st in sts:
+            if st == nst:
+                return
+        sts.append(nst)
+
+    @staticmethod
+    def _step_sts(self, sts):
+        for st in sts:
+            st.step()
+
+    def _exec_cmd(self, sts, rslt):
+        typ = rslt['type']
+        if typ == 'load':
+            pass
+        elif typ == 'flow':
+            cvar, cval = rslt.get('condi', (None, None))
+            dst = rslt['dst_offset']
+            if cvar is None:
+                pass
+
+    def _exec(self, sts):
+        csts = sts
+        for prog in self.psr.iter_program(pi1):
+            for nsts in prog.exec(cb_pck = lambda r: self._exec_cmd(sts, r)):
+                csts = nsts
+        self._step_sts(csts)
+        return csts
+
+    def exec(self):
+        sts = [c_steam_stats(self.pidx)]
+        sts = self._exec(sts)
 
 # ===============
 #      main
