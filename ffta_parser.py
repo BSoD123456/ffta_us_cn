@@ -367,10 +367,15 @@ class c_ffta_script_parser:
             for pi2 in sub.last_idxs:
                 self._dummy_program(pi1, pi2)
 
-    def iter_program(self):
+    def iter_program(self, pi1 = None):
         sect = self.sects['script']
+        if pi1 is None:
+            idxprv = tuple()
+        else:
+            sect = sect[pi1]
+            idxprv = (pi1,)
         for idxp, _ in sect.iter_item():
-            prog = self.get_program(*idxp)
+            prog = self.get_program(*idxprv, *idxp)
             if prog:
                 yield prog
 
@@ -709,15 +714,18 @@ if __name__ == '__main__':
         srels.scan()
         ppr(srels.refer_heads)
 
-    def sc_show(page_idx = 1):
-        global slog_s
-        slog_s = c_ffta_script_log(spsr_s.get_program(page_idx), chs)
-        for i, v in enumerate(slog_s.logs):
+    def _show_log(slog):
+        for i, v in enumerate(slog.logs):
             print(f'{i}-{v}')
 
+    def sc_show(page_idx = 1):
+        _show_log(c_ffta_script_log(spsr_s.get_program(page_idx), chs))
+
     def bt_show(pi2 = 0, pi1 = 3):
-        global slog_b
-        slog_b = c_ffta_script_log(spsr_b.get_program(pi1, pi2), chs)
-        for i, v in enumerate(slog_b.logs):
-            print(f'{i}-{v}')
+        if pi2 is None:
+            for prog in spsr_b.iter_program(pi1):
+                print(f'page {prog.page_idxs[1]}:')
+                _show_log(c_ffta_script_log(prog, chs))
+        else:
+            _show_log(c_ffta_script_log(spsr_b.get_program(pi1, pi2), chs))
 
