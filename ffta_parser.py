@@ -36,7 +36,12 @@ def cmdc(code, typ = 'unknown', rpr = None):
         nm = mth.__name__
         assert nm.startswith('cmd_')
         nm = nm[4:]
-        cls._cmd_tab[code] = (mth, typ, nm, rpr)
+        if isinstance(code, int):
+            codes = (code,)
+        else:
+            codes = code
+        for c in codes:
+            cls._cmd_tab[c] = (mth, typ, nm, rpr)
     return clsdec(_hndl)
 
 class c_ffta_cmd:
@@ -265,7 +270,7 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #params: p1(u16) p2(u16)
     #p1: dest value
     #p2: cur cmd offset increment
-    @cmdc(0x08, 'flow', 'if gv1={out[1]:x} jump {out[0]:0>4x}')
+    @cmdc(0x08, 'flow', 'if gv1={out[1]} jump {out[0]:0>4x}')
     def cmd_test_gv1_jump(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt), self._p16(prms, 0)
 
@@ -282,7 +287,7 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #params: p1(u8) p2(u16)
     #p1: dest character attr 4 value
     #p2: cur cmd offset increment
-    @cmdc(0x0a, 'flow', 'if ch.a4={out[1]:x} found jump {out[0]:0>4x}')
+    @cmdc(0x0a, 'flow', 'if ch.a4={out[1]} found jump {out[0]:0>4x}')
     def cmd_test_cha_f_a4_jump(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt), prms[0]
 
@@ -290,9 +295,38 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #params: p1(u8) p2(u16)
     #p1: dest value
     #p2: cur cmd offset increment
-    @cmdc(0x0b, 'flow', 'if sum(ch.a101)={out[1]:x} jump {out[0]:0>4x}')
+    @cmdc(0x0b, 'flow', 'if sum(ch.a101)={out[1]} jump {out[0]:0>4x}')
     def cmd_test_sum_cha_a101_jump(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt), prms[0]
+
+    #cmd: test gv2 jump
+    #params: p1(u8) p2(u16)
+    #p1: dest value
+    #p2: cur cmd offset increment
+    @cmdc((0x0c, 0xd), 'flow', 'if gv2={out[1]} jump {out[0]:0>4x}')
+    def cmd_test_gv2_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), prms[0]
+
+    #cmd: test some chara1 st2 jump
+    #params: p1(u16)
+    #p1: cur cmd offset increment
+    @cmdc(0x0e, 'flow', 'if ch:s1 is st2 jump {out:0>4x}')
+    def cmd_test_cha_s1_st2_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt)
+
+    #cmd: test find chara a4=0x0d and gv3=0x140 jump
+    #params: p1(u16)
+    #p1: cur cmd offset increment
+    @cmdc(0x0f, 'flow', 'if ch.a4=0xd found and gv3=0x140 jump {out:0>4x}')
+    def cmd_test_cha_s1_st2_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt)
+
+    #cmd: test gcondi1 jump
+    #params: p1(u16)
+    #p1: cur cmd offset increment
+    @cmdc(0x10, 'flow', 'if gc1 jump {out:0>4x}')
+    def cmd_test_cha_s1_st2_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt)
 
 class c_ffta_script_parser:
 
