@@ -54,6 +54,10 @@ class c_ffta_cmd:
     def __len__(self):
         return 1 + len(self.prms)
 
+    @staticmethod
+    def _p16(prms, idx):
+        return prms[idx] + (prms[idx + 1] << 8)
+
     def exec(self, psr, rslt = None):
         if rslt is None:
             rslt = {}
@@ -124,7 +128,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p1: cur cmd offset increment
     @cmdc(0x19, 'flow', 'jump {out:0>4x}')
     def cmd_jump(self, prms, psr, rslt):
-        v = prms[0] + (prms[1] << 8)
+        v = self._p16(prms, -2)
         if 0x8000 & v:
             v -= 0x10000
         v += len(prms) + 1
@@ -188,8 +192,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p1: scene idx in s_fat
     @cmdc(0x1c, 'load', 'load scene {out}')
     def cmd_load_scene(self, prms, psr, rslt):
-        v = prms[0] + (prms[1] << 8)
-        return v
+        return self._p16(prms, 0)
 
     #cmd: done scene
     #params: ?
@@ -212,7 +215,7 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p1: cur cmd offset increment
     @cmdc(0x01, 'flow', 'jump {out:0>4x}')
     def cmd_jump(self, prms, psr, rslt):
-        v = prms[-2] + (prms[-1] << 8)
+        v = self._p16(prms, -2)
         if 0x8000 & v:
             v -= 0x10000
         v += len(prms) + 1
@@ -225,7 +228,7 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: dest value
     @cmdc(0x02, 'stat', 'set flg:{out[0]:x} = {out[1]}')
     def cmd_set_flg(self, prms, psr, rslt):
-        return prms[0] + (prms[1] << 8), prms[2]
+        return self._p16(prms, 0), prms[2]
 
     #cmd: test flag jump
     #params: p1(u16) p2(u16)
@@ -233,38 +236,62 @@ class c_ffta_battle_cmd(c_ffta_cmd):
     #p2: cur cmd offset increment
     @cmdc(0x04, 'flow', 'if flg:{out[1]:x} jump {out[0]:0>4x}')
     def cmd_test_flg_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0] + (prms[1] << 8)
+        return self.cmd_jump(prms, psr, rslt), self._p16(prms, 0)
 
     #cmd: load scene
     #params: ?
     @cmdc(0x05, 'load', 'load scene {out}')
     def cmd_load_scene(self, prms, psr, rslt):
-        v = prms[0] + (prms[1] << 8)
-        return v
+        return self._p16(prms, 0)
 
-    #cmd: test bval jump
-    #params: p1(u8) p2(u8) p3(u16)
-    #p1: bval idx
-    #p2: dest bval(?) value
-    #p3: cur cmd offset increment
-    @cmdc(0x07, 'flow', 'if v:{out[1]:x}={out[2]} jump {out[0]:0>4x}')
-    def cmd_test_bval_jump(self, prms, psr, rslt):
-        return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
-
-    #cmd: test bcondi jump
+    #cmd: test chara stat1 jump
     #params: p1(u8) p2(u16)
-    #p1: bcondi idx
+    #p1: character idx
     #p2: cur cmd offset increment
-    @cmdc(0x06, 'flow', 'if c:{out[1]:x} jump {out[0]:0>4x}')
-    def cmd_test_bcnd_jump(self, prms, psr, rslt):
+    @cmdc(0x06, 'flow', 'if ch:{out[1]:x} is st1 jump {out[0]:0>4x}')
+    def cmd_test_cha_st1_jump(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt), prms[0]
 
-    #cmd: test sum jump
-    #params: p1(u8) p2(u16)
-    #p1: dest sum(?all bvals) value
+    #cmd: test cur chara attr101 jump
+    #params: p1(u8) p2(u8) p3(u16)
+    #p1: character idx
+    #p2: dest value
+    #p3: cur cmd offset increment
+    @cmdc(0x07, 'flow', 'if cur_ch:{out[1]:x}.a101={out[2]} jump {out[0]:0>4x}')
+    def cmd_test_cha_c_a101_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
+
+    #cmd: test gv1 jump
+    #params: p1(u16) p2(u16)
+    #p1: dest value
     #p2: cur cmd offset increment
-    @cmdc(0x0b, 'flow', 'if sum={out[1]:x} jump {out[0]:0>4x}')
-    def cmd_test_sum_jump(self, prms, psr, rslt):
+    @cmdc(0x08, 'flow', 'if gv1={out[1]:x} jump {out[0]:0>4x}')
+    def cmd_test_gv1_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), self._p16(prms, 0)
+
+    #cmd: test chara attr18 jump
+    #params: p1(u8) p2(u8) p3(u16)
+    #p1: character idx
+    #p2: dest value
+    #p3: cur cmd offset increment
+    @cmdc(0x09, 'flow', 'if ch:{out[1]:x}.a18>={out[2]} jump {out[0]:0>4x}')
+    def cmd_test_cha_a18_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), prms[0], prms[1]
+
+    #cmd: test find chara by a4 jump
+    #params: p1(u8) p2(u16)
+    #p1: dest character attr 4 value
+    #p2: cur cmd offset increment
+    @cmdc(0x0a, 'flow', 'if ch.a4={out[1]:x} found jump {out[0]:0>4x}')
+    def cmd_test_cha_f_a4_jump(self, prms, psr, rslt):
+        return self.cmd_jump(prms, psr, rslt), prms[0]
+
+    #cmd: test sum cha a101 jump
+    #params: p1(u8) p2(u16)
+    #p1: dest value
+    #p2: cur cmd offset increment
+    @cmdc(0x0b, 'flow', 'if sum(ch.a101)={out[1]:x} jump {out[0]:0>4x}')
+    def cmd_test_sum_cha_a101_jump(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt), prms[0]
 
 class c_ffta_script_parser:
