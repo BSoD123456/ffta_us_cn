@@ -66,8 +66,16 @@ class c_ffta_cmd:
     def exec(self, psr, rslt = None):
         if rslt is None:
             rslt = {}
+        if 'thrd' in rslt:
+            thrds = rslt['thrd']
+        else:
+            thrds = [{
+                'ctx': None
+            }]
+            rslt['thrd'] = thrds
+        for th in thrds:
+            th['step'] = len(self)
         rslt.update({
-            'step': [len(self)],
             'type': 'unknown',
         })
         if self.op in self._cmd_tab:
@@ -468,13 +476,12 @@ class c_ffta_script_program:
     def get_cmd(self, ofs):
         return self.cmds.get(ofs, None)
 
-    def _raise_rslt(self, ofs, msg, **kargs):
-        kargs.update({
+    def _raise_rslt(self, rslt, msg):
+        rslt.update({
             'type': 'error',
-            'offset': ofs,
             'output': msg,
         })
-        return kargs
+        return rslt
 
     def _hndl_rslt(self, rslt, flt, flt_out, cb_pck):
         typ = rslt['type']
@@ -488,22 +495,31 @@ class c_ffta_script_program:
             ro = rslt['output']
         return ro
 
-    def exec(self, st_ofs = 0, flt = None, flt_out = ['unknown'], cb_pck = None, wk = None):
+    def exec(self, st_ofs = 0, flt = None, flt_out = ['unknown'], cb_pck = None, ctx = None, wk = None, tid = None):
         if wk is None:
             wk = set()
+        if tid is None:
+            tid = [0]
         cur_ofs = st_ofs
         page_size = self.page_size
         while True:
+            rslt = {
+                'offset': cur_ofs,
+                'tid': tuple(tid),
+                'thrd': [{
+                    'ctx': ctx,
+                }],
+            }
             if cur_ofs >= page_size:
                 ro = self._hndl_rslt(
-                    self._raise_rslt(cur_ofs, f'overflow 0x{page_size:x}'),
+                    self._raise_rslt(rslt, f'overflow 0x{page_size:x}'),
                     flt, flt_out, cb_pck)
                 if not ro is None:
                     yield ro
                 break
             elif cur_ofs in wk:
                 ro = self._hndl_rslt(
-                    self._raise_rslt(cur_ofs, 'walked skip'),
+                    self._raise_rslt(rslt, 'walked skip'),
                     flt, flt_out, cb_pck)
                 if not ro is None:
                     yield ro
@@ -511,28 +527,30 @@ class c_ffta_script_program:
             cmd = self.get_cmd(cur_ofs)
             if cmd is None:
                 ro = self._hndl_rslt(
-                    self._raise_rslt(cur_ofs, f'no valid cmd'),
+                    self._raise_rslt(rslt, f'no valid cmd'),
                     flt, flt_out, cb_pck)
                 if not ro is None:
                     yield ro
                 break
-            rslt = {
-                'offset': cur_ofs,
-                'cmd': cmd,
-            }
+            rslt['cmd'] = cmd
             rslt = cmd.exec(self, rslt)
             wk.add(cur_ofs)
             ro = self._hndl_rslt(rslt, flt, flt_out, cb_pck)
             if not ro is None:
                 yield ro
-            stps = rslt['step']
-            if len(stps) == 0:
+            thrds = rslt['thrd']
+            thlen = len(thrds)
+            if thlen == 0:
                 break
-            for stp in stps[:-1]:
+            for i, th in enumerate(thrds[:-1]):
+                stp = th['step']
                 nxt_ofs = cur_ofs + stp
                 yield from self.exec(
-                    nxt_ofs, flt, flt_out, cb_pck, wk)
-            cur_ofs += stps[-1]
+                    nxt_ofs, flt, flt_out, cb_pck, th['ctx'],
+                    wk.copy(), [*tid, i])
+            if thlen > 1:
+                tid.append(thlen - 1)
+            cur_ofs += thrds[-1]['step']
 
 # ===============
 #     scene
@@ -769,27 +787,67 @@ class c_ffta_battle_stream:
         for st in sts:
             st.step()
 
-    def _exec_cmd(self, sts, rslt):
+    def _exec_cmd(self, rslt):
         typ = rslt['type']
-        if typ == 'load':
-            pass
-        elif typ == 'flow':
-            cvar, cval = rslt.get('condi', (None, None))
-            dst = rslt['dst_offset']
-            if cvar is None:
-                pass
+        tid = rslt['tid']
+        thrds = rslt['thrd']
+        if typ == 'error':
+            rsts = []
+            for thrd in thrds:
+                rsts.append(thrd['ctx']['stat'])
+            return False, rsts
+        ret = []
+        del_ti = []
+        nthrds = []
+        for ti, thrd in enumerate(thrds):
+            ctx = thrd['ctx']
+            if typ == 'load':
+                ret.append((tid, rslt['scene']))
+                del_ti.append(ti)
+            elif typ == 'flow':
+                cvar, cval = rslt.get('condi', (None, None))
+                step = rslt['flow_offset']
+                if cvar is None:
+                    thrd['step'] = step
+                    continue
+                st = ctx['stat']
+                for rcondi, nst in st.check(cvar, cval):
+                    if rcondi:
+                        nctx = ctx.copy()
+                        nctx['stat'] = nst
+                        nthrds.append({
+                            'ctx': nctx,
+                            'step': step,
+                        })
+                    else:
+                        ctx['stat'] = nst
+        for ti in reversed(del_ti):
+            thrds.pop(ti)
+        thrds.extend(nthrds)
+        if ret:
+            return True, ret
 
     def _exec(self, sts):
-        csts = sts
-        for prog in self.psr.iter_program(pi1):
-            for nsts in prog.exec(cb_pck = lambda r: self._exec_cmd(sts, r)):
-                csts = nsts
-        self._step_sts(csts)
-        return csts
+        rlds = {}
+        for prog in self.psr.iter_program(self.pidx):
+            nsts = []
+            for st in sts:
+                for pdone, lds in prog.exec(
+                    cb_pck = self._exec_cmd, ctx = {
+                        'stat': st,
+                    }):
+                    if not pdone:
+                        nsts.extend(lds)
+                        continue
+                    for ldtid, ldsc in lds:
+                        assert not ldtid in rlds
+                        rlds[ldtid] = ldsc
+            sts = nsts
+        return rlds
 
     def exec(self):
-        sts = [c_steam_stats(self.pidx)]
-        sts = self._exec(sts)
+        sts = [c_steam_stats()]
+        return self._exec(sts)
 
 # ===============
 #      main
@@ -833,6 +891,8 @@ if __name__ == '__main__':
 
     spsr_s = make_script_parser(rom, 'scene')
     spsr_b = make_script_parser(rom, 'battle')
+
+    strm_b = c_ffta_battle_stream(spsr_b, 2)
 
     def find_scene_by_txts(rom, tidxs):
         sfat = rom.tabs['s_fat']
