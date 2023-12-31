@@ -793,7 +793,7 @@ class c_steam_stats:
 
 class c_sp_blk:
 
-    def __init__(self, sp = True):
+    def __init__(self, sp):
         self.blk = []
         self.sp = sp
 
@@ -801,16 +801,24 @@ class c_sp_blk:
         blk = self.blk
         if not blk:
             return 0
-        ln = 1
-        if not self.sp:
+        if self.sp:
+            ln = 1
             for sub in blk:
                 if isinstance(sub, c_sp_blk):
                     ln *= len(sub)
+        else:
+            ln = 0
+            for sub in blk:
+                if isinstance(sub, c_sp_blk):
+                    ln += len(sub)
+                else:
+                    ln += 1
         return ln
 
     def _iter_subs(self, subs):
         assert self.sp
         if not subs:
+            yield []
             return
         sub = subs[0]
         tail = subs[1:]
@@ -846,74 +854,46 @@ class c_sp_blk:
         r.blk = rblk
         return r
 
-    def merge(self, src):
-        if self.sp == src.sp:
-            dst = type(self)(self.sp)
-            if self:
+    def merge(self, src, sp):
+        dst = type(self)(sp)
+        if self:
+            if self.sp == sp:
                 self._copy_to_blk(dst.blk)
-            if src:
-                src._copy_to_blk(dst.blk)
-        else:
-            dst = type(self)(not self.sp)
-            if self:
+            else:
                 dst.blk.append(self.copy())
-            if src:
+        if src:
+            if src.sp == sp:
+                src._copy_to_blk(dst.blk)
+            else:
                 dst.blk.append(src.copy())
         return dst
 
     def append(self, v, sp):
         src = type(self)(sp)
         src.blk.append(v)
-        return self.merge(src)
+        return self.merge(src, sp)
 
 class c_branch_log:
 
     def __init__(self):
-        self.blks = []
+        self.blk = c_sp_blk(True)
 
     def copy(self):
         r = c_branch_log()
-        for blk in self.blks:
-            rblk = []
-            for ch in blk:
-                rblk.append(ch.copy())
-            r.blks.append(rblk)
+        r.blk = self.blk.copy()
         return r
 
     def __len__(self):
-        blks = self.blks
-        if not blks:
-            return 0
-        ln = 1
-        for blk in blks:
-            ln *= len(blk)
-        return ln
-
-    def _iter_blks(self, blks):
-        if len(blks) == 0:
-            return
-        blk = blks[0]
-        tls = blks[1:]
-        for ch in blk:
-            for tl in self._iter_blks(tls):
-                yield [*ch, *tl]
+        return len(self.blk)
 
     def __iter__(self):
-        self._iter_blks(self.blks)
+        yield from self.blk
 
     def write(self, val):
-        blks = self.blks
-        if not blks or len(blks[-1]) > 1:
-            blk = [[]]
-            blks.append(blk)
-        else:
-            blk = blks[-1]
-        assert len(blk) == 1
-        ch = blk[0]
-        ch.append(val)
+        self.blk = self.blk.append(val, True)
 
     def merge(self, dst):
-        pass
+        self.blk = self.blk.merge(dst.blk, False)
 
 class c_ffta_battle_stream:
 
@@ -937,7 +917,8 @@ class c_ffta_battle_stream:
                 rvs = ovs.copy()
             elif isinstance(ovs, c_branch_log):
                 assert isinstance(nvs, c_branch_log)
-                rvs = ovs.merge(nvs)
+                rvs = ovs.copy()
+                rvs.merge(nvs)
             else:
                 rvs = ovs.copy()
                 for nv in nvs:
@@ -1003,15 +984,13 @@ class c_ffta_battle_stream:
                 del_ti.append(ti)
             elif typ == 'load':
                 lds = ctx['lds']
-                if not lds:
-                    lds = [[]]
+                if lds:
+                    lds = lds.copy()
+                else:
+                    lds = c_branch_log()
                 ldsc = rslt['scene']
-                nlds = []
-                for ld in lds:
-                    nld = ld.copy()
-                    nld.append(ldsc)
-                    nlds.append(nld)
-                ret.append((tid, nlds, ctx['stat']))
+                lds.write(ldsc)
+                ret.append((tid, lds, ctx['stat']))
                 ret_done = True
                 del_ti.append(ti)
             elif typ == 'stat':
@@ -1050,8 +1029,7 @@ class c_ffta_battle_stream:
     def _exec(self, sts):
         xsts = []
         for prog in self.psr.iter_program(self.pidx):
-            #if len(sts) > 1:
-            #    print('h', prog.page_idx, len(sts))
+            print('h', prog.page_idx, len(sts))
             nsts = []
             for st, tids, lds in sts:
                 for rets, rdone in prog.exec(
@@ -1060,14 +1038,18 @@ class c_ffta_battle_stream:
                         'lds': lds,
                     }, tid = tids[0] if tids else None):
                     for rtid, rlds, rst in rets:
+                        assert rlds or not lds
                         if rdone:
-                            #print('x1', rst.det, rlds)
-                            print('x1', len(rlds))
+                            #print('x1', rst.det, [*rlds] if rlds else None)
                             self._add_sts(xsts, rst, [rtid], rlds)
                         else:
-                            #print('n1', rst.det, rlds)
+                            #print('n1', rst.det, [*rlds] if rlds else None)
                             self._add_sts(nsts, rst, [rtid], rlds)
             sts = nsts
+            for _, _, _ld in nsts:
+                if _ld:
+                    print('h2', prog.page_idxs, [*_ld])
+            print('h2a', prog.page_idxs, [len(_ld) for _, _, _ld in nsts if _ld])
         for st, tids, lds in sts:
             #print('x2', st.det, lds)
             self._add_sts(xsts, st, tids, lds)
@@ -1085,8 +1067,8 @@ class c_ffta_battle_stream:
 ##            for st, _, ld in osts:
 ##                print(st.det, ld)
 ##            print('---')
-##            for st, _, ld in nsts:
-##                print(st.det, ld)
+            for st, _, ld in nsts:
+                print(st.det, list(ld) if ld else None)
             for _, _, lds in osts:
                 if not lds:
                     continue
