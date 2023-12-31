@@ -820,9 +820,9 @@ class c_ffta_battle_stream:
     def _add_sts(self, sts, nst, *nsinfo):
         for i, (st, *sinfo) in enumerate(sts):
             if st == nst:
-                sts[i] = (nst, *self._merge_sinfo(sinfo, nsinfo, True))
+                sts[i] = (nst, *self._merge_sinfo(sinfo, nsinfo, False))
                 return False
-        sts.append((nst, *([nv] if nv else None for nv in nsinfo)))
+        sts.append((nst, *nsinfo))
         return True
 
     def _diff_sts(self, osts, nsts):
@@ -830,7 +830,8 @@ class c_ffta_battle_stream:
         for nst, *nsinfo in nsts:
             for i, (ost, *osinfo) in enumerate(osts):
                 if nst.det_eq(ost):
-                    osts[i] = (nst, *self._merge_sinfo(osinfo, nsinfo, False))
+                    # logging new info makes the result too long
+                    #osts[i] = (nst, *self._merge_sinfo(osinfo, nsinfo, False))
                     break
             else:
                 dsts.append((nst, *nsinfo))
@@ -887,16 +888,28 @@ class c_ffta_battle_stream:
     def _exec(self, sts):
         for prog in self.psr.iter_program(self.pidx):
             nsts = []
-            for st, tids, *_ in sts:
+            for st, tids, olds in sts:
                 for rets in prog.exec(
                     cb_pck = self._exec_cmd, ctx = {
                         'stat': st,
                     }, tid = tids[0] if tids else None):
                     for rtid, ldsc, rst in rets:
-                        self._add_sts(nsts, rst, rtid, ldsc)
-            print('h1', [v[2] for v in nsts])
+                        if ldsc is None:
+                            nlds = olds
+                        elif olds:
+                            nlds = []
+                            for old in olds:
+                                nld = old.copy()
+                                nld.append(ldsc)
+                                nlds.append(nld)
+                        else:
+                            nlds = [[ldsc]]
+                        #if nlds:
+                        #    print('h', nlds)
+                        self._add_sts(nsts, rst, [rtid], nlds)
+            #print('h1', tuple(v[2] for v in nsts))
             sts = nsts
-        print('h2')
+        #print('h2')
         self._step_sts(sts)
         return sts
 
