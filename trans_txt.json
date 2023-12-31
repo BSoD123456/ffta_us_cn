@@ -2498,7 +2498,7 @@
         ],
         "61/16/189": [
             "Everyone in town is@[4D]suffering because of@[4D]your law!@[40]@[42]",
-            "城里所有人[4D]都因为你的法律而受苦!@[40]@[42]"
+            "城里所有人@[4D]都因为你的法律而受苦!@[40]@[42]"
         ],
         "61/16/190": [
             "Well, now, I wonder?@[4D]Why don’t you try@[4D]thinking for yourself?@[40]@[42]",
@@ -5994,7 +5994,7 @@
         ],
         "44": [
             "Craftsman ",
-            "手艺人"
+            "工匠"
         ]
     }
 }
