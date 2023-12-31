@@ -823,6 +823,12 @@ class c_ffta_battle_stream:
         sts.append((nst, *nsinfo))
         return True
 
+    def _copy_sts(self, sts):
+        rsts = []
+        for sv in sts:
+            rsts.append(tuple(None if v is None else v.copy() for v in sv))
+        return rsts
+
     def _diff_sts(self, osts, nsts):
         dsts = []
         for nst, *nsinfo in nsts:
@@ -908,6 +914,7 @@ class c_ffta_battle_stream:
                             self._add_sts(xsts, rst, [rtid], rlds)
                         else:
                             self._add_sts(nsts, rst, [rtid], rlds)
+            #print('h', prog.page_idx, len(sts), len(nsts))
             sts = nsts
         for st, tids, lds in sts:
             self._add_sts(xsts, st, tids, lds)
@@ -918,9 +925,18 @@ class c_ffta_battle_stream:
         rlds = set()
         sts = [(c_steam_stats(), None, None)]
         while sts:
+            osts = self._copy_sts(sts)
             nsts = self._exec(sts)
-            nsts = self._diff_sts(sts, nsts)
-            for _, _, lds in sts:
+            nsts = self._diff_sts(osts, nsts)
+##            print('===')
+##            for _, _, ld in osts:
+##                if ld:
+##                    print(ld)
+##            print('---')
+##            for _, _, ld in nsts:
+##                if ld:
+##                    print(ld)
+            for _, _, lds in osts:
                 if not lds:
                     continue
                 for ld in lds:
