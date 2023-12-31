@@ -791,15 +791,13 @@ class c_ffta_battle_stream:
         self.pidx = pidx
 
     @staticmethod
-    def _merge_sinfo(osinfo, nsinfo, uni):
+    def _merge_sinfo(osinfo, nsinfo):
         slen = len(osinfo)
         assert slen == len(nsinfo)
         rsinfo = []
         for si in range(slen):
             ovs = osinfo[si]
             nvs = nsinfo[si]
-            if uni and not nvs is None:
-                nvs = [nvs]
             if ovs is None and nvs is None:
                 rvs = None
             elif ovs is None:
@@ -820,7 +818,7 @@ class c_ffta_battle_stream:
     def _add_sts(self, sts, nst, *nsinfo):
         for i, (st, *sinfo) in enumerate(sts):
             if st == nst:
-                sts[i] = (nst, *self._merge_sinfo(sinfo, nsinfo, False))
+                sts[i] = (nst, *self._merge_sinfo(sinfo, nsinfo))
                 return False
         sts.append((nst, *nsinfo))
         return True
@@ -830,8 +828,7 @@ class c_ffta_battle_stream:
         for nst, *nsinfo in nsts:
             for i, (ost, *osinfo) in enumerate(osts):
                 if nst.det_eq(ost):
-                    # logging new info makes the result too long
-                    #osts[i] = (nst, *self._merge_sinfo(osinfo, nsinfo, False))
+                    osts[i] = (nst, *self._merge_sinfo(osinfo, nsinfo))
                     break
             else:
                 dsts.append((nst, *nsinfo))
@@ -847,6 +844,7 @@ class c_ffta_battle_stream:
         tid = rslt['tid']
         thrds = rslt['thrd']
         ret = []
+        ret_done = False
         del_ti = []
         nthrds = []
         for ti, thrd in enumerate(thrds):
@@ -855,7 +853,17 @@ class c_ffta_battle_stream:
                 ret.append((tid, None, ctx['stat']))
                 del_ti.append(ti)
             elif typ == 'load':
-                ret.append((tid, rslt['scene'], ctx['stat']))
+                lds = ctx['lds']
+                if not lds:
+                    lds = [[]]
+                ldsc = rslt['scene']
+                nlds = []
+                for ld in lds:
+                    nld = ld.copy()
+                    nld.append(ldsc)
+                    nlds.append(nld)
+                ret.append((tid, nlds, ctx['stat']))
+                ret_done = True
                 del_ti.append(ti)
             elif typ == 'stat':
                 dvar = rslt['var']
@@ -883,42 +891,33 @@ class c_ffta_battle_stream:
             thrds.pop(ti)
         thrds.extend(nthrds)
         if ret:
-            return ret
+            return ret, ret_done
 
     def _exec(self, sts):
+        xsts = []
         for prog in self.psr.iter_program(self.pidx):
             nsts = []
-            for st, tids, olds in sts:
-                for rets in prog.exec(
+            for st, tids, lds in sts:
+                for rets, rdone in prog.exec(
                     cb_pck = self._exec_cmd, ctx = {
                         'stat': st,
+                        'lds': lds,
                     }, tid = tids[0] if tids else None):
-                    for rtid, ldsc, rst in rets:
-                        if ldsc is None:
-                            nlds = olds
-                        elif olds:
-                            nlds = []
-                            for old in olds:
-                                nld = old.copy()
-                                nld.append(ldsc)
-                                nlds.append(nld)
+                    for rtid, rlds, rst in rets:
+                        if rdone:
+                            self._add_sts(xsts, rst, [rtid], rlds)
                         else:
-                            nlds = [[ldsc]]
-                        #if nlds:
-                        #    print('h', nlds)
-                        self._add_sts(nsts, rst, [rtid], nlds)
-            #print('h1', tuple(v[2] for v in nsts))
+                            self._add_sts(nsts, rst, [rtid], rlds)
             sts = nsts
-        #print('h2')
-        self._step_sts(sts)
-        return sts
+        for st, tids, lds in sts:
+            self._add_sts(xsts, st, tids, lds)
+        self._step_sts(xsts)
+        return xsts
 
     def exec(self):
         sts = [(c_steam_stats(), None, None)]
         while sts:
             nsts = self._exec(sts)
-            #for _, tids, ld in nsts:
-            #    print('h', [''.join(str(i) for i in tid) for tid in tids] if tids else '-', ld)
             nsts = self._diff_sts(sts, nsts)
             print('===')
             for _, _, ld in sts:
