@@ -774,6 +774,10 @@ class c_steam_stats:
         yield True, br_true
 
     def check(self, var, val, det = None):
+        if var is None:
+            yield False, self.copy()
+            yield True, self.copy()
+            return
         var = self._cvar(var)
         if det != False and (det == True or var in self.det):
             yield self.det.get(var, None) == val, self
@@ -865,7 +869,10 @@ class c_ffta_battle_stream:
         for ti, thrd in enumerate(thrds):
             ctx = thrd['ctx']
             if typ == 'error':
-                ret.append((tid, None, ctx['stat']))
+                lds = ctx['lds']
+                if lds:
+                    lds = lds.copy()
+                ret.append((tid, lds, ctx['stat']))
                 del_ti.append(ti)
             elif typ == 'load':
                 lds = ctx['lds']
@@ -891,8 +898,13 @@ class c_ffta_battle_stream:
                 if cvar is None:
                     thrd['step'] = step
                     continue
+                if cvar[0] == '__cur__' and cvar[1] in ['cha', 'sum']:
+                    cvar = None
+                    cdet = None
+                else:
+                    cdet = (cvar[0] == 'flg')
                 st = ctx['stat']
-                for rcondi, nst in st.check(cvar, cval, cvar[0] == 'flg'):
+                for rcondi, nst in st.check(cvar, cval, cdet):
                     nctx = ctx.copy()
                     nctx['stat'] = nst
                     if rcondi:
@@ -911,7 +923,8 @@ class c_ffta_battle_stream:
     def _exec(self, sts):
         xsts = []
         for prog in self.psr.iter_program(self.pidx):
-            print('h', prog.page_idx, len(sts))
+            #if len(sts) > 1:
+            #    print('h', prog.page_idx, len(sts))
             nsts = []
             for st, tids, lds in sts:
                 for rets, rdone in prog.exec(
@@ -921,11 +934,15 @@ class c_ffta_battle_stream:
                     }, tid = tids[0] if tids else None):
                     for rtid, rlds, rst in rets:
                         if rdone:
+                            #print('x1', rst.det, rlds)
+                            print('x1', len(rlds))
                             self._add_sts(xsts, rst, [rtid], rlds)
                         else:
+                            #print('n1', rst.det, rlds)
                             self._add_sts(nsts, rst, [rtid], rlds)
             sts = nsts
         for st, tids, lds in sts:
+            #print('x2', st.det, lds)
             self._add_sts(xsts, st, tids, lds)
         self._step_sts(xsts)
         return xsts
@@ -938,13 +955,11 @@ class c_ffta_battle_stream:
             nsts = self._exec(sts)
             nsts = self._diff_sts(osts, nsts)
             print('===')
-            for _, _, ld in osts:
-                if ld:
-                    print(ld)
-            print('---')
-            for st, _, ld in nsts:
-                if ld:
-                    print(st.det, ld)
+##            for st, _, ld in osts:
+##                print(st.det, ld)
+##            print('---')
+##            for st, _, ld in nsts:
+##                print(st.det, ld)
             for _, _, lds in osts:
                 if not lds:
                     continue
