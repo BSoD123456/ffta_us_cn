@@ -915,15 +915,18 @@ class c_ffta_battle_stream:
         return xsts
 
     def exec(self):
+        rlds = set()
         sts = [(c_steam_stats(), None, None)]
         while sts:
             nsts = self._exec(sts)
             nsts = self._diff_sts(sts, nsts)
-            print('===')
-            for _, _, ld in sts:
-                if ld:
-                    print(ld)
+            for _, _, lds in sts:
+                if not lds:
+                    continue
+                for ld in lds:
+                    rlds.add(tuple(ld))
             sts = nsts
+        return sorted(rlds)
 
 # ===============
 #      main
@@ -968,8 +971,6 @@ if __name__ == '__main__':
     spsr_s = make_script_parser(rom, 'scene')
     spsr_b = make_script_parser(rom, 'battle')
 
-    strm_b = c_ffta_battle_stream(spsr_b, 3)
-
     def find_scene_by_txts(rom, tidxs):
         sfat = rom.tabs['s_fat']
         for i in range(sfat.tsize):
@@ -981,7 +982,14 @@ if __name__ == '__main__':
         global srels
         srels = c_ffta_script_relation(spsr_s, spsr_b)
         srels.scan()
-        ppr(srels.refer_heads)
+        for v in srels.refer_heads:
+            print(v, srels.refer[v])
+
+    def scan_strm(bi):
+        global strm_b
+        strm_b = c_ffta_battle_stream(spsr_b, bi)
+        lds = strm_b.exec()
+        ppr(lds)
 
     def _show_log(slog):
         for i, v in enumerate(slog.logs):
