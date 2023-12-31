@@ -844,6 +844,8 @@ class c_sp_blk:
                     yield sub
 
     def __eq__(self, dst):
+        if not isinstance(dst, c_sp_blk):
+            return False
         if self.sp != dst.sp:
             return False
         ln = len(self.blk)
@@ -1157,18 +1159,18 @@ class c_ffta_battle_stream:
                     for rtid, rlds, rst in rets:
                         assert rlds or not lds
                         if rdone:
-                            #print('x1', rst.det, [*rlds] if rlds else None)
+                            print('x1', rst.det, [*rlds] if rlds else None)
                             self._add_sts(xsts, rst, [rtid], rlds)
                         else:
-                            #print('n1', rst.det, [*rlds] if rlds else None)
+                            print('n1', rst.det, [*rlds] if rlds else None)
                             self._add_sts(nsts, rst, [rtid], rlds)
             sts = nsts
-            for _, _, _ld in nsts:
-                if _ld:
-                    print('h2', prog.page_idxs, [*_ld])
+            #for _, _, _ld in nsts:
+            #    if _ld:
+            #        print('h2', prog.page_idxs, [*_ld])
             print('h2a', prog.page_idxs, [len(_ld) for _, _, _ld in nsts if _ld])
         for st, tids, lds in sts:
-            #print('x2', st.det, lds)
+            print('x2', st.det, lds)
             self._add_sts(xsts, st, tids, lds)
         self._step_sts(xsts)
         return xsts
@@ -1184,8 +1186,8 @@ class c_ffta_battle_stream:
 ##            for st, _, ld in osts:
 ##                print(st.det, ld)
 ##            print('---')
-            for st, _, ld in nsts:
-                print(st.det, list(ld) if ld else None)
+##            for st, _, ld in nsts:
+##                print(st.det, list(ld) if ld else None)
             for _, _, lds in osts:
                 if not lds:
                     continue
