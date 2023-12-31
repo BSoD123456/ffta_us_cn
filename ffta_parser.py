@@ -791,6 +791,81 @@ class c_steam_stats:
             return
         self.det[var] = val
 
+class c_sp_blk:
+
+    def __init__(self, sp = True):
+        self.blk = []
+        self.sp = sp
+
+    def __len__(self):
+        blk = self.blk
+        if not blk:
+            return 0
+        ln = 1
+        if not self.sp:
+            for sub in blk:
+                if isinstance(sub, c_sp_blk):
+                    ln *= len(sub)
+        return ln
+
+    def _iter_subs(self, subs):
+        assert self.sp
+        if not subs:
+            return
+        sub = subs[0]
+        tail = subs[1:]
+        if isinstance(sub, c_sp_blk):
+            itr = sub.__iter__()
+        else:
+            itr = [[sub]]
+        for hd in itr:
+            for tl in self._iter_subs(tail):
+                yield [*hd, *tl]
+
+    def __iter__(self):
+        blk = self.blk
+        if self.sp:
+            yield from self._iter_subs(blk)
+        else:
+            for sub in blk:
+                if isinstance(sub, c_sp_blk):
+                    yield from sub
+                else:
+                    yield sub
+
+    def _copy_to_blk(self, rblk):
+        for sub in self.blk:
+            if isinstance(sub, c_sp_blk):
+                sub = sub.copy()
+            rblk.append(sub)
+
+    def copy(self):
+        r = type(self)(self.sp)
+        rblk = []
+        self._copy_to_blk(rblk)
+        r.blk = rblk
+        return r
+
+    def merge(self, src):
+        if self.sp == src.sp:
+            dst = type(self)(self.sp)
+            if self:
+                self._copy_to_blk(dst.blk)
+            if src:
+                src._copy_to_blk(dst.blk)
+        else:
+            dst = type(self)(not self.sp)
+            if self:
+                dst.blk.append(self.copy())
+            if src:
+                dst.blk.append(src.copy())
+        return dst
+
+    def append(self, v, sp):
+        src = type(self)(sp)
+        src.blk.append(v)
+        return self.merge(src)
+
 class c_branch_log:
 
     def __init__(self):
