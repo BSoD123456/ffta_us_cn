@@ -791,6 +791,55 @@ class c_steam_stats:
             return
         self.det[var] = val
 
+class c_branch_log:
+
+    def __init__(self):
+        self.blks = []
+
+    def copy(self):
+        r = c_branch_log()
+        for blk in self.blks:
+            rblk = []
+            for ch in blk:
+                rblk.append(ch.copy())
+            r.blks.append(rblk)
+        return r
+
+    def __len__(self):
+        blks = self.blks
+        if not blks:
+            return 0
+        ln = 1
+        for blk in blks:
+            ln *= len(blk)
+        return ln
+
+    def _iter_blks(self, blks):
+        if len(blks) == 0:
+            return
+        blk = blks[0]
+        tls = blks[1:]
+        for ch in blk:
+            for tl in self._iter_blks(tls):
+                yield [*ch, *tl]
+
+    def __iter__(self):
+        self._iter_blks(self.blks)
+
+    def write(self, val):
+        blks = self.blks
+        if not blks or len(blks[-1]) > 1:
+            blk = [[]]
+            blks.append(blk)
+        else:
+            blk = blks[-1]
+        assert len(blk) == 1
+        ch = blk[0]
+        ch.append(val)
+
+    def merge(self, dst):
+        pass
+
 class c_ffta_battle_stream:
 
     def __init__(self, psr, pidx):
@@ -811,6 +860,9 @@ class c_ffta_battle_stream:
                 rvs = nvs.copy()
             elif nvs is None:
                 rvs = ovs.copy()
+            elif isinstance(ovs, c_branch_log):
+                assert isinstance(nvs, c_branch_log)
+                rvs = ovs.merge(nvs)
             else:
                 rvs = ovs.copy()
                 for nv in nvs:
