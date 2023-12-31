@@ -737,6 +737,9 @@ class c_steam_stats:
     def det_eq(self, dst):
         return self.det == dst.det
 
+    def reset_ndet(self):
+        self.ndet = {}
+
     def step(self):
         self.cur += 1
 
@@ -832,12 +835,18 @@ class c_ffta_battle_stream:
     def _diff_sts(self, osts, nsts):
         dsts = []
         for nst, *nsinfo in nsts:
+            nst.reset_ndet()
             for i, (ost, *osinfo) in enumerate(osts):
                 if nst.det_eq(ost):
                     osts[i] = (nst, *self._merge_sinfo(osinfo, nsinfo))
                     break
             else:
-                dsts.append((nst, *nsinfo))
+                for i, (dst, *dsinfo) in enumerate(dsts):
+                    if nst.det_eq(dst):
+                        dsts[i] = (nst, *self._merge_sinfo(dsinfo, nsinfo))
+                        break
+                else:
+                    dsts.append((nst, *nsinfo))
         return dsts
 
     @staticmethod
@@ -884,15 +893,15 @@ class c_ffta_battle_stream:
                     continue
                 st = ctx['stat']
                 for rcondi, nst in st.check(cvar, cval, cvar[0] == 'flg'):
+                    nctx = ctx.copy()
+                    nctx['stat'] = nst
                     if rcondi:
-                        nctx = ctx.copy()
-                        nctx['stat'] = nst
                         nthrds.append({
                             'ctx': nctx,
                             'step': step,
                         })
                     else:
-                        ctx['stat'] = nst
+                        thrd['ctx'] = nctx
         for ti in reversed(del_ti):
             thrds.pop(ti)
         thrds.extend(nthrds)
@@ -902,6 +911,7 @@ class c_ffta_battle_stream:
     def _exec(self, sts):
         xsts = []
         for prog in self.psr.iter_program(self.pidx):
+            print('h', prog.page_idx, len(sts))
             nsts = []
             for st, tids, lds in sts:
                 for rets, rdone in prog.exec(
@@ -914,7 +924,6 @@ class c_ffta_battle_stream:
                             self._add_sts(xsts, rst, [rtid], rlds)
                         else:
                             self._add_sts(nsts, rst, [rtid], rlds)
-            #print('h', prog.page_idx, len(sts), len(nsts))
             sts = nsts
         for st, tids, lds in sts:
             self._add_sts(xsts, st, tids, lds)
@@ -928,14 +937,14 @@ class c_ffta_battle_stream:
             osts = self._copy_sts(sts)
             nsts = self._exec(sts)
             nsts = self._diff_sts(osts, nsts)
-##            print('===')
-##            for _, _, ld in osts:
-##                if ld:
-##                    print(ld)
-##            print('---')
-##            for _, _, ld in nsts:
-##                if ld:
-##                    print(ld)
+            print('===')
+            for _, _, ld in osts:
+                if ld:
+                    print(ld)
+            print('---')
+            for st, _, ld in nsts:
+                if ld:
+                    print(st.det, ld)
             for _, _, lds in osts:
                 if not lds:
                     continue
