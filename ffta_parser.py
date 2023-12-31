@@ -824,6 +824,8 @@ class c_sp_blk:
         tail = subs[1:]
         if isinstance(sub, c_sp_blk):
             itr = sub.__iter__()
+        elif sub is None:
+            itr = [[]]
         else:
             itr = [[sub]]
         for hd in itr:
@@ -841,37 +843,152 @@ class c_sp_blk:
                 else:
                     yield sub
 
-    def _copy_to_blk(self, rblk):
-        for sub in self.blk:
+    def __eq__(self, dst):
+        if self.sp != dst.sp:
+            return False
+        ln = len(self.blk)
+        if ln != len(dst.blk):
+            return False
+        for i in range(ln):
+            ssub = self.blk[i]
+            dsub = dst.blk[i]
+            if ssub != dsub:
+                return False
+        return True
+
+    def _copy_from_blk(self, sblk):
+        for sub in sblk:
             if isinstance(sub, c_sp_blk):
                 sub = sub.copy()
-            rblk.append(sub)
+            self.blk.append(sub)
 
     def copy(self):
         r = type(self)(self.sp)
-        rblk = []
-        self._copy_to_blk(rblk)
-        r.blk = rblk
+        r._copy_from_blk(self.blk)
         return r
 
     def merge(self, src, sp):
         dst = type(self)(sp)
         if self:
             if self.sp == sp:
-                self._copy_to_blk(dst.blk)
+                dst._copy_from_blk(self.blk)
             else:
                 dst.blk.append(self.copy())
         if src:
             if src.sp == sp:
-                src._copy_to_blk(dst.blk)
+                if sp == False:
+                    dst._merge_blk_ppp(src)
+                else:
+                    dst._copy_from_blk(src.blk)
             else:
-                dst.blk.append(src.copy())
+                if sp == False:
+                    dst._merge_blk_pps(src)
+                else:
+                    dst.blk.append(src.copy())
         return dst
 
     def append(self, v, sp):
         src = type(self)(sp)
         src.blk.append(v)
         return self.merge(src, sp)
+
+    def _cmp_split(self, dblk):
+        sblk = self.blk
+        ln = min(len(sblk), len(dblk))
+        for i in range(ln):
+            if sblk[i] != dblk[i]:
+                c1 = i
+                break
+        else:
+            c1 = ln
+            c2 = 0
+        if c1 < ln:
+            for i in range(ln):
+                if sblk[-i-1] != dblk[-i-1]:
+                    c2 = i
+            else:
+                c2 = ln
+            if c1 + c2 > ln:
+                c2 = ln - c1
+        if c1 > 0:
+            p_f = sblk[:c1]
+        else:
+            p_f = None
+        if c2 > 0:
+            p_b = sblk[-c2:]
+        else:
+            p_b = None
+        cm = len(sblk) - c1 - c2
+        if cm > 0:
+            p_m_s = sblk[c1:-c2]
+        else:
+            p_m_s = None
+        cm = len(dblk) - c1 - c2
+        if cm > 0:
+            p_m_d = dblk[c1:-c2]
+        else:
+            p_m_d = None
+        return p_f, (p_m_s, p_m_d), p_b, c1, c2
+
+    def _merge_blk_pss(self, dst):
+        assert self.sp == dst.sp == True
+        dblk = dst.blk
+        p_f, (p_m_s, p_m_d), p_b, c1, c2 = self._cmp_split(dblk)
+        if p_m_s:
+            mblk_s = type(self)(self.sp)
+            mblk_s._copy_from_blk(p_m_s)
+        else:
+            mblk_s = None
+        if p_m_d:
+            mblk_d = type(self)(self.sp)
+            mblk_d._copy_from_blk(p_m_d)
+        else:
+            mblk_d = None
+        if p_m_s or p_m_d:
+            mblk = type(self)(not self.sp)
+            mblk.blk = [mblk_s, mblk_d]
+        else:
+            mblk = None
+        rblk = type(self)(self.sp)
+        if p_f:
+            rblk._copy_from_blk(p_f)
+        if mblk:
+            rblk.blk.append(mblk)
+        if p_b:
+            rblk._copy_from_blk(p_b)
+        return rblk, c1, c2
+
+    def _merge_blk_pps(self, dst, nocopy = False):
+        assert self.sp == False and dst.sp == True
+        cmax = (0, 0)
+        maxsubrblk = None
+        imax = None
+        for si, sub in enumerate(self.blk):
+            if not isinstance(sub, c_sp_blk):
+                continue
+            subrblk, c1, c2 = sub._merge_blk_pss(dst)
+            if (c1+c2, c1) > cmax:
+                cmax = (c1+c2, c1)
+                maxsubrblk = subrblk
+                imax = si
+        if nocopy:
+            rblk = self
+        else:
+            rblk = self.copy()
+        if maxsubrblk:
+            rblk.blk[imax] = maxsubrblk
+        else:
+            rblk.blk.append(dst.copy())
+
+    def _merge_blk_ppp(self, dst, nocopy = False):
+        assert self.sp == dst.sp == False
+        if nocopy:
+            rblk = self
+        else:
+            rblk = self.copy()
+        for sub in dst.blk:
+            rblk._merge_blk_pps(sub, True)
+        return rblk
 
 class c_branch_log:
 
