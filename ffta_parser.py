@@ -1171,7 +1171,7 @@ class c_ffta_battle_stream:
         self._step_sts(xsts)
         return xsts
 
-    def exec(self):
+    def exec(self, mergec = False):
         rlds = set()
         sts = [(c_steam_stats(), None, None)]
         while sts:
@@ -1184,7 +1184,39 @@ class c_ffta_battle_stream:
                 for ld in lds:
                     rlds.add(tuple(ld))
             sts = nsts
-        return sorted(rlds)
+        if mergec:
+            return self._merge_contain(rlds)
+        else:
+            return sorted(rlds)
+
+    @staticmethod
+    def _merge_contain(src):
+        dst = []
+        for s in src:
+            for di, d in enumerate(dst):
+                sln = len(s)
+                dln = len(d)
+                if sln > dln:
+                    vl = s
+                    vs = d
+                    bln = dln
+                    aln = sln - bln
+                else:
+                    vl = d
+                    vs = s
+                    bln = sln
+                    aln = dln - bln
+                for vi in range(0, aln + 1):
+                    if vs == vl[vi:vi+bln]:
+                        break
+                else:
+                    continue
+                if sln > dln:
+                    dst[di] = s
+                break
+            else:
+                dst.append(s)
+        return sorted(dst)
 
 # ===============
 #      main
@@ -1246,7 +1278,7 @@ if __name__ == '__main__':
     def scan_strm(bi):
         global strm_b
         strm_b = c_ffta_battle_stream(spsr_b, bi)
-        lds = strm_b.exec()
+        lds = strm_b.exec(True)
         ppr(lds)
 
     def _show_log(slog):
