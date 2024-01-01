@@ -211,7 +211,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #cmd: set script page
     #params: p1(u16)
     #p1: found some page title in a rom tab, then set that page index
-    #search in tab(*0xc+0x1) 0x8563c7c from 0x8564666(tail), then set index to 0x2003c2a
+    #search in tab(*0xc+0x1) 0x8563a70 from 0x8564666(tail), then set index to 0x2003c2a
     @cmdc(0x53, 'conf')
     def cmd_wait(self, prms, psr, rslt):
         v = self._p16(prms, 0)
