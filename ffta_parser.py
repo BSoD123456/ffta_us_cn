@@ -215,7 +215,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     @cmdc(0x53, 'conf')
     def cmd_wait(self, prms, psr, rslt):
         v = self._p16(prms, 0)
-        print('smd53', hex(v))
+        #print('scmd53', hex(v))
 
     #cmd: end thread
     #params: -
@@ -288,6 +288,21 @@ class c_ffta_battle_cmd(c_ffta_cmd):
         rslt['var'] = ('flg', fid)
         rslt['val'] = dval
         return fid, dval
+
+    #cmd: set stat
+    #params: p1(u16) p2(u8)
+    #p1: stat idx
+    #p2: dest value
+    #set 0x2002030 + stat_idx directly
+    @cmdc(0x03, 'stat', 'set stat:{out[0]:x} = {out[1]}')
+    def cmd_set_stat(self, prms, psr, rslt):
+        vid = self._p16(prms, 0)
+        dval = prms[2]
+        assert dval in (0, 1)
+        rslt['var'] = ('sta', vid)
+        rslt['val'] = dval
+        #print('bcmd03', hex(vid), dval)
+        return vid, dval
 
     #cmd: test flag jump
     #params: p1(u16) p2(u16)
