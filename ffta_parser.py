@@ -109,7 +109,11 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         tidx = prms[0]
         rslt['win_type'] = 'normal'
         rslt['win_portrait'] = prms[1]
-        t_page = psr.sects['text']
+        if (tidx & 0xf0) == 0xf0:
+            t_page = psr.sects['text0']
+            tidx = (tidx  & 0xf)
+        else:
+            t_page = psr.sects['text']
         try:
             t_line = t_page[tidx]
             toks = t_page[tidx].text.tokens
@@ -154,6 +158,29 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     @cmdc(0x1, 'flow', 'call {out:0>4x}')
     def cmd_call(self, prms, psr, rslt):
         return self.cmd_jump(prms, psr, rslt)
+
+    #cmd: set flag
+    #params: p1(u16) p2(u8)
+    #p1: flag idx
+    #p2: dest value
+    @cmdc(0x1a, 'stat', 'set flg:{out[0]:x} = {out[1]}')
+    def cmd_set_flg(self, prms, psr, rslt):
+        fid = self._p16(prms, 0)
+        dval = prms[2]
+        assert dval in (0, 1)
+        rslt['var'] = ('flg', fid)
+        rslt['val'] = dval
+        return fid, dval
+
+    #cmd: test flag jump
+    #params: p1(u16) p2(u16)
+    #p1: flag idx
+    #p2: cur cmd offset increment
+    @cmdc(0x65, 'flow', 'if flg:{out[1]:x} jump {out[0]:0>4x}')
+    def cmd_test_flg_jump(self, prms, psr, rslt):
+        fidx = self._p16(prms, 0)
+        rslt['condi'] = (('flg', fidx), 1)
+        return self.cmd_jump(prms, psr, rslt), fidx
 
     #cmd: wait
     #params: p1(u8)
@@ -582,6 +609,7 @@ class c_ffta_scene_script_parser(c_ffta_script_parser):
         if prog is None:
             return None
         prog.sects['text'] = sect_text
+        prog.sects['text0'] = self.sects['text'][0]
         prog.sects['fx_text'] = self.sects['fx_text']
         prog.parse(c_ffta_scene_cmd)
         return prog

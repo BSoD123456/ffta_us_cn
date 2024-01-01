@@ -110,17 +110,26 @@ CONF = {
         },
     },
     'sandbox': {
-        'enable': False,
+        'enable': True,
         'only': True,
         'scene': {
             'boot': None,
+            'fat': {
+                #1: (None, None, 61),
+            },
         },
         'script': {
             'scene': (lambda f: {
                 1: {
-                    0x367: [
-                        0x17, 0x5,
+                    0x363: [
+                        0xf, 0xf5, 0x18, 0xa4,
+                        #0xf, 0x9, 0xff, 0xa4,
+                        #0x17, 0x5,
+                        #*f['load'](176, 2),
                     ],
+                    #0x367: [
+                    #    0x17, 0x5,
+                    #],
                     #0x4d4: [
                         #*f['fade'](True, 60),
                         #*f['load'](6),
@@ -136,6 +145,11 @@ CONF = {
                 },
                 2: {
                     #0x4: f['wait'](255),
+                },
+                9: {
+                    #0xba: [
+                    #    *f['load'](176, 2),
+                    #]
                 }
             })({
                 'wait': lambda frms: [
@@ -153,6 +167,13 @@ CONF = {
                     0x17, typ,
                 ],
             }),
+            'battle': {
+                (7, 2): {
+                    0x9: [
+                        0x5, 177, 0x0,
+                    ],
+                },
+            }
         },
         'direct': {
         },
@@ -811,9 +832,15 @@ class c_ffta_modifier:
             return None
         conf = self.conf.get('sandbox', {}).get('scene', {})
         boot_idx = conf.get('boot', None)
-        if not boot_idx:
+        if boot_idx:
+            r = {1: boot_idx}
+        else:
+            r = {}
+        for fi, fv in conf.get('fat', {}).items():
+            r[fi] = fv
+        if not r:
             return None
-        return {1: boot_idx}
+        return r
 
     def _rplc_scrpt_tab(self, as_sndbx):
         if not as_sndbx:

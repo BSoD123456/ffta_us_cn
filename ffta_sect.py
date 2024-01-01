@@ -872,7 +872,14 @@ class c_ffta_sect_scene_fat(c_ffta_sect_tab):
             if isinstance(dval, int):
                 si1, si2, ti = self.get_entry(dval)
             else:
+                osi1, osi2, oti = self.get_entry(didx)
                 si1, si2, ti = dval
+                if si1 is None:
+                    si1 = osi1
+                if si2 is None:
+                    si2 = osi2
+                if ti is None:
+                    ti = oti
             dofs = self.tbase(didx)
             rmk.W8(si1 + 1, dofs)
             rmk.W8(si2, dofs + 1)
