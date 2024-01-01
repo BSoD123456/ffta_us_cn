@@ -104,6 +104,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p1: index of text on this page
     #p2: index of portrait
     #p3: flags, 80: left, 82: right
+    #subpage idx of text 61 is (*0x2003c2a)//10
     @cmdc(0x0f, 'text')
     def cmd_text(self, prms, psr, rslt):
         tidx = prms[0]
@@ -210,7 +211,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #cmd: set script page
     #params: p1(u16)
     #p1: found some page title in a rom tab, then set that page index
-    #search in tab(*0xc+0x1) 0x8563c7c from 0x8564666(tail)
+    #search in tab(*0xc+0x1) 0x8563c7c from 0x8564666(tail), then set index to 0x2003c2a
     @cmdc(0x53, 'conf')
     def cmd_wait(self, prms, psr, rslt):
         v = self._p16(prms, 0)
