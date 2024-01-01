@@ -115,7 +115,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
             toks = t_page[tidx].text.tokens
         except:
             rslt['txt_invalid'] = True
-            toks = f'text with invalid tidx {tidx}'
+            toks = f'text with invalid tidx {tidx}: {self}'
         return toks
 
     #cmd: text window with ask(yes or no) / notice
