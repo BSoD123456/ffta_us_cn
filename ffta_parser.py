@@ -207,6 +207,15 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         br = prms[2]
         return is_out, dur, br
 
+    #cmd: set script page
+    #params: p1(u16)
+    #p1: found some page title in a rom tab, then set that page index
+    #search in tab(*0xc+0x1) 0x8563c7c from 0x8564666(tail)
+    @cmdc(0x53, 'conf')
+    def cmd_wait(self, prms, psr, rslt):
+        v = self._p16(prms, 0)
+        print('smd53', hex(v))
+
     #cmd: end thread
     #params: -
     @cmdc(0x02, 'thread', 'ret')
