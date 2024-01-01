@@ -116,7 +116,7 @@ CONF = {
             'boot': None,
             'fat': {
                 #1: (None, None, 61),
-                6: (None, None, 61),
+                #6: (None, None, 61),
             },
         },
         'script': {
@@ -126,12 +126,12 @@ CONF = {
                         #0x53, 0x9, 0x0,
                     ],
                     0x363: [
-                        #0xf, 0xf5, 0x18, 0xa4,
-                        #0x53, 0x59, 0x0,
-                        #0xf, 0x1, 0x18, 0xa4,
-                        #0xf, 100, 0x18, 0xa4,
-                        #0x17, 0x5,
-                        #*f['load'](176, 2),
+                        *f['text_full'](1, 0, 1, 0x18, 0x82),
+                        *f['text_full'](115, 5, 57, 0x18, 0x82),
+                        *f['text_full'](115, 10, 230, 0x18, 0x82),
+                        *f['text_full'](115, 11, 0, 0x18, 0x82),
+                        *f['fade'](True, 60),
+                        *f['done'](5),
                     ],
                     #0x367: [
                     #    0x17, 0x5,
@@ -153,9 +153,9 @@ CONF = {
                     #0x4: f['wait'](255),
                 },
                 6: {
-                    0x9: [
-                        0xf, 0x1, 0x18, 0xa4,
-                    ],
+                    #0x9: [
+                    #    0xf, 0x1, 0x18, 0xa4,
+                    #],
                 },
                 9: {
                     #0xba: [
@@ -171,11 +171,28 @@ CONF = {
                 ] if is_out else [
                     0x6, 0x13, frms, 0x64,
                 ],
-                'load': lambda sc, typ=2: [
+                'load': lambda sc: [
                     # load scene
                     0x1c, sc, 0x0,
-                    # safe return after load
+                ],
+                'done': lambda typ=2: [
+                    # safe return
                     0x17, typ,
+                ],
+                'text_full': lambda sc, sub, tidx, prt, flg: (
+                    lambda rsub, rtidx: [
+                        # set sc_idx at 0x2002192 = 0x162 + 0x2002030
+                        0x1b, 0x62, 0x1, sc,
+                        # set sub_idx at 0x2003c2a = 0x1bfa + 0x2002030
+                        0x1b, 0xfa, 0x1b, rsub,
+                        0xf, rtidx, prt, flg,
+                    ]
+                )(
+                    tidx // 24 + 1 + 10 * sub, tidx % 24
+                ) if sub > 0 else [
+                    # set sc_idx at 0x2002192 = 0x162 + 0x2002030
+                    0x1b, 0x62, 0x1, sc,
+                    0xf, tidx, prt, flg,
                 ],
             }),
             'battle': {
