@@ -212,10 +212,25 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #params: p1(u16)
     #p1: found some page title in a rom tab, then set that page index
     #search in tab(*0xc+0x1) 0x8563a70 from 0x8564666(tail), then set index to 0x2003c2a
-    @cmdc(0x53, 'conf')
+    @cmdc(0x53, 'stat')
     def cmd_wait(self, prms, psr, rslt):
         v = self._p16(prms, 0)
         #print('scmd53', hex(v))
+
+    #cmd: set stat
+    #params: p1(u16) p2(u8)
+    #p1: stat idx
+    #p2: dest value
+    #set 0x2002030 + stat_idx directly
+    @cmdc(0x1b, 'stat', 'set stat:{out[0]:x} = {out[1]}')
+    def cmd_set_stat(self, prms, psr, rslt):
+        vid = self._p16(prms, 0)
+        dval = prms[2]
+        assert dval in (0, 1)
+        rslt['var'] = ('sta', vid)
+        rslt['val'] = dval
+        print('scmd1b', hex(vid), dval)
+        return vid, dval
 
     #cmd: end thread
     #params: -
