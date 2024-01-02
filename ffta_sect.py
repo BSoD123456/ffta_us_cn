@@ -418,6 +418,9 @@ class c_ffta_sect_tab(c_ffta_sect):
     @property
     def has_tsize(self):
         return hasattr(self, 'tsize') and self.tsize < INF
+    @property
+    def tab_top(self):
+        return self.tsize * self._TAB_WIDTH if self.tsize < INF else None
     def parse_size(self, top_ofs, top_align_width):
         has_tsize = self.has_tsize
         if top_ofs is None and has_tsize:
@@ -1579,8 +1582,11 @@ class c_ffta_sect_rom(c_ffta_sect):
     def _replace_ptrs(self, rplc_ptrs):
         for i in range(0, self.accessable_top, 4):
             v = self.U32(i)
-            if v in rplc_ptrs:
-                self.W32(rplc_ptrs[v], i)
+            for oaddr, delt, sz, nm in rplc_ptrs:
+                if oaddr <= v < oaddr + sz:
+                    if v != oaddr:
+                        print('h', nm, hex(oaddr), hex(v), hex(sz))
+                    self.W32(v + delt, i)
 
     def _repack_end(self, rmk):
         rmk.setup(self.init_info, rmk.accessable_top)
@@ -1588,7 +1594,7 @@ class c_ffta_sect_rom(c_ffta_sect):
     def _repack_with(self, tabs):
         tail = self.sect_top
         ntabs = []
-        rplc_ptrs = {}
+        rplc_ptrs = []
         lst_srmk = None
         lst_tail = None
         for tname, tab in tabs.items():
@@ -1621,7 +1627,7 @@ class c_ffta_sect_rom(c_ffta_sect):
                 continue
             oaddr = self.aot(subsect.real_offset, 'oa')
             naddr = self.aot(tail, 'oa')
-            rplc_ptrs[oaddr] = naddr
+            rplc_ptrs.append((oaddr, naddr - oaddr, subsect.tab_top, tname))
             ntabs.append((tail, srmk))
             lst_srmk = srmk
             lst_tail = tail
@@ -1708,7 +1714,7 @@ def load_rom_us(fn):
                     ('val2', 1),
                 )), 0x7f
             ),
-            'quest_data': (0xd2ac0,
+            'quest_data': (0x0d09bc, #0xd2ac0,
                 meta_c_ffta_sect_tab_flex((
                     ('idx', 2),
                     ('_uk1', 1),
