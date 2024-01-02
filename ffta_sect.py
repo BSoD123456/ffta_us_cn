@@ -1725,7 +1725,7 @@ def load_rom_us(fn):
                     # 0x41:u16 ctrflag: m8-> 0x300+ scan
                     ('_uk4', 2),
                     ('_uk5', 2),
-                    ('_uk6', 1),
+                    ('nest', 1),
                 )), 0x1ff
             ),
         }, _trim_raw_len(raw, 0xf00000))
