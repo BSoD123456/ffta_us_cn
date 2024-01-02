@@ -816,10 +816,11 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         rmk.concat(cmk)
         return rmk, True
 
-def meta_c_ffta_sect_tab_flex(ent_fmt):
+def meta_c_ffta_sect_tab_flex(ent_fmt, alt_ptrs = None):
     @tabkey('entry')
     class c_ffta_sect_tab_flex(c_ffta_sect_tab):
         _TAB_WIDTH = sum(v[1] for v in ent_fmt)
+        _TAB_ALT_PTRS = tuple(alt_ptrs) if alt_ptrs else None
         def set_info(self, tlen):
             self.tsize = tlen
         @tabitm()
@@ -1582,11 +1583,8 @@ class c_ffta_sect_rom(c_ffta_sect):
     def _replace_ptrs(self, rplc_ptrs):
         for i in range(0, self.accessable_top, 4):
             v = self.U32(i)
-            for oaddr, delt, sz, nm in rplc_ptrs:
-                if oaddr <= v < oaddr + sz:
-                    if v != oaddr:
-                        print('h', nm, hex(oaddr), hex(v), hex(sz))
-                    self.W32(v + delt, i)
+            if v in rplc_ptrs:
+                self.W32(v + rplc_ptrs[v], i)
 
     def _repack_end(self, rmk):
         rmk.setup(self.init_info, rmk.accessable_top)
@@ -1594,7 +1592,7 @@ class c_ffta_sect_rom(c_ffta_sect):
     def _repack_with(self, tabs):
         tail = self.sect_top
         ntabs = []
-        rplc_ptrs = []
+        rplc_ptrs = {}
         lst_srmk = None
         lst_tail = None
         for tname, tab in tabs.items():
@@ -1626,8 +1624,12 @@ class c_ffta_sect_rom(c_ffta_sect):
             if not sdirty:
                 continue
             oaddr = self.aot(subsect.real_offset, 'oa')
-            naddr = self.aot(tail, 'oa')
-            rplc_ptrs.append((oaddr, naddr - oaddr, subsect.tab_top, tname))
+            ndelt = self.aot(tail, 'oa') - oaddr
+            rplc_ptrs[oaddr] = ndelt
+            if hasattr(subsect, '_TAB_ALT_PTRS') and subsect._TAB_ALT_PTRS:
+                for aptr in subsect._TAB_ALT_PTRS:
+                    assert aptr
+                    rplc_ptrs[oaddr + aptr] = ndelt
             ntabs.append((tail, srmk))
             lst_srmk = srmk
             lst_tail = tail
@@ -1732,7 +1734,7 @@ def load_rom_us(fn):
                     ('_uk4', 2),
                     ('_uk5', 2),
                     ('nest', 1),
-                )), 0x1ff
+                ), alt_ptrs = [0x46]), 0x1ff
             ),
         }, _trim_raw_len(raw, 0xf00000))
 
