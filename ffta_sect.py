@@ -813,6 +813,46 @@ class c_ffta_sect_tab_ref_addr(c_ffta_sect_tab_ref):
         rmk.concat(cmk)
         return rmk, True
 
+def meta_c_ffta_sect_tab_flex(ent_fmt):
+    @tabkey('entry')
+    class c_ffta_sect_tab_flex(c_ffta_sect_tab):
+        _TAB_WIDTH = sum(v[1] for v in ent_fmt)
+        def set_info(self, tlen):
+            self.tsize = tlen
+        @tabitm()
+        def get_entry(self, ofs):
+            r = {}
+            vi = 0
+            for nm, vw in ent_fmt:
+                r[nm] = self.readval(ofs + vi, vw, False)
+                vi += vw
+            return r
+        def _repack_with(self, tab):
+            rmk = self.repack_copy()
+            dirty = False
+            for didxs, dent in tab.items():
+                if isinstance(didxs, int):
+                    ditr = (didxs,)
+                else:
+                    ditr = range(*didxs)
+                for didx in ditr:
+                    if not 0 <= didx < self.tsize:
+                        report('warning', f'invalid tab index {didx}/{self.tsize}')
+                        continue
+                    dofs = self.tbase(didx)
+                    vi = 0
+                    for nm, vw in ent_fmt:
+                        if nm in dent:
+                            dval = dent[nm]
+                            rmk.writeval(dval, dofs + vi, vw)
+                            dirty = True
+                        vi += vw
+            if dirty:
+                return rmk, True
+            else:
+                return self, False
+    return c_ffta_sect_tab_flex
+
 # ===============
 #     scene
 # ===============
@@ -1541,6 +1581,8 @@ class c_ffta_sect_rom(c_ffta_sect):
         tail = self.sect_top
         ntabs = []
         rplc_ptrs = {}
+        lst_srmk = None
+        lst_tail = None
         for tname, tab in tabs.items():
             if tab is None:
                 continue
@@ -1553,6 +1595,13 @@ class c_ffta_sect_rom(c_ffta_sect):
                 continue
             subsect = ctabs
             report('info', f'repack tab: {tname}')
+            align = max(subsect.sect_align, subsect.sect_top_align)
+            if not lst_srmk is None:
+                ntail = lst_srmk.realign(align, lst_tail)
+                assert ntail >= tail
+                tail = ntail
+                lst_srmk = None
+                lst_tail = None
             if isinstance(tab, c_ffta_sect):
                 srmk = tab.repack_copy()
                 sdirty = True
@@ -1566,7 +1615,8 @@ class c_ffta_sect_rom(c_ffta_sect):
             naddr = self.aot(tail, 'oa')
             rplc_ptrs[oaddr] = naddr
             ntabs.append((tail, srmk))
-            align = max(subsect.sect_align, subsect.sect_top_align)
+            lst_srmk = srmk
+            lst_tail = tail
             tail = srmk.realign(align, tail)
         if not ntabs:
             return self, False
@@ -1641,6 +1691,14 @@ def load_rom_us(fn):
                 'name': (0xc9ed0, 0x2d5),
                 'title': (0x192bc, 0x34),
             }),
+            'rumor_data': (0xd1bec,
+                meta_c_ffta_sect_tab_flex((
+                    ('idx', 2),
+                    ('flag1', 2),
+                    ('val1', 1),
+                    ('flag2', 2),
+                    ('val2', 1),
+                )), 0x7f),
         }, _trim_raw_len(raw, 0xf00000))
 
 def load_rom_jp(fn):

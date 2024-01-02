@@ -232,7 +232,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         assert dval in (0, 1)
         rslt['var'] = ('sta', vid)
         rslt['val'] = dval
-        print('scmd1b', hex(vid), dval)
+        #print('scmd1b', hex(vid), dval)
         return vid, dval
 
     #cmd: end thread
@@ -265,10 +265,11 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         return sc
 
     #cmd: done scene
-    #params: ?
-    @cmdc(0x17, 'flow')
+    #params: p1(u8)
+    #p1: return type
+    @cmdc(0x17, 'flow', 'done to {out:x}')
     def cmd_done_scene(self, prms, psr, rslt):
-        pass
+        return prms[0]
 
 class c_ffta_battle_cmd(c_ffta_cmd):
 

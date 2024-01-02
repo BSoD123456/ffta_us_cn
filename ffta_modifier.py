@@ -110,7 +110,7 @@ CONF = {
         },
     },
     'sandbox': {
-        'enable': False,
+        'enable': True,
         'only': True,
         'scene': {
             'boot': None,
@@ -131,6 +131,9 @@ CONF = {
                         *f['text_full'](57, 0x18, 0x82, 5, 115),
                         *f['text_full'](230, 0x18, 0x82, 10),
                         *f['text_full'](0, 0x18, 0x82, 11),
+                        *f['setflag'](0x301),
+                        #*[j for i in range(300) for j in f['setflag'](0x301+i)],
+                        #*f['setflag'](0x43b),
                         *f['fade'](True, 60),
                         *f['done'](5),
                     ],
@@ -180,6 +183,9 @@ CONF = {
                     # safe return
                     0x17, typ,
                 ],
+                'setflag': lambda fidx, val=1: [
+                    0x1a, fidx & 0xff, fidx >> 8, val,
+                ],
                 'text_full': lambda tidx, prt, flg, sub=0, sc=0: (
                     lambda rsub, rtidx: [
                         *([
@@ -214,6 +220,14 @@ CONF = {
             }
         },
         'direct': {
+            'rumor_data': {
+                (0, 0x7f): {
+                    'flag1': 0x301,
+                    'val1': 1,
+                    'flag2': 0,
+                    'val2': 0,
+                },
+            },
         },
     },
 }
