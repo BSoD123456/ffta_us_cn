@@ -824,7 +824,11 @@ def meta_c_ffta_sect_tab_flex(ent_fmt):
             r = {}
             vi = 0
             for nm, vw in ent_fmt:
-                r[nm] = self.readval(ofs + vi, vw, False)
+                if vw > 4:
+                    rv = self.BYTES(ofs + vi, vw)
+                else:
+                    rv = self.readval(ofs + vi, vw, False)
+                r[nm] = rv
                 vi += vw
             return r
         def _repack_with(self, tab):
@@ -844,7 +848,11 @@ def meta_c_ffta_sect_tab_flex(ent_fmt):
                     for nm, vw in ent_fmt:
                         if nm in dent:
                             dval = dent[nm]
-                            rmk.writeval(dval, dofs + vi, vw)
+                            if vw > 4:
+                                assert len(dval) == vw
+                                rmk.WBYTES(dval, dofs + vi)
+                            else:
+                                rmk.writeval(dval, dofs + vi, vw)
                             dirty = True
                         vi += vw
             if dirty:
@@ -1698,7 +1706,28 @@ def load_rom_us(fn):
                     ('val1', 1),
                     ('flag2', 2),
                     ('val2', 1),
-                )), 0x7f),
+                )), 0x7f
+            ),
+            'quest_data': (0xd2ac0,
+                meta_c_ffta_sect_tab_flex((
+                    ('idx', 2),
+                    ('_uk1', 1),
+                    ('type', 1), # &0x70
+                    ('_uk2', 1),
+                    ('flag1', 2),
+                    ('val1', 1),
+                    ('flag2', 2),
+                    ('val2', 1),
+                    ('flag3', 2),
+                    ('val3', 1),
+                    ('_uk3', 1),
+                    ('_padding', 0x46 - 0xf - 5),
+                    # 0x41:u16 ctrflag: m8-> 0x300+ scan
+                    ('_uk4', 2),
+                    ('_uk5', 2),
+                    ('_uk6', 1),
+                )), 0x1ff
+            ),
         }, _trim_raw_len(raw, 0xf00000))
 
 def load_rom_jp(fn):
@@ -1769,7 +1798,8 @@ def main():
 if __name__ == '__main__':
     import pdb
     from hexdump import hexdump as hd
-    from pprint import pprint as ppr
+    from pprint import pprint
+    ppr = lambda *a, **ka: pprint(*a, **ka, sort_dicts = False)
 
     main()
 
