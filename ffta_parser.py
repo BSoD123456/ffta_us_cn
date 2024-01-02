@@ -105,11 +105,14 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p2: index of portrait
     #p3: flags, 80: left, 82: right
     #subpage idx of text 61 is (*0x2003c2a)//10
-    @cmdc(0x0f, 'text')
+    @cmdc(0x0f, 'text', 'ch.{out[1]:x}({out[2]:x}): {out[0]}')
     def cmd_text(self, prms, psr, rslt):
         tidx = prms[0]
+        pidx = prms[1]
+        flag = prms[2]
         rslt['win_type'] = 'normal'
-        rslt['win_portrait'] = prms[1]
+        rslt['win_portrait'] = pidx
+        rslt['win_flag'] = pidx
         if (tidx & 0xf0) == 0xf0:
             t_page = psr.sects['text0']
             tidx = (tidx  & 0xf)
@@ -121,7 +124,8 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         except:
             rslt['txt_invalid'] = True
             toks = f'text with invalid tidx {tidx}: {self}'
-        return toks
+        rslt['tokens'] = toks
+        return toks, pidx, flag
 
     #cmd: text window with ask(yes or no) / notice
     #params: p1(u8)
@@ -212,10 +216,9 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #params: p1(u16)
     #p1: found some page title in a rom tab, then set that page index
     #search in tab(*0xc+0x1) 0x8563a70 from 0x8564666(tail), then set index to 0x2003c2a
-    @cmdc(0x53, 'stat')
-    def cmd_wait(self, prms, psr, rslt):
-        v = self._p16(prms, 0)
-        #print('scmd53', hex(v))
+    @cmdc(0x53, 'stat', 'set subpage={out:x}')
+    def cmd_set_subpage(self, prms, psr, rslt):
+        return self._p16(prms, 0)
 
     #cmd: set stat
     #params: p1(u16) p2(u8)
@@ -691,8 +694,8 @@ class c_ffta_script_log:
     def _pck_rslt(self, rslt):
         typ = rslt['type']
         if typ == 'text' and not rslt.get('txt_invalid', False):
-            toks = rslt['output']
-            rslt['output'] = self.charset.decode(toks)
+            toks = rslt['tokens']
+            rslt['output'] = [self.charset.decode(toks), *rslt['output'][1:]]
         rrpr = rslt.get('repr', None)
         rout = rslt.get('output', None)
         if not rrpr is None:
