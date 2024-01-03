@@ -1,9 +1,6 @@
 #! python3
 # coding: utf-8
 
-import json, re
-import os, os.path, shutil
-
 CONF = {
     'roms': {
         'src': {
@@ -237,7 +234,7 @@ CONF = {
                     #]
                 }
             })(lambda s: [
-                    int(v, 16) if re.match(r'^[0-9a-fA-F]{1,2}$', v) else v
+                    int(v, 16) if len(v) <= 2 else v
                     for r in [rr.split('#')[0].strip() for rr in s.splitlines()] if r
                     for v in (r[1:-1].replace(':', '').split() if r.startswith('<') else [r])
                 ], {
@@ -448,6 +445,9 @@ def codejumper(cd):
         #dirty = True
     return r
 CONF['sandbox']['script']['__mod__'] = codejumper
+
+import json, re
+import os, os.path, shutil
 
 from ffta_sect import load_rom
 from ffta_charset import c_ffta_charset_ocr, c_ffta_charset_dynamic
