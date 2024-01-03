@@ -130,7 +130,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #cmd: text window with ask(yes or no) / notice
     #params: p1(u8)
     #p1: index of text on this page
-    @cmdc(0x12, 'text', 'nt.{out[1]:x}: {out[0]}')
+    @cmdc(0x12, 'text', 'nt.{out[2]:x}/{out[1]:x}: {out[0]}')
     def cmd_text_yon(self, prms, psr, rslt):
         tidx = prms[0]
         if tidx > 0x80:
@@ -144,7 +144,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         t_line = t_page[tidx]
         toks = t_page[tidx].text.tokens
         rslt['tokens'] = toks
-        return toks, tidx
+        return toks, tidx, pidx
 
     #cmd: jump
     #params: p1(u16)
