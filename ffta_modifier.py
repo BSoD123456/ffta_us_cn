@@ -173,7 +173,7 @@ CONF = {
                         '''),
                         *[
                             v
-                            for tname, tab in txts.items()
+                            for tab in txts
                             for v in [
                                 *c('''
                                 <27: 0F 06 00 00>
@@ -245,7 +245,7 @@ CONF = {
                         <02: >
                         lab3:
                         '''),
-                        *f['text_full'](57, 0xf, 0x80, 5, 115),
+                        *f['text_full'](57, 0xf, 0x80, 115, 5),
                         *f['wait'](180),
                         *f['fade'](True),
                         *f['setflag'](0x301),
@@ -285,7 +285,7 @@ CONF = {
                 'setflag': lambda fidx, val=1: [
                     0x1a, fidx & 0xff, fidx >> 8, val,
                 ],
-                'text_full': lambda tidx, prt, flg, sub=0, sc=0: (
+                'text_full': lambda tidx, prt, flg, sc=0, sub=0: (
                     lambda rsub, rtidx: [
                         *([
                             # set sc_idx at 0x2002192 = 0x162 + 0x2002030
@@ -300,6 +300,7 @@ CONF = {
                         ] if sub > 0 else [
                             0xf, tidx, prt, flg,
                         ]),
+                        #*([], sub > 0 and rsub > 0xff and breakpoint())[0],
                     ]
                 )(
                     tidx // 24 + 1 + 10 * sub, tidx % 24
@@ -419,7 +420,7 @@ def codejumper(cd):
         r[i+1] = (d >> 8)
         #dirty = True
     return r
-CONF['sandbox']['script']['__mod__'] = codejumper
+CONF['sandbox']['script']['__mod_scene'] = codejumper
 
 import json, re
 import os, os.path, shutil
@@ -427,7 +428,7 @@ import os, os.path, shutil
 from ffta_sect import load_rom
 from ffta_charset import c_ffta_charset_ocr, c_ffta_charset_dynamic
 from ffta_font_generator import make_ffta_font_gen
-from ffta_parser import make_script_parser
+from ffta_parser import make_script_parser, collect_text_cmds
 
 def report(*args):
     r = ' '.join(a for a in args if a)
@@ -1054,39 +1055,26 @@ class c_ffta_modifier:
             return None
         return r
 
-    def _coll_trans_txts(self):
-        return {
-            'abc': [
-                (1, 0x11, 0x80),
-                (2, 0x11, 0x80),
-            ],
-            'def': [
-                (3, 0x12, 0x80),
-                (4, 0x12, 0x80),
-            ],
-        }
-        return {
-            tname: [(int(v.split('/')[-1]), 0xf, 0x80) for v in tab if int(v.split('/')[-1]) < 0x100]
-            for tname, tab in self.txts['trans'].items()
-        }
+    def _coll_trans_txts(self, psr):
+        return collect_text_cmds(psr, self.txts['trans']['s_text'])
 
     def _rplc_scrpt_tab(self, as_sndbx):
         if not as_sndbx:
             return None, None
         srom = self.srom['base']
         conf = self.conf.get('sandbox', {}).get('script', {})
-        mod = conf.get('__mod__', None)
         rtabs = {}
         for typ, tab in conf.items():
             if typ.startswith('__'):
                 continue
             if not tab:
                 continue
+            mod = conf.get('__mod_' + typ, None)
             rtab = {}
             psr = make_script_parser(srom, typ)
             psr.refresh_sect_top()
             if callable(tab):
-                tab = tab(self._coll_trans_txts())
+                tab = tab(self._coll_trans_txts(psr))
             for idxp, cmds in tab.items():
                 if isinstance(idxp, int):
                     idxp = (idxp,)

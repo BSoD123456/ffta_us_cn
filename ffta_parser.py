@@ -105,7 +105,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
     #p2: index of portrait
     #p3: flags, 80: left, 82: right
     #subpage idx of text 61 is (*0x2003c2a)//10
-    @cmdc(0x0f, 'text', 'ch.{out[1]:x}({out[2]:x}): {out[0]}')
+    @cmdc(0x0f, 'text', 'ch.{out[2]:x}({out[3]:x}): {out[0]}')
     def cmd_text(self, prms, psr, rslt):
         tidx = prms[0]
         pidx = prms[1]
@@ -114,6 +114,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
         rslt['win_portrait'] = pidx
         rslt['win_flag'] = pidx
         if (tidx & 0xf0) == 0xf0:
+            rslt['txt_shared'] = True
             t_page = psr.sects['text0']
             tidx = (tidx  & 0xf)
         else:
@@ -125,7 +126,7 @@ class c_ffta_scene_cmd(c_ffta_cmd):
             rslt['txt_invalid'] = True
             toks = f'text with invalid tidx {tidx}: {self}'
         rslt['tokens'] = toks
-        return toks, pidx, flag
+        return toks, tidx, pidx, flag
 
     #cmd: text window with ask(yes or no) / notice
     #params: p1(u8)
@@ -1290,6 +1291,51 @@ class c_ffta_battle_stream:
             else:
                 dst.append(s)
         return sorted(dst)
+
+# ===============
+#      misc
+# ===============
+
+def collect_text_cmds(psr, dtab = None, gen_sc61 = True):
+    if not isinstance(psr, c_ffta_scene_script_parser):
+        return None
+    def _pck_rslt(rslt):
+        if (rslt['win_type'] != 'normal' or
+            rslt.get('txt_shared', False) or
+            rslt.get('txt_invalid', False) ):
+            return None
+        return rslt['output'][1:]
+    rtxts = []
+    sc61 = None
+    for prog in psr.iter_program():
+        if prog.text_idx == 61:
+            # with unsolved dynamic sub page
+            # just ignore
+            sc61 = prog.page_idx
+            continue
+        page = []
+        for cprms in prog.exec(
+                cb_pck = _pck_rslt,
+                flt = ['text']):
+            sidxp = (prog.text_idx, cprms[0])
+            sidxr = '/'.join(str(i) for i in sidxp)
+            if not dtab is None and not dtab.get(sidxr, None):
+                continue
+            page.append((*cprms, prog.page_idx))
+        if page:
+            rtxts.append(page)
+    if sc61 is None or not gen_sc61 or dtab is None:
+        return rtxts
+    page = []
+    for idxr, (sval, dval) in dtab.items():
+        idxp = tuple(int(i) for i in idxr.split('/'))
+        if idxp[0] != 61:
+            continue
+        assert idxp[1] < 25
+        page.append((idxp[2], 0xf, 0xa4, sc61, idxp[1]))
+    if page:
+        rtxts.append(page)
+    return rtxts
 
 # ===============
 #      main
