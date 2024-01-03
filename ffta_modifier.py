@@ -166,7 +166,8 @@ CONF = {
                         *f['face'](0xf, 0),
                         0x27, 0xF, 0x16, 0, 0,
                         0x12, 0xaf,
-                        0x71, 'skip2',
+                        0x71, 0x3, 0x0,
+                        0x19, 'skip2',
                         *c('''
                         <1F: 4E 56 00 20 00>
                         <27: 4E 05 00 00>
@@ -191,7 +192,8 @@ CONF = {
                                     ]
                                 ],
                                 0x12, 0xb0,
-                                0x71, 'skip',
+                                0x71, 0x3, 0x0,
+                                0x19, 'skip',
                             ]
                             
                         ],
@@ -277,8 +279,8 @@ CONF = {
                 '1/172': '上班了…@[40]@[42]',
             },
             'fx_text': {
-                '1/47': '要翻看台词吗?@[4D]@[3211]否/@[ ]是@[ ]@[42]',
-                '1/48': '要继续吗?@[4D]@[3211]否/@[ ]是@[ ]@[42]',
+                '1/47': '要翻看台词吗?@[4D]@[3210]是/@[ ]否@[ ]@[42]',
+                '1/48': '要继续吗?@[4D]@[3210]是/@[ ]否@[ ]@[42]',
             },
         },
         'direct': {
@@ -1020,7 +1022,7 @@ class c_ffta_modifier:
         return r
 
     def _coll_trans_txts(self, psr):
-        return collect_text_cmds(psr, self.txts['trans']['s_text'])[36:]
+        return collect_text_cmds(psr, self.txts['trans']['s_text'])
 
     def _rplc_scrpt_tab(self, as_sndbx):
         if not as_sndbx:
