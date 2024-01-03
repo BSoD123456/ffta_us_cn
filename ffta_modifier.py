@@ -1,6 +1,9 @@
 #! python3
 # coding: utf-8
 
+import json, re
+import os, os.path, shutil
+
 CONF = {
     'roms': {
         'src': {
@@ -189,20 +192,14 @@ CONF = {
                         *f['fade'](False),
                         *f['wait'](60),
                         0x12, 0xaf,
-                        0x71, 0x2, 0,
+                        0x71, 'lab1',
                         0x17, 0x5,
-                        *c('''
-                        # move to 7,4 dir 3 speed 1
-                        <3E: 0F 07 04 03 00 01 00>
-                        # warp to 7,4
-                        #<2F: 0F 07 04>
-                        # move to 2,4 dir 1 speed 3
-                        <3E: 0F 02 04 01 00 03 00>
-                        # warp to 6,4
-                        <2F: 0F 06 04>
-                        # dir to 3
-                        <25: 0F 03 01>
-                        '''),
+                        'lab1:',
+                        #*f['warp'](0xf, 4, 4),
+                        *f['move'](0xf, 4, 6, 0),
+                        *f['move'](0xf, 7, 6, 3),
+                        *f['move'](0xf, 5, 4, 2),
+                        *f['face'](0xf, 3),
                         *f['wait'](60),
                         *c('''
                         #<41: 0F 11 00>
@@ -212,11 +209,15 @@ CONF = {
                         #<25: 0F 01 01>
                         #<29: 0F 00>
                         <27: 0F 16 00 00>
-                        <01: 03 00>
-                        <19: 0B 00>
+                        <01: func1>
+                        <19: lab3>
+                        func1:
                         <27: 0F 06 00 00>
+                        lab2:
                         <27: 0F 06 00 00>
+                        <19: lab2>
                         <02: >
+                        lab3:
                         '''),
                         *f['text_full'](57, 0xf, 0x80, 5, 115),
                         *f['wait'](180),
@@ -236,10 +237,21 @@ CONF = {
                     #]
                 }
             })(lambda s: [
-                    int(v, 16) for r in [rr.split('#')[0].strip() for rr in s.splitlines()] if r in r for v in r[1:-1].replace(':', '').split()
+                    int(v, 16) if re.match(r'^[0-9a-fA-F]{1,2}$', v) else v
+                    for r in [rr.split('#')[0].strip() for rr in s.splitlines()] if r
+                    for v in (r[1:-1].replace(':', '').split() if r.startswith('<') else [r])
                 ], {
                 'wait': lambda frms: [
                     0x15, frms,
+                ],
+                'move': lambda ch, x, y, d, spd=1: [
+                    0x3e, ch, x, y, d, 0, spd, 0,
+                ],
+                'warp': lambda ch, x, y: [
+                    0x2f, ch, x, y,
+                ],
+                'face': lambda ch, d: [
+                    0x25, ch, d, 1,
                 ],
                 'fade': lambda is_out, frms=60: [
                     0x6, 0x31, frms, 0x0,
@@ -408,8 +420,34 @@ CONF['text']['modf'].extend([
     mod_static_refer,
 ])
 
-import json, re
-import os, os.path, shutil
+def codejumper(cd):
+    labs = {}
+    r = []
+    for c in cd:
+        if isinstance(c, str):
+            if c.endswith(':'):
+                labs[c[:-1]] = len(r)
+            else:
+                r.append(c)
+                r.append(None)
+        else:
+            r.append(c)
+    #dirty = False
+    for i in range(len(r)):
+        c = r[i]
+        if not isinstance(c, str):
+            continue
+        if not c in labs:
+            raise ValueError(f'unknown lable: {c}')
+        assert i < len(r) - 1 and r[i+1] is None
+        d = labs[c] - i - 2
+        if d < 0:
+            d += 0x10000
+        r[i] = (d & 0xff)
+        r[i+1] = (d >> 8)
+        #dirty = True
+    return r
+CONF['sandbox']['script']['__mod__'] = codejumper
 
 from ffta_sect import load_rom
 from ffta_charset import c_ffta_charset_ocr, c_ffta_charset_dynamic
@@ -1046,8 +1084,11 @@ class c_ffta_modifier:
             return None, None
         srom = self.srom['base']
         conf = self.conf.get('sandbox', {}).get('script', {})
+        mod = conf.get('__mod__', None)
         rtabs = {}
         for typ, tab in conf.items():
+            if typ.startswith('__'):
+                continue
             if not tab:
                 continue
             rtab = {}
@@ -1058,6 +1099,8 @@ class c_ffta_modifier:
                     idxp = (idxp,)
                 prog = psr.get_program(*idxp)
                 didxp = prog.page_idxs
+                if callable(mod):
+                    cmds = {ofs: mod(c) for ofs, c in cmds.items()}
                 rtab[didxp] = (cmds, prog)
             if rtab:
                 rtabs[typ] = rtab
