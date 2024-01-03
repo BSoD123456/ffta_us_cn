@@ -1314,6 +1314,7 @@ def collect_text_cmds(psr, dtab = None, gen_sc61 = True):
             sc61 = prog.page_idx
             continue
         page = []
+        txt_1st = True
         for cprms in prog.exec(
                 cb_pck = _pck_rslt,
                 flt = ['text']):
@@ -1321,18 +1322,40 @@ def collect_text_cmds(psr, dtab = None, gen_sc61 = True):
             sidxr = '/'.join(str(i) for i in sidxp)
             if not dtab is None and not dtab.get(sidxr, None):
                 continue
-            page.append((*cprms, prog.page_idx))
+            if txt_1st:
+                page.append((*cprms, prog.page_idx))
+                txt_1st = False
+            else:
+                page.append(cprms)
         if page:
             rtxts.append(page)
     if sc61 is None or not gen_sc61 or dtab is None:
         return rtxts
     page = []
+    lst_rsubidx = None
+    txt_1st = True
     for idxr, (sval, dval) in dtab.items():
         idxp = tuple(int(i) for i in idxr.split('/'))
         if idxp[0] != 61:
             continue
-        assert idxp[1] < 25
-        page.append((idxp[2], 0xf, 0xa4, sc61, idxp[1]))
+        stidx = idxp[2]
+        subidx = idxp[1]
+        assert subidx < 25
+        rsubidx = stidx // 24 + 1 + 10 * subidx
+        if rsubidx == lst_rsubidx:
+            pass#subidx = 0
+        else:
+            lst_rsubidx = rsubidx
+            if page:
+                rtxts.append(page)
+                page = []
+                txt_1st = True
+        if txt_1st:
+            rsc = sc61
+            txt_1st = False
+        else:
+            rsc = 0
+        page.append((stidx, 0x1, 0x80, rsc, subidx))
     if page:
         rtxts.append(page)
     return rtxts

@@ -120,6 +120,7 @@ CONF = {
             },
         },
         'script': {
+            '__arg_scene_text_start': 8,
             'scene': lambda txts: (lambda c, f: {
                 2: {
                     0: [
@@ -202,8 +203,12 @@ CONF = {
                         'skip2:',
                         *f['move'](0xf, 6, 4, 3),
                         *f['move'](0xf, 7, 8, 0),
+                        *f['wait'](30),
                         *f['text_full'](171, 0xf, 0x80, 2),
-                        *f['wait'](60),
+                        *f['face'](0xf, 3),
+                        *f['text_full'](172, 0xf, 0x80),
+                        *f['text_full'](173, 0xf, 0x80),
+                        *f['face'](0xf, 0),
                         *f['fade'](True),
                         *f['setflag'](0x301),
                         *f['done'](5),
@@ -275,17 +280,24 @@ CONF = {
         },
         'text': {
             's_text': {
-                '1/171': '要离开了。@[40]@[42]',
-                '1/172': '上班了…@[40]@[42]',
+                '1/171': '对了,@[4D]还有一件事。@[40]@[42]',
+                '1/172': '从这里出去后,@[4D]所有流言都将被解锁。@[4F]@[42]读过第1条流言后,@[4D]新增的20个任务@[4D]会解锁前10个。@[4F]@[42]读过第2条后,@[4D]会解锁后10个。@[40]@[42]',
+                '1/173': '但是因为任务@[4D]最多只能有15个,@[4D]请存档后分别解锁。@[40]@[42]',
             },
             'fx_text': {
-                '1/47': '要翻看台词吗?@[4D]@[3210]是/@[ ]否@[ ]@[42]',
+                '1/47': '要偷看书的后面吗?@[4D]@[3210]是/@[ ]否@[ ]@[42]',
                 '1/48': '要继续吗?@[4D]@[3210]是/@[ ]否@[ ]@[42]',
             },
         },
         'direct': {
             'rumor_data': {
-                (0, 0x7f): {
+                (0, 6): {
+                    'flag1': 0x301,
+                    'val1': 0,
+                    'flag2': 0,
+                    'val2': 0,
+                },
+                (6, 0x7f): {
                     'flag1': 0x301,
                     'val1': 1,
                     'flag2': 0,
@@ -1021,8 +1033,12 @@ class c_ffta_modifier:
             return None
         return r
 
-    def _coll_trans_txts(self, psr):
-        return collect_text_cmds(psr, self.txts['trans']['s_text'])
+    def _coll_trans_txts(self, psr, txtst):
+        r = collect_text_cmds(psr, self.txts['trans']['s_text'])
+        if txtst is None:
+            return r
+        else:
+            return r[txtst:]
 
     def _rplc_scrpt_tab(self, as_sndbx):
         if not as_sndbx:
@@ -1040,7 +1056,8 @@ class c_ffta_modifier:
             psr = make_script_parser(srom, typ)
             psr.refresh_sect_top()
             if callable(tab):
-                tab = tab(self._coll_trans_txts(psr))
+                txtst = conf.get('__arg_' + typ + '_text_start', None)
+                tab = tab(self._coll_trans_txts(psr, txtst))
             for idxp, cmds in tab.items():
                 if isinstance(idxp, int):
                     idxp = (idxp,)
