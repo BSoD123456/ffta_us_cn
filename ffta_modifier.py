@@ -156,6 +156,7 @@ CONF = {
                 },
                 2: {
                     0: [
+                        #0x19, 0xdc, 0xa,
                         *c('''
                         <C: 05>
                         <48: 00>
@@ -192,12 +193,13 @@ CONF = {
                         <28: 0F>
                         <41: 0F 12 00>
                         <28: 0F>
+                        #<25: 0F 01 01>
+                        #<29: 0F 00>
+                        <27: 0F 16 00 00>
                         <01: 03 00>
-                        <19: 0F 00>
+                        <19: 0B 00>
                         <27: 0F 06 00 00>
-                        <28: 0F>
                         <27: 0F 06 00 00>
-                        <28: 0F>
                         <02: >
                         '''),
                         *f['text_full'](57, 0xf, 0x80, 5, 115),
@@ -218,7 +220,7 @@ CONF = {
                     #]
                 }
             })(lambda s: [
-                    int(v, 16) for r in s.splitlines() if r for v in r.strip()[1:-1].replace(':', '').split()
+                    int(v, 16) for r in [rr.split('#')[0].strip() for rr in s.splitlines()] if r in r for v in r[1:-1].replace(':', '').split()
                 ], {
                 'wait': lambda frms: [
                     0x15, frms,
