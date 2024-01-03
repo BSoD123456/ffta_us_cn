@@ -166,7 +166,11 @@ CONF = {
                         *f['face'](0xf, 0),
                         0x27, 0xF, 0x16, 0, 0,
                         0x12, 0xaf,
-                        0x71, 'skip',
+                        0x71, 'skip2',
+                        *c('''
+                        <1F: 4E 56 00 20 00>
+                        <27: 4E 05 00 00>
+                        '''),
                         *[
                             v
                             for tname, tab in txts.items()
@@ -189,6 +193,8 @@ CONF = {
                             
                         ],
                         'skip:',
+                        0x27, 0x4E, 6, 0, 0,
+                        'skip2:',
                         *f['move'](0xf, 4, 6, 0),
                         'lp1:',
                         *f['move'](0xf, 7, 6, 3, 5),
@@ -1049,6 +1055,16 @@ class c_ffta_modifier:
         return r
 
     def _coll_trans_txts(self):
+        return {
+            'abc': [
+                (1, 0x11, 0x80),
+                (2, 0x11, 0x80),
+            ],
+            'def': [
+                (3, 0x12, 0x80),
+                (4, 0x12, 0x80),
+            ],
+        }
         return {
             tname: [(int(v.split('/')[-1]), 0xf, 0x80) for v in tab if int(v.split('/')[-1]) < 0x100]
             for tname, tab in self.txts['trans'].items()
