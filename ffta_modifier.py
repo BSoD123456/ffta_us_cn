@@ -301,7 +301,7 @@ CONF = {
                         *([
                             # load char at chlp
                             0x1f, prt, chlp, chld, 0x20, 0x0,
-                        ] if chlp > 0 else []),
+                        ] if prt > 1 and chlp > 0 else []),
                         *([
                             0xf, rtidx, prt, flg,
                         ] if sub > 0 else [
@@ -311,7 +311,7 @@ CONF = {
                             # unload char
                             0x24, prt,
                             0x22, prt,
-                        ] if chlp > 0 else []),
+                        ] if prt > 1 and chlp > 0 else []),
                         #*([], prt == 0x17 and breakpoint())[0],
                     ]
                 )(
@@ -1068,7 +1068,7 @@ class c_ffta_modifier:
         return r
 
     def _coll_trans_txts(self, psr):
-        return collect_text_cmds(psr, self.txts['trans']['s_text'])
+        return collect_text_cmds(psr, self.txts['trans']['s_text'])[35:]
 
     def _rplc_scrpt_tab(self, as_sndbx):
         if not as_sndbx:
