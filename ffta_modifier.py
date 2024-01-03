@@ -277,6 +277,12 @@ CONF = {
                 },
             }
         },
+        'text': {
+            'fx_text': {
+                '1/45': '要开始读台词吗?@[4D]@[3210]是/@[ ]否@[ ]@[42]',
+                '1/46': '要休息了吗?@[4D]@[3211]是/@[ ]否@[ ]@[42]',
+            },
+        },
         'direct': {
             'rumor_data': {
                 (0, 0x7f): {
@@ -977,6 +983,13 @@ class c_ffta_modifier:
                 rtabs[tname] = rtab
         return rtabs
 
+    def _rplc_utxt_tab(self, utxt):
+        mtxt = {
+            k1: {k2: ['', v] for k2, v in t.items()}
+            for k1, t in utxt.items()
+        }
+        return self._rplc_txt_tab(mtxt)
+
     def _merge_txt_tab(self, tbs):
         rtabs = {}
         for tb in tbs:
@@ -1053,6 +1066,13 @@ class c_ffta_modifier:
             rt = self._rplc_txt_tab(self.txts[tn])
             if rt:
                 tbs.append(rt)
+        if as_sndbx:
+            sbt = self.conf.get('sandbox', {}).get('text', None)
+            if sbt:
+                report('info', f'encode txt: sandbox')
+                rt = self._rplc_utxt_tab(sbt)
+                if rt:
+                    tbs.append(rt)
         artabs = self._merge_txt_tab(tbs)
         if not artabs:
             return None
