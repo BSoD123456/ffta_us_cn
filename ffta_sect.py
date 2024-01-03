@@ -665,9 +665,12 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
 
     def _repack_content(self, tab, base):
         mtab = {}
+        maxsi = -1
         for idxp, val in tab.items():
             si = idxp[0]
             sidxp = idxp[1:]
+            if si > maxsi:
+                maxsi = si
             if not sidxp:
                 if si in mtab:
                     raise ValueError(f'dumplicate repack tab index: {si}')
@@ -681,10 +684,11 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             else:
                 raise ValueError(f'dumplicate repack tab index: {idxp}/{si}')
             stab[sidxp] = val
+        rtsize = max(maxsi+1, self.tsize)
         dirty = False
         srmks = []
         ent_cch = {}
-        cbase = alignup(self._TAB_WIDTH * self.tsize + base, self.sect_align)
+        cbase = alignup(self._TAB_WIDTH * rtsize + base, self.sect_align)
         cent = cbase
         ents = []
         for si, subsect in enumerate(self):
@@ -713,6 +717,26 @@ class c_ffta_sect_tab_ref(c_ffta_sect_tab):
             ents.append(cent)
             cent = srmk.realign(subsect.sect_top_align, cent)
             srmks.append(srmk)
+        if maxsi >= self.tsize:
+            for si in range(self.tsize, maxsi+1):
+                if not si in mtab:
+                    ents.append(0)
+                    srmks.append(None)
+                    continue
+                subsect = self[0]
+                if isinstance(subsect, c_ffta_sect_tab_ref_sub):
+                    srmk, sdirty = subsect.repack_with(mtab[si], cent)
+                else:
+                    srmk, sdirty = subsect.repack_with(mtab[si])
+                if sdirty:
+                    dirty = True
+                if not sdirty:
+                    ents.append(0)
+                    srmks.append(None)
+                    continue
+                ents.append(cent)
+                cent = srmk.realign(subsect.sect_top_align, cent)
+                srmks.append(srmk)
         if not dirty:
             return None, None
         cmk = c_mark(bytearray(), 0)
@@ -1120,7 +1144,6 @@ class c_ffta_sect_text_line(c_ffta_sect):
         dst_idx = 0
         while dst_idx < dst_len:
             cmd, src_idx = self._gc(src_idx)
-            #print hex(cmd)
             if cmd & 0x80:
                 cmd1, src_idx = self._gc(src_idx)
                 ln = ((cmd >> 3) & 0xf) + 3
