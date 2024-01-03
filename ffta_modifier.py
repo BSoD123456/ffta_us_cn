@@ -110,17 +110,13 @@ CONF = {
         },
     },
     'sandbox': {
-        'enable': True,
+        'enable': False,
         'only': True,
         'scene': {
             'boot': 2,
-            'fat': {
-                #1: (None, None, 61),
-                #6: (None, None, 61),
-            },
         },
         'script': {
-            '__arg_scene_text_start': 8,
+            '__arg_scene_text_start': None,
             'scene': lambda txts: (lambda c, f: {
                 2: {
                     0: [
