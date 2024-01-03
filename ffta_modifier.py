@@ -120,40 +120,7 @@ CONF = {
             },
         },
         'script': {
-            'scene': (lambda c, f: {
-                1: {
-                    0x8:[
-                        #0x53, 0x9, 0x0,
-                    ],
-                    0x363: [
-                        *f['text_full'](1, 0x18, 0x82),
-                        *f['text_full'](1, 0x18, 0x82, 0, 10),
-                        *f['text_full'](57, 0x18, 0x82, 5, 115),
-                        *f['text_full'](230, 0x18, 0x82, 10),
-                        *f['text_full'](0, 0x18, 0x82, 11),
-                        *f['setflag'](0x301),
-                        #*f['setflag'](0x302),
-                        #*[j for i in range(300) for j in f['setflag'](0x301+i)],
-                        #*f['setflag'](0x43b),
-                        *f['fade'](True, 60),
-                        *f['done'](5),
-                    ],
-                    #0x367: [
-                    #    0x17, 0x5,
-                    #],
-                    #0x4d4: [
-                        #*f['fade'](True, 60),
-                        #*f['load'](6),
-                    #],
-                    #0x501: [
-                    #    *f['wait'](60),
-                    #    *f['wait'](60),
-                    #    *f['wait'](60),
-                    #    *f['wait'](60),
-                    #    *f['wait'](60),
-                    #    *f['load'](2, 4),
-                    #],
-                },
+            'scene': lambda txts: (lambda c, f: {
                 2: {
                     0: [
                         #0x19, 0xdc, 0xa,
@@ -188,11 +155,40 @@ CONF = {
                         '''),
                         *f['fade'](False),
                         *f['wait'](60),
+                        0x19, 'start',
+                        *c('''
+                        flip:
+                        <27: 0F 06 00 00>
+                        <02: >
+                        '''),
+                        'start:',
+                        *f['move'](0xf, 5, 4, 3),
+                        *f['face'](0xf, 0),
+                        0x27, 0xF, 0x16, 0, 0,
                         0x12, 0xaf,
-                        0x71, 'lab1',
-                        0x17, 0x5,
-                        'lab1:',
-                        #*f['warp'](0xf, 4, 4),
+                        0x71, 'skip',
+                        *[
+                            v
+                            for tname, tab in txts.items()
+                            for v in [
+                                *c('''
+                                <27: 0F 06 00 00>
+                                <27: 0F 06 00 00>
+                                '''),
+                                *[
+                                    v
+                                    for targs in tab
+                                    for v in [
+                                        0x1, 'flip',
+                                        *f['text_full'](*targs),
+                                    ]
+                                ],
+                                0x12, 0xb0,
+                                0x71, 'skip',
+                            ]
+                            
+                        ],
+                        'skip:',
                         *f['move'](0xf, 4, 6, 0),
                         'lp1:',
                         *f['move'](0xf, 7, 6, 3, 5),
@@ -221,7 +217,6 @@ CONF = {
                         *f['face'](0xf, 2),
                         *f['face'](0xf, 1),
                         *f['face'](0xf, 0),
-                        #0x29, 0xf, 0,
                         0x27, 0xF, 0x16, 0, 0,
                         *f['text_full'](172, 0xf, 0x80),
                         *f['move'](0xf, 4, 6, 0, 5),
@@ -251,16 +246,6 @@ CONF = {
                         *f['done'](5),
                     ],
                 },
-                6: {
-                    #0x9: [
-                    #    0xf, 0x1, 0x18, 0xa4,
-                    #],
-                },
-                9: {
-                    #0xba: [
-                    #    *f['load'](176, 2),
-                    #]
-                }
             })(lambda s: [
                     int(v, 16) if len(v) <= 2 else v
                     for r in [rr.split('#')[0].strip() for rr in s.splitlines()] if r
@@ -314,18 +299,6 @@ CONF = {
                     tidx // 24 + 1 + 10 * sub, tidx % 24
                 ),
             }),
-            'battle': {
-                (3, 1): {
-                    0x11: [
-                        0x3, 0xfa, 0x1b, 0x25,
-                    ],
-                },
-                (7, 2): {
-                    0x9: [
-                        0x5, 122, 0x0,
-                    ],
-                },
-            }
         },
         'text': {
             's_text': {
@@ -333,8 +306,8 @@ CONF = {
                 '1/172': '上班了…@[40]@[42]',
             },
             'fx_text': {
-                '1/47': '要开始读台词吗?@[4D]@[3210]是/@[ ]否@[ ]@[42]',
-                '1/48': '要休息了吗?@[4D]@[3211]是/@[ ]否@[ ]@[42]',
+                '1/47': '要翻看台词吗?@[4D]@[3211]否/@[ ]是@[ ]@[42]',
+                '1/48': '要继续吗?@[4D]@[3211]否/@[ ]是@[ ]@[42]',
             },
         },
         'direct': {
@@ -347,34 +320,6 @@ CONF = {
                 },
             },
             'quest_data': {
-##                0x2: {
-##                    'flag1': 0,
-##                    'val1': 0,
-##                    'flag2': 0,
-##                    'val2': 0,
-##                    'flag3': 0,
-##                    'val3': 0,
-##                },
-##                #128: {
-##                39: {
-##                    'type': 16,
-##                    'flag1': 0x302,
-##                    'val1': 1,
-##                    'flag2': 0,
-##                    'val2': 0,
-##                    'flag3': 0,
-##                    'val3': 0,
-##                    'nest': 0,
-##                },
-##                40: {
-##                    'flag1': 0x303,
-##                    'val1': 1,
-##                    'flag2': 0,
-##                    'val2': 0,
-##                    'flag3': 0,
-##                    'val3': 0,
-##                    'nest': 0,
-##                },
                 (377, 397): {
                     'flag1': 0x301,
                     'val1': 1,
@@ -400,14 +345,6 @@ CONF = {
                 (393, 395): {
                     '_uk2': 0,
                 },
-##                (393, 395): {
-##                    'type': 32,
-##                    '_uk1': 0,
-##                    '_uk2': 0,
-##                    '_uk3': 161,
-##                    '_uk4': 4109,
-##                    '_uk5': 200,
-##                },
             },
         },
     },
@@ -1111,6 +1048,12 @@ class c_ffta_modifier:
             return None
         return r
 
+    def _coll_trans_txts(self):
+        return {
+            tname: [(int(v.split('/')[-1]), 0xf, 0x80) for v in tab if int(v.split('/')[-1]) < 0x100]
+            for tname, tab in self.txts['trans'].items()
+        }
+
     def _rplc_scrpt_tab(self, as_sndbx):
         if not as_sndbx:
             return None, None
@@ -1126,6 +1069,8 @@ class c_ffta_modifier:
             rtab = {}
             psr = make_script_parser(srom, typ)
             psr.refresh_sect_top()
+            if callable(tab):
+                tab = tab(self._coll_trans_txts())
             for idxp, cmds in tab.items():
                 if isinstance(idxp, int):
                     idxp = (idxp,)
