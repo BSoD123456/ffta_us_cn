@@ -198,58 +198,10 @@ CONF = {
                         'skip:',
                         0x27, 0x4E, 6, 0, 0,
                         'skip2:',
-                        *f['move'](0xf, 4, 6, 0),
-                        'lp1:',
-                        *f['move'](0xf, 7, 6, 3, 5),
-                        *f['move'](0xf, 7, 4, 2, 5),
-                        *f['move'](0xf, 4, 4, 1, 5),
-                        *f['move'](0xf, 4, 6, 0, 5),
-                        *f['move'](0xf, 7, 6, 3, 5),
-                        *f['move'](0xf, 7, 4, 2, 5),
-                        *f['move'](0xf, 4, 4, 1, 5),
-                        *f['face'](0xf, 0),
-                        *f['face'](0xf, 3),
-                        *f['face'](0xf, 2),
-                        *f['face'](0xf, 1),
-                        *f['face'](0xf, 0),
-                        *f['text_full'](171, 0xf, 0x80),
-                        *f['move'](0xf, 4, 6, 0, 5),
-                        *f['move'](0xf, 7, 6, 3, 5),
-                        *f['move'](0xf, 7, 4, 2, 5),
-                        *f['move'](0xf, 4, 4, 1, 5),
-                        *f['move'](0xf, 4, 6, 0, 5),
-                        *f['move'](0xf, 7, 6, 3, 5),
-                        *f['move'](0xf, 7, 4, 2, 5),
-                        *f['move'](0xf, 4, 4, 1, 5),
-                        *f['face'](0xf, 0),
-                        *f['face'](0xf, 3),
-                        *f['face'](0xf, 2),
-                        *f['face'](0xf, 1),
-                        *f['face'](0xf, 0),
-                        0x27, 0xF, 0x16, 0, 0,
-                        *f['text_full'](172, 0xf, 0x80),
-                        *f['move'](0xf, 4, 6, 0, 5),
-                        0x19, 'lp1',
-                        *c('''
-                        #<41: 0F 11 00>
-                        #<28: 0F>
-                        #<41: 0F 12 00>
-                        #<28: 0F>
-                        #<25: 0F 01 01>
-                        #<29: 0F 00>
-                        <27: 0F 16 00 00>
-                        <01: func1>
-                        <19: lab3>
-                        func1:
-                        <27: 0F 06 00 00>
-                        lab2:
-                        <27: 0F 06 00 00>
-                        <19: lab2>
-                        <02: >
-                        lab3:
-                        '''),
-                        *f['text_full'](57, 0xf, 0x80, 115, 5),
-                        *f['wait'](180),
+                        *f['move'](0xf, 6, 4, 3),
+                        *f['move'](0xf, 7, 8, 0),
+                        *f['text_full'](171, 0xf, 0x80, 2),
+                        *f['wait'](60),
                         *f['fade'](True),
                         *f['setflag'](0x301),
                         *f['done'](5),
@@ -321,7 +273,7 @@ CONF = {
         },
         'text': {
             's_text': {
-                '1/171': '放假了!@[40]@[42]',
+                '1/171': '要离开了。@[40]@[42]',
                 '1/172': '上班了…@[40]@[42]',
             },
             'fx_text': {
@@ -1068,7 +1020,7 @@ class c_ffta_modifier:
         return r
 
     def _coll_trans_txts(self, psr):
-        return collect_text_cmds(psr, self.txts['trans']['s_text'])[35:]
+        return collect_text_cmds(psr, self.txts['trans']['s_text'])[36:]
 
     def _rplc_scrpt_tab(self, as_sndbx):
         if not as_sndbx:
