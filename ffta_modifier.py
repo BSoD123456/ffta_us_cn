@@ -130,12 +130,12 @@ CONF = {
                         <1F: 0F 43 00 20 00>
                         <29: 0F 00>
                         <27: 0F 07 00 00>
-                        <1F: 11 87 02 20 00>
-                        <24: 11>
-                        <2E: 11 00 00 08 00 00 00>
-                        <1F: 10 87 02 20 00>
-                        <24: 10>
-                        <2E: 10 00 00 08 00 00 00>
+                        #<1F: 11 87 02 20 00>
+                        #<24: 11>
+                        #<2E: 11 00 00 08 00 00 00>
+                        #<1F: 10 87 02 20 00>
+                        #<24: 10>
+                        #<2E: 10 00 00 08 00 00 00>
                         <4B: 14>
                         <4D: 64 01 00 01>
                         <47: 90 00 E8 00 01 00>
@@ -184,7 +184,10 @@ CONF = {
                                     for targs in tab
                                     for v in [
                                         0x1, 'flip',
-                                        *f['text_full'](*targs),
+                                        *(
+                                            f['text_full'](*targs) if targs[1] == 0xf else
+                                            f['text_full'](*targs, chlp=0x63, chld=3)
+                                        ),
                                     ]
                                 ],
                                 0x12, 0xb0,
@@ -285,7 +288,7 @@ CONF = {
                 'setflag': lambda fidx, val=1: [
                     0x1a, fidx & 0xff, fidx >> 8, val,
                 ],
-                'text_full': lambda tidx, prt, flg, sc=0, sub=0: (
+                'text_full': lambda tidx, prt, flg, sc=0, sub=0, chlp=0, chld=0: (
                     lambda rsub, rtidx: [
                         *([
                             # set sc_idx at 0x2002192 = 0x162 + 0x2002030
@@ -296,11 +299,20 @@ CONF = {
                             0x1b, 0xfa, 0x1b, rsub,
                         ] if sub > 0 else []),
                         *([
+                            # load char at chlp
+                            0x1f, prt, chlp, chld, 0x20, 0x0,
+                        ] if chlp > 0 else []),
+                        *([
                             0xf, rtidx, prt, flg,
                         ] if sub > 0 else [
                             0xf, tidx, prt, flg,
                         ]),
-                        #*([], sub > 0 and rsub > 0xff and breakpoint())[0],
+                        *([
+                            # unload char
+                            0x24, prt,
+                            0x22, prt,
+                        ] if chlp > 0 else []),
+                        #*([], prt == 0x17 and breakpoint())[0],
                     ]
                 )(
                     tidx // 24 + 1 + 10 * sub, tidx % 24
